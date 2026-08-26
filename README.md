@@ -6,7 +6,7 @@ Userscript untuk Scalev HTML Mode dan Visual Editor.
 
 Pasang melalui [link raw GitHub ini](https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.js) dengan Tampermonkey.
 
-Untuk testing terisolasi, gunakan [script testing v0.23.2](https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.testing.js). Script ini memakai nama dan namespace terpisah sehingga tidak menimpa instalasi production.
+Untuk testing terisolasi, gunakan [script testing v0.23.3](https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.testing.js). Script ini memakai nama dan namespace terpisah sehingga tidak menimpa instalasi production.
 
 ## Update
 
