@@ -4,7 +4,7 @@
 // @version      0.24.5
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.user.js
-// @description  Strict schema-first Scalev wedding visual editor for HTML Mode, with Template Library import, paint-first instant-open lifecycle, first-frame tab-shell visibility above the native editor toolbar, idle prewarm, dirty-aware parse/render reuse, cached native Scalev layout nodes, instant 21-section accordion, section HTML prewarm/cache, LRU DOM retention, delegated realtime Content input, fast CONFIG range commits without parse-all, section-local invalidation, content-visibility repeater virtualization, cached schema/search indexes, and unified Scalev-native geometry across Content, Images, Colors, Style, Audio, and Status panels; Media-style Image cards; Lucide clipboard-paste URL replacement; native Status alerts; Universal Master validation; safe CONFIG paths/parser; CSP manifest; fail-closed compatibility gate; fresh-import defaults; realtime preview sync; section ordering; image settings; guestbook slug sync; Google Fonts; and audio controls.
+// @description  Schema-first Scalev Visual Editor: Template Library, 21-section accordion, realtime preview.
 // @match        https://app.scalev.com/pages/*
 // @grant        GM_xmlhttpRequest
 // @connect      ozdonprvactdvpiirnrq.supabase.co
