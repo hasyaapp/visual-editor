@@ -14644,10 +14644,6 @@ ${end}`;
         background: #f2f5f8;
       }
 
-      #${ID} .button.editor-update[hidden] {
-        display: none;
-      }
-
       #${ID} .update-status {
         display: block;
         margin-top: 3px;
@@ -17571,16 +17567,6 @@ ${end}`;
 
           <div class="save-actions">
             <button
-              id="${ID}-editor-check"
-              type="button"
-              class="button editor-check"
-              title="Cek update Visual Editor"
-              aria-label="Cek update Visual Editor"
-            >
-              Cek Update
-            </button>
-
-            <button
               id="${ID}-support"
               type="button"
               class="button support"
@@ -17606,11 +17592,10 @@ ${end}`;
               id="${ID}-editor-update"
               type="button"
               class="button editor-update"
-              title="Update Visual Editor"
-              aria-label="Update Visual Editor"
-              hidden
+              title="Cek update Visual Editor"
+              aria-label="Cek update Visual Editor"
             >
-              Update / Pasang
+              Cek Update
             </button>
 
           </div>
@@ -17682,47 +17667,82 @@ ${end}`;
     ).onclick =
       openSupportWhatsApp;
 
-    const checkButton = $("#" + ID + "-editor-check");
     const updateButton = $("#" + ID + "-editor-update");
     const updateStatus = $("#" + ID + "-update-status");
 
-    checkButton.addEventListener("click", () => {
+    let updateAvailable = false;
+    const setUpdateButton = (label, title, disabled = false) => {
+      updateButton.textContent = label;
+      updateButton.title = title;
+      updateButton.setAttribute("aria-label", title);
+      updateButton.disabled = disabled;
+    };
+
+    updateButton.addEventListener("click", () => {
+      if (updateAvailable) {
+        window.open(UPDATE_URL, "_blank", "noopener");
+        return;
+      }
+
+      updateAvailable = false;
+      setUpdateButton(
+        "Mengecek...",
+        "Sedang mengecek update Visual Editor",
+        true
+      );
       updateStatus.textContent = "Mengecek GitHub...";
       GM_xmlhttpRequest({
         method: "GET",
         url: `${CHECK_URL}&check=${Date.now()}`,
         onload(response) {
+          const resetAfterError = message => {
+            updateAvailable = false;
+            setUpdateButton(
+              "Cek Update",
+              "Cek update Visual Editor"
+            );
+            updateStatus.textContent = message;
+          };
+
+          if (response.status < 200 || response.status >= 300) {
+            resetAfterError("GitHub mengembalikan error.");
+            return;
+          }
+
           let source;
           try {
             const payload = JSON.parse(response.responseText);
             source = atob(payload.content.replace(/\s/g, ""));
           } catch (_) {
-            updateStatus.textContent = "Respons GitHub tidak valid.";
+            resetAfterError("Respons GitHub tidak valid.");
             return;
           }
           const match = source.match(/@version\s+([^\s]+)/);
           const remoteVersion = match && match[1];
           if (!remoteVersion) {
-            updateStatus.textContent = "Versi GitHub tidak terbaca.";
+            resetAfterError("Versi GitHub tidak terbaca.");
             return;
           }
           if (remoteVersion === VERSION) {
+            updateAvailable = false;
+            setUpdateButton("Cek Update", "Cek update Visual Editor");
             updateStatus.textContent = `Sudah versi terbaru (${VERSION}).`;
-            updateButton.hidden = true;
           } else {
+            updateAvailable = true;
+            setUpdateButton(
+              "Update / Pasang",
+              `Update Visual Editor ke versi ${remoteVersion}`
+            );
             updateStatus.textContent = `Update tersedia: versi ${remoteVersion}.`;
-            updateButton.hidden = false;
           }
         },
         onerror() {
+          updateAvailable = false;
+          setUpdateButton("Cek Update", "Cek update Visual Editor");
           updateStatus.textContent = "Gagal menghubungi GitHub.";
         }
       });
     });
-
-    updateButton.addEventListener("click", () =>
-      window.open(UPDATE_URL, "_blank", "noopener")
-    );
 
     $(
       "#" +
