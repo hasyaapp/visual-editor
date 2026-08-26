@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Scalev Visual Editor - Schema First
 // @namespace    wedding-scalev
-// @version      0.24.3
+// @version      0.24.4
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.user.js
 // @description  Strict schema-first Scalev wedding visual editor for HTML Mode, with Template Library import, paint-first instant-open lifecycle, first-frame tab-shell visibility above the native editor toolbar, idle prewarm, dirty-aware parse/render reuse, cached native Scalev layout nodes, instant 21-section accordion, section HTML prewarm/cache, LRU DOM retention, delegated realtime Content input, fast CONFIG range commits without parse-all, section-local invalidation, content-visibility repeater virtualization, cached schema/search indexes, and unified Scalev-native geometry across Content, Images, Colors, Style, Audio, and Status panels; Media-style Image cards; Lucide clipboard-paste URL replacement; native Status alerts; Universal Master validation; safe CONFIG paths/parser; CSP manifest; fail-closed compatibility gate; fresh-import defaults; realtime preview sync; section ordering; image settings; guestbook slug sync; Google Fonts; and audio controls.
@@ -9,6 +9,7 @@
 // @grant        GM_xmlhttpRequest
 // @connect      ozdonprvactdvpiirnrq.supabase.co
 // @connect      api.github.com
+// @connect      raw.githubusercontent.com
 // @run-at       document-idle
 // ==/UserScript==
 
@@ -16,7 +17,7 @@
   "use strict";
 
   const ID = "sve77";
-  const VERSION = "0.24.3";
+  const VERSION = "0.24.4";
   const SVE_LITE_MODE = false;
 
   /*
@@ -39,7 +40,7 @@
     "https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.user.js";
 
   const CHECK_URL =
-    "https://api.github.com/repos/hasyaapp/visual-editor/contents/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.user.js?ref=main";
+    UPDATE_URL;
 
   function isScalevEditModeUrl() {
     if (location.hostname !== "app.scalev.com") {
@@ -17625,11 +17626,31 @@ ${end}`;
     const updateStatus = $("#" + ID + "-update-status");
 
     let updateAvailable = false;
+    let updateCheckInFlight = false;
+    let updateCooldownUntil = 0;
+    let updateCooldownTimer = null;
+    const UPDATE_COOLDOWN_MS = 15000;
     const setUpdateButton = (label, title, disabled = false) => {
       updateButton.textContent = label;
       updateButton.title = title;
       updateButton.setAttribute("aria-label", title);
       updateButton.disabled = disabled;
+    };
+
+    const startUpdateCooldown = () => {
+      updateCooldownUntil = Date.now() + UPDATE_COOLDOWN_MS;
+      setUpdateButton(
+        "Cek Update",
+        "Cek update Visual Editor",
+        true
+      );
+      clearTimeout(updateCooldownTimer);
+      updateCooldownTimer = setTimeout(() => {
+        updateCooldownUntil = 0;
+        if (!updateCheckInFlight && !updateAvailable) {
+          setUpdateButton("Cek Update", "Cek update Visual Editor");
+        }
+      }, UPDATE_COOLDOWN_MS);
     };
 
     updateButton.addEventListener("click", () => {
@@ -17638,7 +17659,13 @@ ${end}`;
         return;
       }
 
+      if (updateCheckInFlight || Date.now() < updateCooldownUntil) {
+        updateStatus.textContent = "Tunggu sebentar";
+        return;
+      }
+
       updateAvailable = false;
+      updateCheckInFlight = true;
       setUpdateButton(
         "Mengecek...",
         "Sedang mengecek update Visual Editor",
@@ -17647,42 +17674,44 @@ ${end}`;
       updateStatus.textContent = "Mengecek GitHub...";
       GM_xmlhttpRequest({
         method: "GET",
-        url: `${CHECK_URL}&check=${Date.now()}`,
+        url: `${CHECK_URL}?check=${Date.now()}`,
         onload(response) {
           const resetAfterError = message => {
             updateAvailable = false;
+            updateCheckInFlight = false;
             setUpdateButton(
               "Cek Update",
               "Cek update Visual Editor"
             );
             updateStatus.textContent = message;
+            startUpdateCooldown();
           };
 
           if (response.status < 200 || response.status >= 300) {
-            resetAfterError("GitHub mengembalikan error.");
+            resetAfterError(
+              response.status === 403 || response.status === 429
+                ? "Tunggu sebentar"
+                : "Gagal cek update"
+            );
             return;
           }
 
-          let source;
-          try {
-            const payload = JSON.parse(response.responseText);
-            source = atob(payload.content.replace(/\s/g, ""));
-          } catch (_) {
-            resetAfterError("Respons GitHub tidak valid.");
-            return;
-          }
+          const source = response.responseText || "";
           const match = source.match(/@version\s+([^\s]+)/);
           const remoteVersion = match && match[1];
           if (!remoteVersion) {
-            resetAfterError("Versi GitHub tidak terbaca.");
+            resetAfterError("Gagal cek update");
             return;
           }
           if (remoteVersion === VERSION) {
             updateAvailable = false;
+            updateCheckInFlight = false;
             setUpdateButton("Cek Update", "Cek update Visual Editor");
-            updateStatus.textContent = "";
+            updateStatus.textContent = "Sudah terbaru";
+            startUpdateCooldown();
           } else {
             updateAvailable = true;
+            updateCheckInFlight = false;
             setUpdateButton(
               "Pasang",
               `Pasang update Visual Editor versi ${remoteVersion}`
@@ -17692,8 +17721,10 @@ ${end}`;
         },
         onerror() {
           updateAvailable = false;
+          updateCheckInFlight = false;
           setUpdateButton("Cek Update", "Cek update Visual Editor");
-          updateStatus.textContent = "Gagal menghubungi GitHub.";
+          updateStatus.textContent = "Gagal cek update";
+          startUpdateCooldown();
         }
       });
     });
