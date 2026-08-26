@@ -17730,8 +17730,8 @@ ${end}`;
           } else {
             updateAvailable = true;
             setUpdateButton(
-              "Update / Pasang",
-              `Update Visual Editor ke versi ${remoteVersion}`
+              "Pasang",
+              `Pasang update Visual Editor versi ${remoteVersion}`
             );
             updateStatus.textContent = `Update tersedia: versi ${remoteVersion}.`;
           }
