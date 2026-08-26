@@ -8,6 +8,7 @@
 // @match        https://app.scalev.com/pages/*
 // @grant        GM_xmlhttpRequest
 // @connect      ozdonprvactdvpiirnrq.supabase.co
+// @connect      api.github.com
 // @run-at       document-idle
 // ==/UserScript==
 
@@ -37,8 +38,57 @@
   const VISUAL_EDITOR_UPDATE_URL =
     "https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.testing.js";
 
+  const VISUAL_EDITOR_CHECK_URL =
+    "https://api.github.com/repos/hasyaapp/visual-editor/contents/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.testing.js?ref=main";
+
   function openVisualEditorUpdate() {
     window.open(VISUAL_EDITOR_UPDATE_URL, "_blank", "noopener,noreferrer");
+  }
+
+  function checkVisualEditorUpdate() {
+    const checkButton = document.getElementById(`${ID}-editor-check`);
+    const updateButton = document.getElementById(`${ID}-editor-update`);
+    const status = document.getElementById(`${ID}-update-status`);
+    if (!checkButton || !updateButton || !status) return;
+
+    checkButton.disabled = true;
+    status.textContent = "Mengecek GitHub...";
+    GM_xmlhttpRequest({
+      method: "GET",
+      url: `${VISUAL_EDITOR_CHECK_URL}&check=${Date.now()}`,
+      onload(response) {
+        let source;
+        try {
+          const payload = JSON.parse(response.responseText);
+          source = atob((payload.content || "").replace(/\s/g, ""));
+        } catch (_) {
+          status.textContent = "Respons GitHub tidak valid.";
+          checkButton.disabled = false;
+          return;
+        }
+
+        const match = source.match(/@version\s+([^\s]+)/);
+        const remoteVersion = match && match[1];
+        if (!remoteVersion) {
+          status.textContent = "Versi GitHub tidak terbaca.";
+          checkButton.disabled = false;
+          return;
+        }
+
+        if (remoteVersion === VERSION) {
+          status.textContent = `Sudah versi terbaru (${VERSION}).`;
+          updateButton.hidden = true;
+        } else {
+          status.textContent = `Update tersedia: versi ${remoteVersion}.`;
+          updateButton.hidden = false;
+        }
+        checkButton.disabled = false;
+      },
+      onerror() {
+        status.textContent = "Gagal menghubungi GitHub.";
+        checkButton.disabled = false;
+      }
+    });
   }
 
   function isScalevEditModeUrl() {
@@ -14644,6 +14694,18 @@ ${end}`;
         background: #f2f5f8;
       }
 
+      #${ID} .button.editor-update[hidden] {
+        display: none;
+      }
+
+      #${ID} .update-status {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 9px;
+        line-height: 1.25;
+      }
+
       #${ID} .support-icon {
         width: 15px;
         height: 15px;
@@ -17548,9 +17610,26 @@ ${end}`;
             >
               Siap diedit
             </span>
+            <small
+              id="${ID}-update-status"
+              class="update-status"
+              aria-live="polite"
+            >
+              Belum mengecek update.
+            </small>
           </div>
 
           <div class="save-actions">
+            <button
+              id="${ID}-editor-check"
+              type="button"
+              class="button editor-check"
+              title="Cek update Visual Editor"
+              aria-label="Cek update Visual Editor"
+            >
+              Cek Update
+            </button>
+
             <button
               id="${ID}-support"
               type="button"
@@ -17579,8 +17658,9 @@ ${end}`;
               class="button editor-update"
               title="Update Visual Editor"
               aria-label="Update Visual Editor"
+              hidden
             >
-              Update
+              Update / Pasang
             </button>
 
           </div>
@@ -17651,6 +17731,13 @@ ${end}`;
       "-support"
     ).onclick =
       openSupportWhatsApp;
+
+    $(
+      "#" +
+      ID +
+      "-editor-check"
+    ).onclick =
+      checkVisualEditorUpdate;
 
     $(
       "#" +
