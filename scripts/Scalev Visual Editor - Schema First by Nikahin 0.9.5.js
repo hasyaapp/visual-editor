@@ -35,61 +35,11 @@
   const SUPPORT_WHATSAPP_TEXT =
     "~halooo mas Hasya, aku kreator undangan Nikahin dari Scalev panel...";
 
-  const VISUAL_EDITOR_UPDATE_URL =
+  const UPDATE_URL =
     "https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.js";
 
-  const VISUAL_EDITOR_CHECK_URL =
+  const CHECK_URL =
     "https://api.github.com/repos/hasyaapp/visual-editor/contents/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.js?ref=main";
-
-  function openVisualEditorUpdate() {
-    window.open(VISUAL_EDITOR_UPDATE_URL, "_blank", "noopener,noreferrer");
-  }
-
-  function checkVisualEditorUpdate() {
-    const checkButton = document.getElementById(`${ID}-editor-check`);
-    const updateButton = document.getElementById(`${ID}-editor-update`);
-    const status = document.getElementById(`${ID}-update-status`);
-    if (!checkButton || !updateButton || !status) return;
-
-    checkButton.disabled = true;
-    status.textContent = "Mengecek GitHub...";
-    GM_xmlhttpRequest({
-      method: "GET",
-      url: `${VISUAL_EDITOR_CHECK_URL}&check=${Date.now()}`,
-      onload(response) {
-        let source;
-        try {
-          const payload = JSON.parse(response.responseText);
-          source = atob((payload.content || "").replace(/\s/g, ""));
-        } catch (_) {
-          status.textContent = "Respons GitHub tidak valid.";
-          checkButton.disabled = false;
-          return;
-        }
-
-        const match = source.match(/@version\s+([^\s]+)/);
-        const remoteVersion = match && match[1];
-        if (!remoteVersion) {
-          status.textContent = "Versi GitHub tidak terbaca.";
-          checkButton.disabled = false;
-          return;
-        }
-
-        if (remoteVersion === VERSION) {
-          status.textContent = `Sudah versi terbaru (${VERSION}).`;
-          updateButton.hidden = true;
-        } else {
-          status.textContent = `Update tersedia: versi ${remoteVersion}.`;
-          updateButton.hidden = false;
-        }
-        checkButton.disabled = false;
-      },
-      onerror() {
-        status.textContent = "Gagal menghubungi GitHub.";
-        checkButton.disabled = false;
-      }
-    });
-  }
 
   function isScalevEditModeUrl() {
     if (location.hostname !== "app.scalev.com") {
@@ -17732,19 +17682,47 @@ ${end}`;
     ).onclick =
       openSupportWhatsApp;
 
-    $(
-      "#" +
-      ID +
-      "-editor-check"
-    ).onclick =
-      checkVisualEditorUpdate;
+    const checkButton = $("#" + ID + "-editor-check");
+    const updateButton = $("#" + ID + "-editor-update");
+    const updateStatus = $("#" + ID + "-update-status");
 
-    $(
-      "#" +
-      ID +
-      "-editor-update"
-    ).onclick =
-      openVisualEditorUpdate;
+    checkButton.addEventListener("click", () => {
+      updateStatus.textContent = "Mengecek GitHub...";
+      GM_xmlhttpRequest({
+        method: "GET",
+        url: `${CHECK_URL}&check=${Date.now()}`,
+        onload(response) {
+          let source;
+          try {
+            const payload = JSON.parse(response.responseText);
+            source = atob(payload.content.replace(/\s/g, ""));
+          } catch (_) {
+            updateStatus.textContent = "Respons GitHub tidak valid.";
+            return;
+          }
+          const match = source.match(/@version\s+([^\s]+)/);
+          const remoteVersion = match && match[1];
+          if (!remoteVersion) {
+            updateStatus.textContent = "Versi GitHub tidak terbaca.";
+            return;
+          }
+          if (remoteVersion === VERSION) {
+            updateStatus.textContent = `Sudah versi terbaru (${VERSION}).`;
+            updateButton.hidden = true;
+          } else {
+            updateStatus.textContent = `Update tersedia: versi ${remoteVersion}.`;
+            updateButton.hidden = false;
+          }
+        },
+        onerror() {
+          updateStatus.textContent = "Gagal menghubungi GitHub.";
+        }
+      });
+    });
+
+    updateButton.addEventListener("click", () =>
+      window.open(UPDATE_URL, "_blank", "noopener")
+    );
 
     $(
       "#" +
