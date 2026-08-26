@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Scalev Visual Editor - Schema First
 // @namespace    wedding-scalev
-// @version      0.24.2
+// @version      0.24.3
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.user.js
 // @description  Strict schema-first Scalev wedding visual editor for HTML Mode, with Template Library import, paint-first instant-open lifecycle, first-frame tab-shell visibility above the native editor toolbar, idle prewarm, dirty-aware parse/render reuse, cached native Scalev layout nodes, instant 21-section accordion, section HTML prewarm/cache, LRU DOM retention, delegated realtime Content input, fast CONFIG range commits without parse-all, section-local invalidation, content-visibility repeater virtualization, cached schema/search indexes, and unified Scalev-native geometry across Content, Images, Colors, Style, Audio, and Status panels; Media-style Image cards; Lucide clipboard-paste URL replacement; native Status alerts; Universal Master validation; safe CONFIG paths/parser; CSP manifest; fail-closed compatibility gate; fresh-import defaults; realtime preview sync; section ordering; image settings; guestbook slug sync; Google Fonts; and audio controls.
@@ -16,7 +16,7 @@
   "use strict";
 
   const ID = "sve77";
-  const VERSION = "0.24.2";
+  const VERSION = "0.24.3";
   const SVE_LITE_MODE = false;
 
   /*
@@ -552,12 +552,6 @@
 
   function markDirty() {
     state.dirty = true;
-
-    const status = $("#" + ID + "-save-status");
-
-    if (status) {
-      status.textContent = "Ada perubahan";
-    }
   }
 
   /* =========================================================
@@ -13217,43 +13211,16 @@ ${end}`;
       return;
     }
 
-    const status =
-      $(
-        "#" +
-        ID +
-        "-save-status"
-      );
-
     const button =
       nativeSaveButton();
 
     if (!button) {
-      if (status) {
-        status.textContent =
-          "Simpan belum tersedia";
-      }
-
       return;
-    }
-
-    if (status) {
-      status.textContent =
-        "Menyimpan...";
     }
 
     button.click();
 
     state.dirty = false;
-
-    setTimeout(
-      () => {
-        if (status) {
-          status.textContent =
-            "Tersimpan";
-        }
-      },
-      900
-    );
   }
 
   /* =========================================================
@@ -16199,14 +16166,6 @@ ${end}`;
         white-space: nowrap;
       }
 
-      #${ID} .save-status {
-        display: block;
-        margin-top: 3px;
-        color: var(--muted);
-        font-size: 9px;
-        line-height: 1.2;
-      }
-
       #${ID} .font-manual-help {
         margin-top: 6px;
 
@@ -17553,13 +17512,6 @@ ${end}`;
         <div class="savebar">
           <div class="footer-meta">
             <strong>Visual Editor · v${VERSION}</strong>
-            <span
-              id="${ID}-save-status"
-              class="save-status"
-              hidden
-            >
-              Siap diedit
-            </span>
             <small
               id="${ID}-update-status"
               class="update-status"
