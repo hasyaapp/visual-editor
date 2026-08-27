@@ -80,8 +80,6 @@
     open: false,
     tab: "content",
     search: "",
-    dirty: false,
-    exitPromptOpen: false,
 
     editors: {
       html: null,
@@ -546,7 +544,7 @@
   }
 
   function markDirty() {
-    state.dirty = true;
+    /* no-op — state.dirty removed saat exit prompt dihapus */
   }
 
   /* =========================================================
@@ -1852,37 +1850,10 @@
     scheduleVisualEditorPrewarm();
   }
 
-  function updateExitPrompt() {
-    const prompt = document.getElementById(ID + "-exit-prompt");
-
-    if (!prompt) return;
-
-    const visible = state.exitPromptOpen === true;
-    prompt.hidden = !visible;
-    prompt.setAttribute("aria-hidden", visible ? "false" : "true");
-  }
-
   function requestPanelClose() {
-    if (!state.dirty) {
-      setPanelOpen(false);
-      return;
-    }
-
-    state.exitPromptOpen = true;
-    updateExitPrompt();
-    document.getElementById(ID + "-exit-keep")?.focus();
-  }
-
-  function closeExitPrompt() {
-    state.exitPromptOpen = false;
-    updateExitPrompt();
-  }
-
-  function closePanelAnyway() {
-    state.exitPromptOpen = false;
     setPanelOpen(false);
-    updateExitPrompt();
   }
+
 
   /* =========================================================
      CODEMIRROR
@@ -2546,7 +2517,6 @@
     library.previousSource = null;
     library.importedId = "";
     library.importedName = "";
-    state.dirty = true;
     state.sourceDirty = true;
     parseAll();
     notifyPreview();
@@ -4041,7 +4011,6 @@
       updateGoogleFontsHead();
     }
 
-    state.dirty = false;
     parseAll();
     render();
     notifyPreview();
@@ -12066,8 +12035,6 @@ ${end}`;
     }
 
     button.click();
-
-    state.dirty = false;
   }
 
   /* =========================================================
@@ -12259,131 +12226,6 @@ html.sve77-panel-open
 #${ID}.open
 #${ID}-dock {
   display: flex;
-}
-
-#${ID}-exit-prompt {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 5;
-  display: flex;
-  width: min(360px, calc(100% - 24px));
-  flex-direction: row;
-  overflow: hidden;
-  border: 2px solid #d99a14;
-  border-radius: 4px;
-  background: #fff8e7;
-  box-shadow: 0 4px 12px rgba(32, 44, 59, .14);
-  color: var(--txt);
-  text-align: left;
-}
-
-#${ID}-exit-prompt[hidden] {
-  display: none;
-}
-
-#${ID}-exit-prompt .exit-prompt-close {
-  flex: 0 0 auto;
-  order: 3;
-  align-self: flex-start;
-  margin: 8px 8px 0 0;
-  z-index: 1;
-  display: inline-flex;
-  width: 24px;
-  height: 24px;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: #5b6675;
-}
-
-#${ID}-exit-prompt .exit-prompt-close svg {
-  width: 12px;
-  height: 12px;
-}
-
-#${ID}-exit-prompt .exit-prompt-content {
-  order: 2;
-  min-width: 0;
-  overflow-y: auto;
-  padding: 10px 0 10px 12px;
-  line-height: 18px;
-}
-
-#${ID}-exit-prompt::before {
-  content: "!";
-  order: 1;
-  flex: 0 0 auto;
-  align-self: flex-start;
-  width: 32px;
-  height: 32px;
-  margin: 10px 0 0 10px;
-  border-radius: 4px;
-  background: #d99a14;
-  color: #fff;
-  font-size: 22px;
-  line-height: 32px;
-  font-weight: 700;
-  text-align: center;
-}
-
-#${ID}-exit-prompt h2 {
-  margin: 0;
-  color: #5b3b00;
-  font-size: 13px;
-  line-height: 16px;
-  font-weight: 700;
-}
-
-#${ID}-exit-prompt p {
-  margin: 2px 0 0;
-  color: #202c3b;
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 500;
-}
-
-#${ID}-exit-prompt .exit-prompt-actions {
-  display: flex;
-  justify-content: flex-start;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-#${ID}-exit-prompt .exit-prompt-actions button {
-  display: inline-flex;
-  min-width: 72px;
-  min-height: 32px;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: 2px solid var(--p);
-  border-radius: 4px;
-  padding: 6px 10px;
-  font: inherit;
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 500;
-  text-align: center;
-  transition: background-color .1s ease, color .1s ease;
-}
-
-#${ID}-exit-prompt .exit-prompt-actions button:focus {
-  outline: 2px solid var(--p);
-  outline-offset: 2px;
-}
-
-#${ID}-exit-prompt .exit-prompt-keep {
-  background: #fff;
-  color: var(--p);
-}
-
-#${ID}-exit-prompt .exit-prompt-exit {
-  background: var(--p);
-  color: #fff;
 }
 
 
@@ -16402,37 +16244,6 @@ input:checked
 
           </div>
         </div>
-
-        <div
-          id="${ID}-exit-prompt"
-          role="dialog"
-          aria-modal="false"
-          aria-labelledby="${ID}-exit-prompt-title"
-          aria-hidden="true"
-          hidden
-        >
-          <button
-            type="button"
-            class="exit-prompt-close"
-            id="${ID}-exit-close"
-            aria-label="Tutup"
-            title="Tutup"
-          >
-            <svg viewBox="0 1 10 11" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path fill-rule="evenodd" clip-rule="evenodd" d="M0.757358 0.757359C1.226 0.288717 1.98579 0.288734 2.45441 0.757359L5 3.30294L7.54558 0.757359C8.01422 0.288717 8.77401 0.288734 9.24264 0.757359C9.71128 1.226 9.71128 1.98577 9.24264 2.45442L6.69705 5L9.24264 7.54558C9.71128 8.01423 9.71128 8.774 9.24264 9.24264C8.77401 9.71127 8.01422 9.71128 7.54558 9.24264L5 6.69706L2.45441 9.24264C1.98579 9.71127 1.226 9.71128 0.757358 9.24264C0.288724 8.77401 0.288733 8.01421 0.757358 7.54558L3.30294 5L0.757358 2.45442C0.288733 1.98579 0.288724 1.22599 0.757358 0.757359Z" fill="currentColor"></path>
-            </svg>
-          </button>
-
-          <div class="exit-prompt-content">
-            <h2 id="${ID}-exit-prompt-title">Yakin keluar?</h2>
-            <p>Perubahan belum tersimpan.</p>
-
-            <div class="exit-prompt-actions">
-              <button type="button" class="exit-prompt-keep" id="${ID}-exit-keep">Tetap edit</button>
-              <button type="button" class="exit-prompt-exit" id="${ID}-exit-confirm">Keluar</button>
-            </div>
-          </div>
-        </div>
       </aside>
     `;
 
@@ -16445,12 +16256,8 @@ input:checked
       ID +
       "-close"
     ).onclick = () => {
-      requestPanelClose();
+      setPanelOpen(false);
     };
-
-    $("#" + ID + "-exit-close").onclick = closeExitPrompt;
-    $("#" + ID + "-exit-keep").onclick = closeExitPrompt;
-    $("#" + ID + "-exit-confirm").onclick = closePanelAnyway;
 
     $(
       "#" +
@@ -16768,22 +16575,6 @@ input:checked
         },
         80
       )
-    );
-
-    document.addEventListener(
-      "keydown",
-      event => {
-        if (
-          event.key ===
-          "Escape"
-        ) {
-          if (state.exitPromptOpen) {
-            event.preventDefault();
-            closeExitPrompt();
-            return;
-          }
-        }
-      }
     );
   }
 
