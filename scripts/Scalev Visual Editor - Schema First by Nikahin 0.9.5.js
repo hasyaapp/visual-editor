@@ -6892,7 +6892,6 @@
               title="Default — gunakan posisi dari CSS theme"
               aria-label="Default"
             >
-              ${scalevAlignmentIcon("default")}
               Default
             </button>
           </div>
