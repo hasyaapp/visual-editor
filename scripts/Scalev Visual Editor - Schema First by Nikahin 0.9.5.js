@@ -126,6 +126,7 @@
     contentCommitTimer: null,
     contentCommitMessage: "",
     contentStateDirty: false,
+    lastSerializedConfig: "",
     contentSearchIndex: null,
     contentFieldCache: new WeakMap(),
     repeaterContentFieldCache: new WeakMap(),
@@ -3570,6 +3571,8 @@
      ========================================================= */
 
   function parseAll() {
+    state.lastSerializedConfig = "";
+
     if (!detectEditors()) {
       state.sourceDirty = true;
       return false;
@@ -3691,6 +3694,7 @@
       next
     );
 
+    state.lastSerializedConfig = "";
     parseAll();
 
     notifyPreview();
@@ -3721,6 +3725,17 @@
     const range = state.configRange;
     const editor = range.editor;
     const serialized = JSON.stringify(state.config, null, 2);
+
+    /* Skip no-op commit when serialized output is identical to last write. */
+    if (serialized === state.lastSerializedConfig) {
+      state.contentStateDirty = false;
+      if (options.deferPreview) {
+        schedulePreviewRefresh({ syncImages: false });
+      } else {
+        notifyPreview();
+      }
+      return true;
+    }
 
     let fastError = null;
 
@@ -3765,6 +3780,7 @@
 
     range.end = range.start + serialized.length;
     range.obj = state.config;
+    state.lastSerializedConfig = serialized;
     state.sourceDirty = false;
     state.contentStateDirty = false;
 
@@ -4006,7 +4022,7 @@
      PREVIEW
      ========================================================= */
 
-  function schedulePreviewRefresh({ syncImages = false, delay = 160 } = {}) {
+  function schedulePreviewRefresh({ syncImages = false, delay = 100 } = {}) {
     state.previewRefreshImages ||= syncImages;
 
     if (state.previewRefreshTimer) return;
@@ -5586,7 +5602,7 @@
             deferPreview: true
           }
         );
-      }, 140);
+      }, 100);
   }
 
   function flushContentCommit(message = "") {
