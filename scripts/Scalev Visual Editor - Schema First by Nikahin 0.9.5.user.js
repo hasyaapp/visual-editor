@@ -11315,6 +11315,15 @@ ${end}`;
     });
   }
 
+  function ensureTabDelegated(root, tabKey) {
+    const flag = tabKey + "Delegated";
+    if (root.dataset[flag] === "1") {
+      return false;
+    }
+    root.dataset[flag] = "1";
+    return true;
+  }
+
   function bindBody(root) {
     if (state.tab === "library") {
       bindTemplateLibraryBody(root);
@@ -11326,1105 +11335,173 @@ ${end}`;
       return;
     }
 
-    /* =====================================================
-       INLINE SECTION ORDERING
-       - tidak ada menu ordering terpisah
-       - ↑ / ↓ ada pada header section
-       - drag/drop memakai header section sebagai drag handle
-       ===================================================== */
+    if (state.tab === "images") {
+      bindImagesBody(root);
+      return;
+    }
 
-    $$(
-      "[data-section-up]",
-      root
-    ).forEach(button => {
-      button.onclick = event => {
+    if (state.tab === "colors") {
+      bindColorsBody(root);
+      return;
+    }
+
+    if (state.tab === "style") {
+      bindStyleBody(root);
+      return;
+    }
+
+    if (state.tab === "audio") {
+      bindAudioBody(root);
+      return;
+    }
+
+    if (state.tab === "compatibility") {
+      bindCompatibilityBody(root);
+      return;
+    }
+
+    bindContentBody(root);
+  }
+
+  function bindImagesBody(root) {
+    if (!ensureTabDelegated(root, "images")) {
+      return;
+    }
+
+    root.addEventListener("click", event => {
+      const paste = event.target.closest("[data-image-paste-path]");
+      if (paste) {
         event.preventDefault();
         event.stopPropagation();
-
-        if (button.disabled) {
-          return;
-        }
-
-        moveSection(
-          button.dataset.sectionUp,
-          -1
-        );
-      };
-    });
-
-    $$(
-      "[data-section-down]",
-      root
-    ).forEach(button => {
-      button.onclick = event => {
-        event.preventDefault();
-        event.stopPropagation();
-
-        if (button.disabled) {
-          return;
-        }
-
-        moveSection(
-          button.dataset.sectionDown,
-          1
-        );
-      };
-    });
-
-    const clearSectionDragState = () => {
-      $$(
-        ".section.dragging, .section.drag-before, .section.drag-after",
-        root
-      ).forEach(card => {
-        card.classList.remove(
-          "dragging",
-          "drag-before",
-          "drag-after"
-        );
-
-        delete card.dataset.dropPlacement;
-      });
-    };
-
-    $$(
-      "[data-section-drag]",
-      root
-    ).forEach(handle => {
-      const card =
-        handle.closest(
-          "[data-section-card]"
-        );
-
-      if (!card) return;
-
-      handle.addEventListener(
-        "click",
-        event => {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-      );
-
-      handle.addEventListener(
-        "dragstart",
-        event => {
-          if (
-            handle.disabled ||
-            handle.getAttribute(
-              "draggable"
-            ) !== "true"
-          ) {
-            event.preventDefault();
-            return;
-          }
-
-          const id =
-            card.dataset.sectionCard;
-
-          card.classList.add(
-            "dragging"
-          );
-
-          event.dataTransfer.effectAllowed =
-            "move";
-
-          event.dataTransfer.setData(
-            "text/plain",
-            id
-          );
-
-          /*
-           * Chrome/Safari lebih stabil jika drag image
-           * berasal dari card, bukan tombol kecil.
-           */
-          if (
-            typeof event.dataTransfer.setDragImage ===
-            "function"
-          ) {
-            event.dataTransfer.setDragImage(
-              card,
-              24,
-              24
-            );
-          }
-        }
-      );
-
-      handle.addEventListener(
-        "dragend",
-        clearSectionDragState
-      );
-    });
-
-    $$(
-      "[data-section-card]",
-      root
-    ).forEach(card => {
-      card.addEventListener(
-        "dragover",
-        event => {
-          const dragId =
-            event.dataTransfer
-              ?.getData(
-                "text/plain"
-              ) ||
-            $(
-              ".section.dragging",
-              root
-            )
-              ?.dataset
-              ?.sectionCard ||
-            "";
-
-          const targetId =
-            card.dataset.sectionCard;
-
-          if (
-            !dragId ||
-            dragId === targetId
-          ) {
-            return;
-          }
-
-          const targetSection =
-            schemaSections().find(
-              section =>
-                sectionId(
-                  section
-                ) ===
-                targetId
-            );
-
-          if (
-            targetId !== "cover" &&
-            !isSectionReorderable(
-              targetSection
-            )
-          ) {
-            return;
-          }
-
-          event.preventDefault();
-
-          event.dataTransfer.dropEffect =
-            "move";
-
-          const rect =
-            card.getBoundingClientRect();
-
-          let placement =
-            event.clientY <
-            (
-              rect.top +
-              rect.height / 2
-            )
-              ? "before"
-              : "after";
-
-          if (
-            targetId === "cover"
-          ) {
-            placement =
-              "after";
-          }
-
-          $$(
-            ".section.drag-before, .section.drag-after",
-            root
-          ).forEach(other => {
-            if (other === card) return;
-
-            other.classList.remove(
-              "drag-before",
-              "drag-after"
-            );
-
-            delete other.dataset.dropPlacement;
-          });
-
-          card.dataset.dropPlacement =
-            placement;
-
-          card.classList.toggle(
-            "drag-before",
-            placement === "before"
-          );
-
-          card.classList.toggle(
-            "drag-after",
-            placement === "after"
-          );
-        }
-      );
-
-      card.addEventListener(
-        "dragleave",
-        event => {
-          if (
-            event.relatedTarget &&
-            card.contains(
-              event.relatedTarget
-            )
-          ) {
-            return;
-          }
-
-          card.classList.remove(
-            "drag-before",
-            "drag-after"
-          );
-
-          delete card.dataset.dropPlacement;
-        }
-      );
-
-      card.addEventListener(
-        "drop",
-        event => {
-          const dragId =
-            event.dataTransfer.getData(
-              "text/plain"
-            );
-
-          const targetId =
-            card.dataset.sectionCard;
-
-          const placement =
-            card.dataset.dropPlacement ||
-            (
-              targetId === "cover"
-                ? "after"
-                : "before"
-            );
-
-          event.preventDefault();
-
-          clearSectionDragState();
-
-          moveSectionByDrop(
-            dragId,
-            targetId,
-            placement
-          );
-        }
-      );
-    });
-
-    $$(".section-head", root).forEach(
-      head => {
-        head.onclick =
-          event => {
-            if (
-              !event.target.closest(
-                ".switch-wrap, .section-actions, .section-move-controls, .section-drag-btn"
-              )
-            ) {
-              head.parentElement
-                .classList
-                .toggle(
-                  "open"
-                );
-            }
-          };
-      }
-    );
-
-    $$(
-      "[data-visible-path]",
-      root
-    ).forEach(input => {
-      input.onchange = () => {
-        setPath(
-          state.config,
-          input.dataset.visiblePath,
-          input.checked
-        );
-
-        commitConfig(
-          input.checked
-            ? "Section ditampilkan"
-            : "Section disembunyikan"
-        );
-      };
-    });
-
-    $$(
-      "[data-field-path]",
-      root
-    ).forEach(input => {
-      if (
-        input.dataset
-          .autoWeddingId ===
-          "1" ||
-        input.dataset
-          .fieldReadonly ===
-          "1" ||
-        input.disabled
-      ) {
+        pasteImageUrlFromClipboard(root, paste.dataset.imagePastePath);
         return;
       }
 
-      input.onchange = () => {
-        const type =
-          String(
-            input.dataset
-              .fieldType ||
-            "text"
-          );
-
-        let value =
-          input.value;
-
-        if (
-          type ===
-          "boolean"
-        ) {
-          value =
-            !!input.checked;
-        }
-
-        if (
-          type ===
-          "number"
-        ) {
-          value =
-            input.value === ""
-              ? ""
-              : Number(
-                  input.value
-                );
-
-          if (
-            value !== "" &&
-            !Number.isFinite(
-              value
-            )
-          ) {
-            value = "";
-          }
-        }
-
-        if (
-          type ===
-          "datetime"
-        ) {
-          value =
-            localDateTimeToOffset(
-              input.value
-            );
-        }
-
-        setPath(
-          state.config,
-          input.dataset.fieldPath,
-          value
-        );
-
-        commitConfig(
-          "Konten diperbarui"
-        );
-      };
-    });
-
-    $$(
-      "[data-repeat-add]",
-      root
-    ).forEach(button => {
-      button.onclick = () => {
-        const path =
-          button.dataset.repeatAdd;
-
-        const schemaField =
-          schemaSections()
-            .flatMap(
-              section =>
-                section.fields ||
-                []
-            )
-            .find(
-              field =>
-                field.type ===
-                  "repeater" &&
-                field.path === path
-            );
-
-        let array =
-          getPath(
-            state.config,
-            path
-          );
-
-        if (
-          !Array.isArray(array)
-        ) {
-          setPath(
-            state.config,
-            path,
-            []
-          );
-
-          array =
-            getPath(
-              state.config,
-              path
-            );
-        }
-
-        array.push(
-          repeaterDefault(
-            schemaField ||
-            {}
-          )
-        );
-
-        commitConfig(
-          "Item ditambahkan"
-        );
-
-        render();
-      };
-    });
-
-    $$(
-      "[data-repeat-delete]",
-      root
-    ).forEach(button => {
-      button.onclick = () => {
-        const array =
-          getPath(
-            state.config,
-            button.dataset.repeatDelete
-          );
-
-        if (
-          !Array.isArray(array)
-        ) {
-          return;
-        }
-
-        array.splice(
-          Number(
-            button.dataset.repeatIndex
-          ),
-          1
-        );
-
-        commitConfig(
-          "Item dihapus"
-        );
-
-        render();
-      };
-    });
-
-    $$(
-      "[data-image-path]",
-      root
-    ).forEach(input => {
-      const path =
-        input.dataset.imagePath;
-
-      const saveImageUrl = () => {
-        const next =
-          input.value.trim();
-
-        const current =
-          String(
-            getPath(
-              state.config,
-              path
-            ) ||
-            ""
-          );
-
-        if (next === current) {
-          return;
-        }
-
-        setPath(
-          state.config,
-          path,
-          next
-        );
-
-        if (next) {
-          setImageSetting(
-            path,
-            {
-              hidden: false
-            }
-          );
-        }
-
-        commitConfig(
-          "Gambar diperbarui"
-        );
-
-        syncImageCardPreview(
-          input,
-          path
-        );
-      };
-
-      input.addEventListener(
-        "paste",
-        () => {
-          setTimeout(
-            saveImageUrl,
-            0
-          );
-        }
-      );
-
-      input.addEventListener(
-        "change",
-        saveImageUrl
-      );
-    });
-
-    $$(
-      "[data-image-width-path]",
-      root
-    ).forEach(range => {
-      const path =
-        range.dataset.imageWidthPath;
-
-      const number =
-        $(
-          `[data-image-width-number="${CSS.escape(
-            path
-          )}"]`,
-          root
-        );
-
-      range.oninput = () => {
-        if (number) {
-          number.value =
-            range.value;
-        }
-
-      };
-
-      range.onchange = () => {
-        const width =
-          Math.max(
-            0,
-            Math.min(
-              100,
-              Number(
-                range.value
-              ) ||
-              0
-            )
-          );
-
-        setImageSetting(
-          path,
-          {
-            width
-          }
-        );
-
-        commitConfig();
-
-        const input =
-          $(
-            `[data-image-path="${CSS.escape(
-              path
-            )}"]`,
-            root
-          );
-
-        if (input) {
-          syncImageCardPreview(
-            input,
-            path
-          );
-        }
-
-        syncImageAdvanceControls(
-          root,
-          path
-        );
-      };
-    });
-
-    $$(
-      "[data-image-width-number]",
-      root
-    ).forEach(number => {
-      const path =
-        number.dataset.imageWidthNumber;
-
-      number.oninput = () => {
-        const value =
-          Math.max(
-            0,
-            Math.min(
-              100,
-              Number(
-                number.value
-              ) ||
-              0
-            )
-          );
-
-        const range =
-          $(
-            `[data-image-width-path="${CSS.escape(
-              path
-            )}"]`,
-            root
-          );
-
-        if (range) {
-          range.value =
-            value;
-        }
-
-      };
-
-      number.onchange = () => {
-
-        const width =
-          Math.max(
-            0,
-            Math.min(
-              100,
-              Number(
-                number.value
-              ) ||
-              0
-            )
-          );
-
-        setImageSetting(
-          path,
-          {
-            width
-          }
-        );
-
-        commitConfig();
-
-        const input =
-          $(
-            `[data-image-path="${CSS.escape(
-              path
-            )}"]`,
-            root
-          );
-
-        if (input) {
-          syncImageCardPreview(
-            input,
-            path
-          );
-        }
-
-        syncImageAdvanceControls(
-          root,
-          path
-        );
-      };
-    });
-
-    $$(
-      "[data-image-align-path]",
-      root
-    ).forEach(button => {
-      button.onclick = () => {
-        const path =
-          button.dataset.imageAlignPath;
-
-        const align =
-          ["left", "center", "right"]
-            .includes(
-              button.dataset.imageAlign
-            )
-            ? button.dataset.imageAlign
-            : "center";
-
-        setImageSetting(
-          path,
-          {
-            align
-          }
-        );
-
-        commitConfig();
-
-        syncImageAdvanceControls(
-          root,
-          path
-        );
-
-        const input =
-          $(
-            `[data-image-path="${CSS.escape(
-              path
-            )}"]`,
-            root
-          );
-
-        if (input) {
-          syncImageCardPreview(
-            input,
-            path
-          );
-        }
-      };
-    });
-
-    $$(
-      "[data-image-fit-path]",
-      root
-    ).forEach(button => {
-      button.onclick = () => {
-        const path =
-          button.dataset.imageFitPath;
-
-        const fit =
-          FIT_MODES.includes(
-            button.dataset.imageFit
-          )
-            ? button.dataset.imageFit
-            : "auto";
-
-        setImageSetting(
-          path,
-          {
-            fit
-          }
-        );
-
-        commitConfig();
-
-        syncImageAdvanceControls(
-          root,
-          path
-        );
-
-        const input =
-          $(
-            `[data-image-path="${CSS.escape(
-              path
-            )}"]`,
-            root
-          );
-
-        if (input) {
-          syncImageCardPreview(
-            input,
-            path
-          );
-        }
-      };
-    });
-
-    $$(
-      "[data-image-alignpos-path]",
-      root
-    ).forEach(button => {
-      button.onclick = () => {
-        const path =
-          button.dataset.imageAlignposPath;
-
-        const alignPos =
-          ALIGN_POSITIONS.includes(
-            button.dataset.imageAlignpos
-          )
-            ? button.dataset.imageAlignpos
-            : "default";
-
-        setImageSetting(
-          path,
-          {
-            alignPos
-          }
-        );
-
-        commitConfig();
-
-        syncImageAdvanceControls(
-          root,
-          path
-        );
-
-        const input =
-          $(
-            `[data-image-path="${CSS.escape(
-              path
-            )}"]`,
-            root
-          );
-
-        if (input) {
-          syncImageCardPreview(
-            input,
-            path
-          );
-        }
-      };
-    });
-
-    $$(
-      "[data-image-ratio-path]",
-      root
-    ).forEach(button => {
-      button.onclick = () => {
-        const path =
-          button.dataset.imageRatioPath;
-
-        const ratio =
-          RATIO_OPTIONS.includes(
-            button.dataset.imageRatio
-          )
-            ? button.dataset.imageRatio
-            : "16:9";
-
-        setImageSetting(
-          path,
-          {
-            ratio
-          }
-        );
-
-        commitConfig();
-
-        syncImageAdvanceControls(
-          root,
-          path
-        );
-
-        const input =
-          $(
-            `[data-image-path="${CSS.escape(
-              path
-            )}"]`,
-            root
-          );
-
-        if (input) {
-          syncImageCardPreview(
-            input,
-            path
-          );
-        }
-      };
-    });
-
-    const resetImagesButton =
-      $(
-        "#" +
-        ID +
-        "-reset-images",
-        root
-      );
-
-    if (resetImagesButton) {
-      resetImagesButton.onclick = () => {
-        resetAllImages();
-      };
-    }
-
-    $$(
-      "[data-image-delete-path]",
-      root
-    ).forEach(button => {
-      button.onclick = () => {
-        deleteStaticImageFrame(
-          button.dataset
-            .imageDeletePath
-        );
-      };
-    });
-
-    $$(
-      "[data-image-paste-path]",
-      root
-    ).forEach(button => {
-      button.onclick = async event => {
-        event.preventDefault();
-        event.stopPropagation();
-
-        await pasteImageUrlFromClipboard(
-          root,
-          button.dataset.imagePastePath
-        );
-      };
-    });
-
-    $$(
-      "[data-image-open-advance]",
-      root
-    ).forEach(button => {
-      button.onclick = () => {
-        const path =
-          button.dataset
-            .imageOpenAdvance;
-
-        const card =
-          $(
-            `[data-image-card-path="${CSS.escape(
-              path
-            )}"]`,
-            root
-          );
-
-        const details =
-          card
-            ? $(
-                ".image-advance",
-                card
-              )
-            : null;
-
+      const del = event.target.closest("[data-image-delete-path]");
+      if (del) {
+        deleteStaticImageFrame(del.dataset.imageDeletePath);
+        return;
+      }
+
+      const openAdvance = event.target.closest("[data-image-open-advance]");
+      if (openAdvance) {
+        const path = openAdvance.dataset.imageOpenAdvance;
+        const card = $(`[data-image-card-path="${CSS.escape(path)}"]`, root);
+        const details = card ? $(".image-advance", card) : null;
         if (details) {
           const nextOpen = !details.open;
           details.open = nextOpen;
-
-          button.setAttribute(
-            "aria-expanded",
-            String(nextOpen)
-          );
-
-          button.setAttribute(
+          openAdvance.setAttribute("aria-expanded", String(nextOpen));
+          openAdvance.setAttribute(
             "aria-label",
-            nextOpen
-              ? "Tutup pengaturan gambar"
-              : "Buka pengaturan gambar"
+            nextOpen ? "Tutup pengaturan gambar" : "Buka pengaturan gambar"
           );
-
-          button.title = nextOpen
+          openAdvance.title = nextOpen
             ? "Tutup pengaturan gambar"
             : "Pengaturan gambar";
-
-          button.classList.toggle(
-            "active",
-            nextOpen
-          );
-
+          openAdvance.classList.toggle("active", nextOpen);
           if (nextOpen) {
-            details.scrollIntoView({
-              block: "nearest",
-              behavior: "smooth"
-            });
+            details.scrollIntoView({ block: "nearest", behavior: "smooth" });
           } else {
-            const card = button.closest(
-              ".image-card"
-            );
-
-            card?.scrollIntoView({
-              block: "nearest",
-              behavior: "smooth"
-            });
+            const advanceCard = openAdvance.closest(".image-card");
+            advanceCard?.scrollIntoView({ block: "nearest", behavior: "smooth" });
           }
         }
-      };
-    });
+        return;
+      }
 
-    $$(
-      "[data-gallery-delete-index]",
-      root
-    ).forEach(button => {
-      button.onclick = () => {
-        const path =
-          button.dataset
-            .galleryDeleteIndex;
+      const align = event.target.closest("[data-image-align-path]");
+      if (align) {
+        const path = align.dataset.imageAlignPath;
+        const value = ["left", "center", "right"].includes(align.dataset.imageAlign)
+          ? align.dataset.imageAlign
+          : "center";
+        setImageSetting(path, { align: value });
+        commitConfig();
+        syncImageAdvanceControls(root, path);
+        const input = $(`[data-image-path="${CSS.escape(path)}"]`, root);
+        if (input) {
+          syncImageCardPreview(input, path);
+        }
+        return;
+      }
 
-        const index =
-          Number(
-            button.dataset
-              .galleryIndex
-          );
+      const fit = event.target.closest("[data-image-fit-path]");
+      if (fit) {
+        const path = fit.dataset.imageFitPath;
+        const value = FIT_MODES.includes(fit.dataset.imageFit)
+          ? fit.dataset.imageFit
+          : "auto";
+        setImageSetting(path, { fit: value });
+        commitConfig();
+        syncImageAdvanceControls(root, path);
+        const input = $(`[data-image-path="${CSS.escape(path)}"]`, root);
+        if (input) {
+          syncImageCardPreview(input, path);
+        }
+        return;
+      }
 
+      const alignPos = event.target.closest("[data-image-alignpos-path]");
+      if (alignPos) {
+        const path = alignPos.dataset.imageAlignposPath;
+        const value = ALIGN_POSITIONS.includes(alignPos.dataset.imageAlignpos)
+          ? alignPos.dataset.imageAlignpos
+          : "default";
+        setImageSetting(path, { alignPos: value });
+        commitConfig();
+        syncImageAdvanceControls(root, path);
+        const input = $(`[data-image-path="${CSS.escape(path)}"]`, root);
+        if (input) {
+          syncImageCardPreview(input, path);
+        }
+        return;
+      }
+
+      const ratio = event.target.closest("[data-image-ratio-path]");
+      if (ratio) {
+        const path = ratio.dataset.imageRatioPath;
+        const value = RATIO_OPTIONS.includes(ratio.dataset.imageRatio)
+          ? ratio.dataset.imageRatio
+          : "16:9";
+        setImageSetting(path, { ratio: value });
+        commitConfig();
+        syncImageAdvanceControls(root, path);
+        const input = $(`[data-image-path="${CSS.escape(path)}"]`, root);
+        if (input) {
+          syncImageCardPreview(input, path);
+        }
+        return;
+      }
+
+      const galleryDel = event.target.closest("[data-gallery-delete-index]");
+      if (galleryDel) {
         deleteGalleryItem(
-          path,
-          index
+          galleryDel.dataset.galleryDeleteIndex,
+          Number(galleryDel.dataset.galleryIndex)
         );
-      };
-    });
+        return;
+      }
 
-    $$(
-      "[data-gallery-add]",
-      root
-    ).forEach(button => {
-      button.onclick = () => {
-        const path =
-          button.dataset.galleryAdd;
-
-        let array =
-          getPath(
-            state.config,
-            path
-          );
-
-        if (
-          !Array.isArray(array)
-        ) {
-          setPath(
-            state.config,
-            path,
-            []
-          );
-
-          array =
-            getPath(
-              state.config,
-              path
-            );
+      const galleryAdd = event.target.closest("[data-gallery-add]");
+      if (galleryAdd) {
+        const path = galleryAdd.dataset.galleryAdd;
+        let array = getPath(state.config, path);
+        if (!Array.isArray(array)) {
+          setPath(state.config, path, []);
+          array = getPath(state.config, path);
         }
-
-        const index =
-          array.length;
-
-        const schema =
-          repeaterImageFieldByRootPath(
-            path
-          );
-
-        const imageField =
-          repeaterImageSubField(
-            schema
-          );
-
-        const imageKey =
-          String(
-            imageField?.key ||
-            "src"
-          );
-
-        const nextItem =
-          schema
-            ? repeaterDefault(
-                schema
-              )
-            : {};
-
-        if (
-          !Object.prototype
-            .hasOwnProperty
-            .call(
-              nextItem,
-              imageKey
-            )
-        ) {
-          nextItem[
-            imageKey
-          ] = "";
+        const index = array.length;
+        const schema = repeaterImageFieldByRootPath(path);
+        const imageField = repeaterImageSubField(schema);
+        const imageKey = String(imageField?.key || "src");
+        const nextItem = schema ? repeaterDefault(schema) : {};
+        if (!Object.prototype.hasOwnProperty.call(nextItem, imageKey)) {
+          nextItem[imageKey] = "";
         }
-
-        array.push(
-          nextItem
-        );
-
+        array.push(nextItem);
         ensureImageSettingsObject()[
-          path +
-          "." +
-          index +
-          "." +
-          imageKey
+          path + "." + index + "." + imageKey
         ] = {
           width: 100,
           align: "center",
@@ -12432,612 +11509,393 @@ ${end}`;
           fit: "auto",
           ratio: "1:1"
         };
-
-        commitConfig(
-          "Foto gallery ditambah"
-        );
-
+        commitConfig("Foto gallery ditambah");
         render();
-      };
-    });
-
-    $$(
-      "[data-color-token-var]",
-      root
-    ).forEach(input => {
-      const variable =
-        input.dataset.colorTokenVar;
-
-      const picker =
-        $(
-          `[data-color-var="${CSS.escape(
-            variable
-          )}"]`,
-          root
-        );
-
-      const syncFromText = (
-        restoreInvalid = false
-      ) => {
-        const next =
-          input.value.trim();
-
-        if (
-          !next ||
-          !isCssColorValue(
-            next
-          )
-        ) {
-          if (restoreInvalid) {
-            const current =
-              cssVarValue(
-                variable
-              );
-
-            if (current) {
-              input.value =
-                current;
-            }
-          }
-
-          return;
-        }
-
-        setCssVar(
-          variable,
-          next
-        );
-
-        if (picker) {
-          picker.value =
-            cssColorToHex(
-              next,
-              picker.value ||
-              "#000000"
-            );
-        }
-      };
-
-      /*
-       * Realtime jika kode sudah valid, misalnya #ff0059.
-       * Saat user masih mengetik "#ff", editor tidak memaksa reset.
-       */
-      input.oninput = () => {
-        syncFromText(false);
-      };
-
-      input.onchange = () => {
-        const next =
-          input.value.trim();
-
-        if (
-          next &&
-          isCssColorValue(
-            next
-          )
-        ) {
-          syncFromText(true);
-        } else {
-          syncFromText(true);
-        }
-      };
-    });
-
-    $$(
-      "[data-color-var]",
-      root
-    ).forEach(input => {
-      input.oninput = () => {
-        const variable =
-          input.dataset.colorVar;
-
-        setCssVar(
-          variable,
-          input.value
-        );
-
-        const textInput =
-          $(
-            `[data-color-token-var="${CSS.escape(
-              variable
-            )}"]`,
-            root
-          );
-
-        if (textInput) {
-          textInput.value =
-            input.value;
-        }
-      };
-    });
-
-    const resetStyleButton =
-      $(
-        "#" +
-        ID +
-        "-reset-style",
-        root
-      );
-
-    if (resetStyleButton) {
-      resetStyleButton.onclick = () => {
-        resetStylePanel();
-      };
-    }
-
-    $$(
-      "[data-style-var]",
-      root
-    ).forEach(input => {
-      const variable =
-        input.dataset.styleVar;
-
-      const applyStyleValue = () => {
-        const next =
-          String(
-            input.value || ""
-          ).trim();
-
-        if (!next) return;
-
-        if (
-          variable ===
-            "--sve-heading-weight" ||
-          variable ===
-            "--sve-body-weight"
-        ) {
-          const target =
-            variable ===
-              "--sve-heading-weight"
-              ? "heading"
-              : "body";
-
-          if (
-            !fontSupportsWeight(
-              target,
-              next
-            )
-          ) {
-            const current =
-              cssVarValue(
-                variable
-              );
-
-            if (current) {
-              input.value =
-                current;
-            }
-
-            return;
-          }
-        }
-
-        setCssVar(
-          variable,
-          next
-        );
-
-        if (
-          variable ===
-            "--sve-heading-weight" ||
-          variable ===
-            "--sve-body-weight"
-        ) {
-          updateGoogleFontsHead();
-        }
-      };
-
-      input.onchange =
-        applyStyleValue;
-
-      if (
-        input.tagName === "SELECT"
-      ) {
-        input.oninput =
-          applyStyleValue;
+        return;
       }
     });
 
-    $$(
-      "[data-reset-token]",
-      root
-    ).forEach(button => {
-      button.onclick = () => {
-        const variable =
-          button.dataset.resetToken;
-
-        const value =
-          defaultCssVar(
-            variable
-          );
-
-        if (!value) return;
-
-        setCssVar(
-          variable,
-          value
+    root.addEventListener("input", event => {
+      const widthRange = event.target.dataset.imageWidthPath;
+      if (widthRange !== undefined) {
+        const number = $(
+          `[data-image-width-number="${CSS.escape(widthRange)}"]`,
+          root
         );
-
-        const textInput =
-          $(
-            `[data-color-token-var="${CSS.escape(
-              variable
-            )}"], [data-style-var="${CSS.escape(
-              variable
-            )}"]`,
-            root
-          );
-
-        const picker =
-          $(
-            `[data-color-var="${CSS.escape(
-              variable
-            )}"]`,
-            root
-          );
-
-        if (textInput) {
-          const options =
-            textInput.tagName === "SELECT"
-              ? Array.from(
-                  textInput.options
-                ).map(
-                  option =>
-                    option.value
-                )
-              : [];
-
-          if (
-            !options.length ||
-            options.includes(
-              value
-            )
-          ) {
-            textInput.value =
-              value;
-          }
+        if (number) {
+          number.value = event.target.value;
         }
+        return;
+      }
 
-        if (picker) {
-          picker.value =
-            cssColorToHex(
-              value,
-              picker.value
-            );
+      const widthNumber = event.target.dataset.imageWidthNumber;
+      if (widthNumber !== undefined) {
+        const value = Math.max(
+          0,
+          Math.min(100, Number(event.target.value) || 0)
+        );
+        const range = $(
+          `[data-image-width-path="${CSS.escape(widthNumber)}"]`,
+          root
+        );
+        if (range) {
+          range.value = value;
         }
-      };
+        return;
+      }
     });
 
-    $(
-      "#" +
-      ID +
-      "-reset-colors",
-      root
-    )
-      ?.addEventListener(
-        "click",
-        () => {
-          COLOR_FIELDS.forEach(
-            (
-              [
-                ,
-                ,
-                variable
-              ]
-            ) => {
-              const current =
-                cssVarValue(
-                  variable
-                );
-
-              if (!current) return;
-
-              setCssVar(
-                variable,
-                defaultCssVar(
-                  variable
-                ) ||
-                current
-              );
-            }
-          );
-
-          $$(
-            "[data-color-token-var]",
-            root
-          ).forEach(input => {
-            const variable =
-              input.dataset.colorTokenVar;
-
-            const value =
-              cssVarValue(
-                variable
-              );
-
-            if (value) {
-              input.value =
-                value;
-            }
-          });
-
-          $$(
-            "[data-color-var]",
-            root
-          ).forEach(input => {
-            const variable =
-              input.dataset.colorVar;
-
-            input.value =
-              cssColorToHex(
-                cssVarValue(
-                  variable
-                ),
-                input.value
-              );
-          });
-        }
-      );
-
-    $(
-      "#" +
-      ID +
-      "-reset-all",
-      root
-    )
-      ?.addEventListener(
-        "click",
-        resetAll
-      );
-
-    const headingInput =
-      $(
-        "#" +
-        ID +
-        "-heading-font",
-        root
-      );
-
-    const bodyInput =
-      $(
-        "#" +
-        ID +
-        "-body-font",
-        root
-      );
-
-    [
-      [
-        "heading",
-        headingInput
-      ],
-      [
-        "body",
-        bodyInput
-      ]
-    ].forEach(
-      ([
-        target,
-        input
-      ]) => {
-        input?.addEventListener(
-          "keydown",
-          event => {
-            if (
-              event.key !==
-              "Enter"
-            ) {
-              return;
-            }
-
-            event.preventDefault();
-
-            applyGoogleFont(
-              target
-            );
-          }
-        );
+    const commitWidth = (path, rawValue) => {
+      const width = Math.max(0, Math.min(100, Number(rawValue) || 0));
+      setImageSetting(path, { width });
+      commitConfig();
+      const input = $(`[data-image-path="${CSS.escape(path)}"]`, root);
+      if (input) {
+        syncImageCardPreview(input, path);
       }
-    );
+      syncImageAdvanceControls(root, path);
+    };
 
-    $(
-      "#" +
-      ID +
-      "-heading-font-apply",
-      root
-    )
-      ?.addEventListener(
-        "click",
-        () =>
-          applyGoogleFont(
-            "heading"
-          )
-      );
+    root.addEventListener("change", event => {
+      const widthRange = event.target.dataset.imageWidthPath;
+      if (widthRange !== undefined) {
+        commitWidth(widthRange, event.target.value);
+        return;
+      }
 
-    $(
-      "#" +
-      ID +
-      "-body-font-apply",
-      root
-    )
-      ?.addEventListener(
-        "click",
-        () =>
-          applyGoogleFont(
-            "body"
-          )
-      );
+      const widthNumber = event.target.dataset.imageWidthNumber;
+      if (widthNumber !== undefined) {
+        commitWidth(widthNumber, event.target.value);
+        return;
+      }
 
-    const audioInput =
-      $(
-        "#" +
-        ID +
-        "-audio-url",
-        root
-      );
+      const imageInput = event.target.closest("[data-image-path]");
+      if (!imageInput) {
+        return;
+      }
 
-    if (audioInput) {
-      const audioField =
-        schemaAudio();
+      const path = imageInput.dataset.imagePath;
+      const next = imageInput.value.trim();
+      const current = String(getPath(state.config, path) || "");
 
-      const audioPath =
-        audioField.path ||
-        "assets.audio";
+      if (next === current) {
+        return;
+      }
 
-      const saveAudioUrl = () => {
-        const next =
-          audioInput.value.trim();
+      setPath(state.config, path, next);
 
-        const current =
-          getPath(
-            state.config,
-            audioPath
-          );
+      if (next) {
+        setImageSetting(path, { hidden: false });
+      }
 
-        if (
-          typeof current === "string" &&
-          current === next
-        ) {
-          syncAudioStartUi(
-            root,
-            next
-          );
+      commitConfig("Gambar diperbarui");
+      syncImageCardPreview(imageInput, path);
+    });
 
-          return;
-        }
-
-        setPath(
-          state.config,
-          audioPath,
-          next
-        );
-
-        commitConfig(
-          "Audio diperbarui"
-        );
-
-        syncAudioStartUi(
-          root,
-          next
-        );
-      };
-
-      audioInput.addEventListener(
-        "paste",
-        () => {
-          setTimeout(
-            saveAudioUrl,
-            0
-          );
-        }
-      );
-
-      audioInput.addEventListener(
-        "change",
-        saveAudioUrl
-      );
-
-      const startEnabled =
-        $(
-          "#" +
-          ID +
-          "-audio-start-enabled",
-          root
-        );
-
-      const startInput =
-        $(
-          "#" +
-          ID +
-          "-audio-start-time",
-          root
-        );
-
-      const saveStartTime = () => {
-        if (
-          !startEnabled ||
-          !startInput
-        ) {
-          return;
-        }
-
-        const currentUrl =
-          audioInput.value.trim();
-
-        const seconds =
-          startEnabled.checked
-            ? parseTimeValueToSeconds(
-                startInput.value
-              )
-            : 0;
-
-        const nextUrl =
-          withYoutubeStartTime(
-            currentUrl,
-            seconds
-          );
-
-        audioInput.value =
-          nextUrl;
-
-        startInput.disabled =
-          !startEnabled.checked;
-
-        if (
-          startEnabled.checked
-        ) {
-          startInput.value =
-            formatAudioStartTime(
-              seconds
-            );
-        }
-
-        setPath(
-          state.config,
-          audioPath,
-          nextUrl
-        );
-
-        commitConfig(
-          seconds > 0
-            ? "Waktu mulai audio diperbarui"
-            : "Waktu mulai audio dimatikan"
-        );
-      };
-
-      startEnabled
-        ?.addEventListener(
-          "change",
-          () => {
-            startInput.disabled =
-              !startEnabled.checked;
-
-            if (
-              startEnabled.checked &&
-              parseTimeValueToSeconds(
-                startInput.value
-              ) <= 0
-            ) {
-              startInput.value =
-                "0:00";
-
-              startInput.focus();
-            }
-
-            saveStartTime();
-          }
-        );
-
-      startInput
-        ?.addEventListener(
-          "change",
-          saveStartTime
-        );
-    }
+    root.addEventListener("paste", event => {
+      const imageInput = event.target.closest("[data-image-path]");
+      if (!imageInput) {
+        return;
+      }
+      setTimeout(() => {
+        imageInput.dispatchEvent(new Event("change", { bubbles: true }));
+      }, 0);
+    });
   }
 
-  /* =========================================================
-     SCALEV SAVE
-     ========================================================= */
+  function bindColorsBody(root) {
+    if (!ensureTabDelegated(root, "colors")) {
+      return;
+    }
+
+    const syncColorFromText = (input, variable, restoreInvalid) => {
+      const next = input.value.trim();
+      if (!next || !isCssColorValue(next)) {
+        if (restoreInvalid) {
+          const current = cssVarValue(variable);
+          if (current) {
+            input.value = current;
+          }
+        }
+        return;
+      }
+      setCssVar(variable, next);
+      const picker = $(`[data-color-var="${CSS.escape(variable)}"]`, root);
+      if (picker) {
+        picker.value = cssColorToHex(next, picker.value || "#000000");
+      }
+    };
+
+    const resetSingleToken = variable => {
+      const value = defaultCssVar(variable);
+      if (!value) return;
+      setCssVar(variable, value);
+      const textInput = $(
+        `[data-color-token-var="${CSS.escape(variable)}"], [data-style-var="${CSS.escape(variable)}"]`,
+        root
+      );
+      const picker = $(`[data-color-var="${CSS.escape(variable)}"]`, root);
+      if (textInput) {
+        const options =
+          textInput.tagName === "SELECT"
+            ? Array.from(textInput.options).map(option => option.value)
+            : [];
+        if (!options.length || options.includes(value)) {
+          textInput.value = value;
+        }
+      }
+      if (picker) {
+        picker.value = cssColorToHex(value, picker.value);
+      }
+    };
+
+    root.addEventListener("click", event => {
+      const resetToken = event.target.closest("[data-reset-token]");
+      if (resetToken) {
+        resetSingleToken(resetToken.dataset.resetToken);
+        return;
+      }
+
+      if (event.target.closest("#" + ID + "-reset-colors")) {
+        COLOR_FIELDS.forEach(([, , variable]) => {
+          const current = cssVarValue(variable);
+          if (!current) return;
+          setCssVar(variable, defaultCssVar(variable) || current);
+        });
+        $$("[data-color-token-var]", root).forEach(input => {
+          const variable = input.dataset.colorTokenVar;
+          const value = cssVarValue(variable);
+          if (value) {
+            input.value = value;
+          }
+        });
+        $$("[data-color-var]", root).forEach(input => {
+          input.value = cssColorToHex(cssVarValue(input.dataset.colorVar), input.value);
+        });
+        return;
+      }
+    });
+
+    root.addEventListener("input", event => {
+      const text = event.target.dataset.colorTokenVar;
+      if (text !== undefined) {
+        syncColorFromText(event.target, text, false);
+        return;
+      }
+
+      const picker = event.target.dataset.colorVar;
+      if (picker !== undefined) {
+        setCssVar(picker, event.target.value);
+        const textInput = $(
+          `[data-color-token-var="${CSS.escape(picker)}"]`,
+          root
+        );
+        if (textInput) {
+          textInput.value = event.target.value;
+        }
+      }
+    });
+
+    root.addEventListener("change", event => {
+      const text = event.target.dataset.colorTokenVar;
+      if (text !== undefined) {
+        syncColorFromText(event.target, text, true);
+      }
+    });
+  }
+
+  function bindStyleBody(root) {
+    if (!ensureTabDelegated(root, "style")) {
+      return;
+    }
+
+    const applyStyleValue = (input, variable) => {
+      const next = String(input.value || "").trim();
+      if (!next) return;
+
+      if (
+        variable === "--sve-heading-weight" ||
+        variable === "--sve-body-weight"
+      ) {
+        const target =
+          variable === "--sve-heading-weight" ? "heading" : "body";
+        if (!fontSupportsWeight(target, next)) {
+          const current = cssVarValue(variable);
+          if (current) {
+            input.value = current;
+          }
+          return;
+        }
+      }
+
+      setCssVar(variable, next);
+
+      if (
+        variable === "--sve-heading-weight" ||
+        variable === "--sve-body-weight"
+      ) {
+        updateGoogleFontsHead();
+      }
+    };
+
+    const resetSingleToken = variable => {
+      const value = defaultCssVar(variable);
+      if (!value) return;
+      setCssVar(variable, value);
+      const textInput = $(
+        `[data-color-token-var="${CSS.escape(variable)}"], [data-style-var="${CSS.escape(variable)}"]`,
+        root
+      );
+      const picker = $(`[data-color-var="${CSS.escape(variable)}"]`, root);
+      if (textInput) {
+        const options =
+          textInput.tagName === "SELECT"
+            ? Array.from(textInput.options).map(option => option.value)
+            : [];
+        if (!options.length || options.includes(value)) {
+          textInput.value = value;
+        }
+      }
+      if (picker) {
+        picker.value = cssColorToHex(value, picker.value);
+      }
+    };
+
+    root.addEventListener("click", event => {
+      const resetToken = event.target.closest("[data-reset-token]");
+      if (resetToken) {
+        resetSingleToken(resetToken.dataset.resetToken);
+        return;
+      }
+
+      if (event.target.closest("#" + ID + "-reset-style")) {
+        resetStylePanel();
+        return;
+      }
+
+      if (event.target.closest("#" + ID + "-reset-all")) {
+        resetAll();
+        return;
+      }
+
+      if (event.target.closest("#" + ID + "-heading-font-apply")) {
+        applyGoogleFont("heading");
+        return;
+      }
+
+      if (event.target.closest("#" + ID + "-body-font-apply")) {
+        applyGoogleFont("body");
+      }
+    });
+
+    root.addEventListener("change", event => {
+      const variable = event.target.dataset.styleVar;
+      if (variable !== undefined) {
+        applyStyleValue(event.target, variable);
+      }
+    });
+
+    root.addEventListener("input", event => {
+      if (event.target.tagName !== "SELECT") {
+        return;
+      }
+      const variable = event.target.dataset.styleVar;
+      if (variable !== undefined) {
+        applyStyleValue(event.target, variable);
+      }
+    });
+
+    root.addEventListener("keydown", event => {
+      if (event.key !== "Enter") {
+        return;
+      }
+      if (event.target.id === ID + "-heading-font") {
+        event.preventDefault();
+        applyGoogleFont("heading");
+      } else if (event.target.id === ID + "-body-font") {
+        event.preventDefault();
+        applyGoogleFont("body");
+      }
+    });
+  }
+
+  function bindAudioBody(root) {
+    if (!ensureTabDelegated(root, "audio")) {
+      return;
+    }
+
+    const audioField = schemaAudio();
+    const audioPath = audioField.path || "assets.audio";
+
+    const audioInput = $("#" + ID + "-audio-url", root);
+    const startEnabled = $("#" + ID + "-audio-start-enabled", root);
+    const startInput = $("#" + ID + "-audio-start-time", root);
+
+    if (!audioInput) {
+      return;
+    }
+
+    const saveAudioUrl = () => {
+      const next = audioInput.value.trim();
+      const current = getPath(state.config, audioPath);
+      if (typeof current === "string" && current === next) {
+        syncAudioStartUi(root, next);
+        return;
+      }
+      setPath(state.config, audioPath, next);
+      commitConfig("Audio diperbarui");
+      syncAudioStartUi(root, next);
+    };
+
+    const saveStartTime = () => {
+      if (!startEnabled || !startInput) {
+        return;
+      }
+      const currentUrl = audioInput.value.trim();
+      const seconds = startEnabled.checked
+        ? parseTimeValueToSeconds(startInput.value)
+        : 0;
+      const nextUrl = withYoutubeStartTime(currentUrl, seconds);
+      audioInput.value = nextUrl;
+      startInput.disabled = !startEnabled.checked;
+      if (startEnabled.checked) {
+        startInput.value = formatAudioStartTime(seconds);
+      }
+      setPath(state.config, audioPath, nextUrl);
+      commitConfig(
+        seconds > 0
+          ? "Waktu mulai audio diperbarui"
+          : "Waktu mulai audio dimatikan"
+      );
+    };
+
+    audioInput.addEventListener("paste", () => {
+      setTimeout(saveAudioUrl, 0);
+    });
+    audioInput.addEventListener("change", saveAudioUrl);
+
+    startEnabled?.addEventListener("change", () => {
+      if (!startInput) return;
+      startInput.disabled = !startEnabled.checked;
+      if (
+        startEnabled.checked &&
+        parseTimeValueToSeconds(startInput.value) <= 0
+      ) {
+        startInput.value = "0:00";
+        startInput.focus();
+      }
+      saveStartTime();
+    });
+
+    startInput?.addEventListener("change", saveStartTime);
+  }
+
+  function bindCompatibilityBody(root) {
+    if (!ensureTabDelegated(root, "compat")) {
+      return;
+    }
+    /* renderCompatibility() emits no interactive elements. */
+  }
 
   function flushEditors() {
     Object
