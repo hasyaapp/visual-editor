@@ -151,7 +151,8 @@
       skippedTabRenders: 0,
       lastRenderMs: 0,
       lastRenderTab: "",
-      slowRenders: 0
+      slowRenders: 0,
+      firstPaintMarks: []
     },
     previewRefreshTimer: null,
     previewRefreshImages: false,
@@ -1744,6 +1745,7 @@
   }
 
   function schedulePanelWorkAfterPaint() {
+    performance.mark("sve-panel-paint-start");
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (!state.open) return;
@@ -1754,7 +1756,10 @@
           applyPushLayout(true);
         } catch (_) {}
 
+        performance.mark("sve-panel-paint-laid-out");
         ensurePanelReady();
+        performance.mark("sve-panel-paint-end");
+        collectFirstPaintMarks();
       });
     });
   }
@@ -1768,6 +1773,7 @@
       return;
     }
 
+    performance.mark("sve-prewarm-start");
     try {
       if (state.sourceDirty || !state.doc) {
         parseAll();
@@ -1783,7 +1789,20 @@
       }
     } catch (_) {}
 
+    performance.mark("sve-prewarm-end");
     scheduleSlugSyncAfterPaint();
+  }
+
+  function collectFirstPaintMarks() {
+    try {
+      const marks = performance.getEntriesByType("mark");
+      state.performance.firstPaintMarks = marks
+        .filter(m => String(m.name).startsWith("sve-"))
+        .map(m => ({
+          name: m.name,
+          startTime: Math.round(m.startTime * 100) / 100
+        }));
+    } catch (_) {}
   }
 
   function scheduleVisualEditorPrewarm() {
@@ -3578,7 +3597,17 @@
       return false;
     }
 
-    cleanupLegacyImageDesignCSS();
+    /*
+     * Defer heavy CSS regex to idle — bukan blocker untuk first paint.
+     * Set sourceDirty = true di callback supaya commit berikutnya
+     * trigger CodeMirror rewrite kalau cleanup modify source.
+     */
+    runWhenIdle(() => {
+      try {
+        cleanupLegacyImageDesignCSS();
+        state.sourceDirty = true;
+      } catch (_) {}
+    }, 200);
 
     state.doc =
       new DOMParser().parseFromString(
@@ -12041,6 +12070,8 @@ ${end}`;
      ========================================================= */
 
   function injectStyles() {
+    performance.mark("sve-styles-start");
+
     const style =
       document.createElement(
         "style"
@@ -16183,6 +16214,8 @@ ${end}`;
     document.head.appendChild(
       style
     );
+
+    performance.mark("sve-styles-all-done");
   }
 
   /* =========================================================
