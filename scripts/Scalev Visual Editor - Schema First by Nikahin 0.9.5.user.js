@@ -15368,6 +15368,11 @@ input:checked
   color: #fff;
 }
 
+#${ID}-body[data-sve-tab="style"] .button.danger {
+  border-color: #e7515e;
+  color: #e7515e;
+}
+
 #${ID}-body[data-sve-tab="style"] .font-apply {
   margin-top: 10px !important;
 }
