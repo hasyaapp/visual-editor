@@ -115,8 +115,6 @@
       loadedAt: 0
     },
 
-    reorderEffect: null,
-
     internalEditorWrite: 0,
     editorChangeBound: new WeakSet(),
     freshBaselineTimer: null,
@@ -488,12 +486,6 @@
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
-  }
-
-  function cssAttrEscape(value) {
-    return String(value ?? "")
-      .replace(/\\/g, "\\\\")
-      .replace(/"/g, '\\"');
   }
 
   function debounce(fn, ms = 180) {
@@ -1819,7 +1811,6 @@
     toggle?.setAttribute('aria-pressed', state.open ? 'true' : 'false');
 
     syncToolbarToggleVisibility();
-    closeFontPortal();
 
     if (state.open) {
       if (state.prewarmScheduled) {
@@ -3551,24 +3542,6 @@
     );
   }
 
-  function resetSectionOrderToSchema() {
-    const order = schemaSections()
-      .map(sectionId)
-      .filter(Boolean);
-
-    writeSectionOrder(order);
-    commitConfig("Urutan section direset");
-
-    applySectionOrderToEditorDOM(
-      order,
-      order.find(
-        id =>
-          id !== "cover"
-      ) || "",
-      "up"
-    );
-  }
-
   function schemaAudio() {
     const schema =
       effectiveSchema();
@@ -3936,11 +3909,6 @@
       lastManagedFingerprint: fingerprint
     });
   }
-
-  const queueManagedFingerprintPersist = debounce(
-    persistManagedFingerprint,
-    80
-  );
 
   /* Typing path may commit several times; full-source fingerprinting is background work. */
   const queueContentFingerprintPersist = debounce(
@@ -7604,29 +7572,6 @@
     );
   }
 
-  function imagePreviewMargins(
-    align
-  ) {
-    if (align === "left") {
-      return {
-        left: "0",
-        right: "auto"
-      };
-    }
-
-    if (align === "right") {
-      return {
-        left: "auto",
-        right: "0"
-      };
-    }
-
-    return {
-      left: "auto",
-      right: "auto"
-    };
-  }
-
   function syncImageCardPreview(
     input,
     path
@@ -9247,10 +9192,6 @@ ${end}`;
     notifyPreview();
 
   }
-
-  function closeFontPortal() {}
-
-  function positionFontPortal() {}
 
   /* =========================================================
      STYLE TAB
@@ -17749,8 +17690,6 @@ ${end}`;
     $$(".tab", app).forEach(
       button => {
         button.onclick = () => {
-          closeFontPortal();
-
           state.tab =
             button.dataset.tab;
           state.uiPrepared = false;
@@ -17917,72 +17856,9 @@ ${end}`;
           if (state.open) {
             applyPushLayout(true);
           }
-
-          if (
-            state.fontPortalInput
-          ) {
-            positionFontPortal(
-              state.fontPortalInput
-            );
-          }
         },
         80
       )
-    );
-
-    document.addEventListener(
-      "scroll",
-      debounce(
-        () => {
-          if (
-            state.fontPortalInput
-          ) {
-            positionFontPortal(
-              state.fontPortalInput
-            );
-          }
-        },
-        10
-      ),
-      true
-    );
-
-    document.addEventListener(
-      "click",
-      event => {
-        const portal =
-          document.getElementById(
-            ID +
-            "-font-portal"
-          );
-
-        const clickedPortal =
-          portal?.contains(
-            event.target
-          );
-
-        const clickedHeading =
-          event.target.closest?.(
-            "#" +
-            ID +
-            "-heading-font"
-          );
-
-        const clickedBody =
-          event.target.closest?.(
-            "#" +
-            ID +
-            "-body-font"
-          );
-
-        if (
-          !clickedPortal &&
-          !clickedHeading &&
-          !clickedBody
-        ) {
-          closeFontPortal();
-        }
-      }
     );
 
     document.addEventListener(
@@ -17997,8 +17873,6 @@ ${end}`;
             closeExitPrompt();
             return;
           }
-
-          closeFontPortal();
         }
       }
     );
