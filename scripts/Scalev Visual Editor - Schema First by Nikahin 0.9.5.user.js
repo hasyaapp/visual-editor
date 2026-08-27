@@ -11414,6 +11414,11 @@ ${end}`;
     }
 
     root.addEventListener("click", event => {
+      if (event.target.closest("#" + ID + "-reset-images")) {
+        resetAllImages();
+        return;
+      }
+
       const paste = event.target.closest("[data-image-paste-path]");
       if (paste) {
         event.preventDefault();
