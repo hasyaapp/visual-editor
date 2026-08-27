@@ -2448,15 +2448,6 @@
       return;
     }
 
-    if (
-      template.id === library.importedId &&
-      !window.confirm(
-        "Reset ke default?\nPerubahan pada template aktif akan diganti dengan source asli."
-      )
-    ) {
-      return;
-    }
-
     try {
       const response = await fetchLibraryResource(template.sourceUrl, {
         headers: { Accept: "text/html" }
@@ -2503,12 +2494,6 @@
 
   function clearImportedTemplate() {
     const library = state.templateLibrary;
-
-    const confirmed = window.confirm(
-      "Kosongkan editor?\nIsi editor akan dihapus."
-    );
-
-    if (!confirmed) return;
 
     ["html", "css", "js", "head"].forEach(kind => {
       setValue(kind, "");
@@ -3988,10 +3973,7 @@
   }
 
   function resetAll() {
-    if (
-      !state.defaults ||
-      !confirm("Reset pengaturan?")
-    ) {
+    if (!state.defaults) {
       return;
     }
 
