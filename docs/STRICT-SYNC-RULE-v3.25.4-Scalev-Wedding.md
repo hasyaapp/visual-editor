@@ -1066,8 +1066,9 @@ dengan fallback berikut (sama dengan default editor):
 }
 ```
 
-Token yang hilang tampil sebagai unset; Reset Warna tidak boleh menciptakan token
-baru. Seluruh warna public utama yang ingin editable MUST memakai token ini.
+Token yang hilang tampil sebagai unset; tombol Reset di tab Warna tidak boleh
+menciptakan token baru. Seluruh warna public utama yang ingin editable MUST
+memakai token ini.
 
 ## 8.2 Dua font token + 18 role token
 

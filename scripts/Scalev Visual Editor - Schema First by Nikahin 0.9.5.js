@@ -5883,7 +5883,7 @@
           class="button danger full"
           id="${ID}-reset-all"
         >
-          Reset ke Default
+          Reset
         </button>
       </div>
     `;
@@ -7610,7 +7610,7 @@
             class="button danger full"
             id="${ID}-reset-images"
           >
-            Reset Semua Gambar
+            Reset
           </button>
         </div>
       `
@@ -8149,10 +8149,10 @@
       `
         <button
           type="button"
-          class="button full"
+          class="button danger full"
           id="${ID}-reset-colors"
         >
-          Reset Warna
+          Reset
         </button>
       `
     );
@@ -9605,10 +9605,10 @@ ${end}`;
       <div class="style-reset-zone">
         <button
           type="button"
-          class="button full"
+          class="button danger full"
           id="${ID}-reset-style"
         >
-          Reset Style
+          Reset
         </button>
       </div>
     `;
