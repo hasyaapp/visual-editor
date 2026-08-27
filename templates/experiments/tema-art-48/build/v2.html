@@ -1,0 +1,1186 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rizky &amp; Wulan - Java Maroon Art</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Aboreto&family=Caudex:ital,wght@0,400;0,600;0,700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Forum&family=Pinyon+Script&display=swap">
+  <style>
+    /* ============================================================
+       Tema Art 48 - Java Maroon Art
+       Source: inv.kondanganmu.id/art-48 (Rizky & Wulan)
+       Visual parity: v2 (decent, font + warna presisi)
+       Contract: 21-section wedding + SVE_SCHEMA + tokens (per STRICT-SYNC-RULE)
+       ============================================================ */
+
+    /* ---------- 10 color token (default, owner-editable) ---------- */
+    #svwWedding {
+      --sve-background-primary: #F7EFE0;
+      --sve-background-secondary: #FDF8F0;
+      --sve-background-tertiary: #E8DDC8;
+      --sve-text-primary: #5A0000;
+      --sve-text-secondary: #6B5A4A;
+      --sve-text-tertiary: #A09185;
+      --sve-button-primary-bg: #5A0000;
+      --sve-button-primary-text: #FFFFFF;
+      --sve-button-secondary-bg: #FFFFFF;
+      --sve-button-secondary-text: #5A0000;
+
+      /* ---------- 2 font token ---------- */
+      --sve-font-heading: "Pinyon Script", "Cormorant Garamond", cursive;
+      --sve-font-body: "Cormorant Garamond", Georgia, serif;
+
+      /* ---------- 18 typography role token ---------- */
+      --sve-display-size: 56px;
+      --sve-display-weight: 400;
+      --sve-display-line-height: 1.0;
+      --sve-heading-size: 40px;
+      --sve-heading-weight: 400;
+      --sve-heading-line-height: 1.2;
+      --sve-subheading-size: 26px;
+      --sve-subheading-weight: 500;
+      --sve-subheading-line-height: 1.3;
+      --sve-body-size: 16px;
+      --sve-body-weight: 400;
+      --sve-body-line-height: 1.6;
+      --sve-small-size: 12px;
+      --sve-small-weight: 500;
+      --sve-small-line-height: 1.4;
+      --sve-button-size: 13px;
+      --sve-button-weight: 700;
+      --sve-button-line-height: 1.2;
+
+      background: var(--sve-background-primary);
+      color: var(--sve-text-primary);
+      font-family: var(--sve-font-body);
+      font-size: var(--sve-body-size);
+      line-height: var(--sve-body-line-height);
+      min-height: 100dvh;
+      position: relative;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; overflow-x: hidden;
+      background: var(--sve-background-primary);
+      color: var(--sve-text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+    img { max-width: 100%; height: auto; display: block; }
+    button { font: inherit; cursor: pointer; border: none; background: none; }
+    a { color: inherit; text-decoration: none; }
+    :where(#svwWedding) h1,
+    :where(#svwWedding) h2,
+    :where(#svwWedding) h3,
+    :where(#svwWedding) p { margin: 0; }
+
+    /* ============================================================
+       COVER GATE
+       ============================================================ */
+    .cover-gate {
+      position: relative;
+      min-height: 100dvh;
+      background: var(--sve-background-secondary);
+      overflow: hidden;
+    }
+    .cover-gate__bg {
+      position: absolute; inset: 0;
+      background: url("../media/decor/sec-cover-gate.png") top center / cover no-repeat;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .cover-gate__overlay {
+      position: absolute;
+      left: 0; right: 0;
+      top: 56%;
+      text-align: center;
+      z-index: 2;
+      padding: 0 20px;
+    }
+    .cover-gate__sub {
+      font-family: "Forum", serif;
+      font-size: 14px;
+      letter-spacing: 1px;
+      color: var(--sve-text-primary);
+      margin-bottom: 6px;
+    }
+    .cover-gate__to-label {
+      font-family: "Caudex", serif;
+      font-size: 14px;
+      letter-spacing: 1px;
+      color: #000;
+      margin: 24px 0 4px;
+    }
+    .cover-gate__to-name {
+      font-family: "Caudex", serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: #000;
+      margin-bottom: 16px;
+    }
+    .cover-gate__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(183deg, #AC3E3E 17%, var(--sve-button-primary-bg) 100%);
+      color: var(--sve-button-primary-text);
+      font-family: "Cormorant Garamond", sans-serif;
+      font-size: var(--sve-button-size);
+      font-weight: var(--sve-button-weight);
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 25px;
+      box-shadow: 0 4px 12px rgba(90, 0, 0, 0.25);
+    }
+    .cover-gate__btn svg { width: 14px; height: 14px; }
+
+    body.gate-closed .svw-content { display: none; }
+    body.gate-open .cover-gate { display: none; }
+
+    /* ============================================================
+       COVER (post-gate)
+       ============================================================ */
+    .cover-main {
+      position: relative;
+      min-height: 100dvh;
+      padding: 80px 20px 60px;
+      text-align: center;
+      background: radial-gradient(ellipse at center, var(--sve-background-secondary) 0%, var(--sve-background-primary) 80%);
+    }
+    .cover-main__kicker {
+      font-family: var(--sve-font-body);
+      font-size: var(--sve-subheading-size);
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--sve-text-primary);
+      margin-bottom: 16px;
+    }
+    .cover-main__name {
+      font-family: var(--sve-font-heading);
+      font-size: clamp(48px, 14vw, 84px);
+      line-height: 1;
+      color: var(--sve-text-primary);
+      margin: 8px 0;
+    }
+    .cover-main__and {
+      font-family: var(--sve-font-heading);
+      font-size: 32px;
+      color: #AC3E3E;
+      margin: 4px 0;
+    }
+    .cover-main__ornament {
+      width: 180px; max-width: 60%;
+      margin: 24px auto 16px;
+      height: 40px;
+      background: linear-gradient(90deg, transparent 0%, #5A0000 20%, #5A0000 80%, transparent 100%);
+      opacity: 0.3;
+    }
+    .cover-main__date {
+      font-family: var(--sve-font-body);
+      font-size: var(--sve-body-size);
+      letter-spacing: 0.18em;
+    }
+    .cover-main__photo {
+      width: 280px; max-width: 80%;
+      margin: 32px auto 0;
+      aspect-ratio: 3 / 4;
+      background: linear-gradient(180deg, #e8d8c4 0%, #c8a888 100%);
+      border: 6px solid #5A0000;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #5A0000;
+      font-family: "Pinyon Script", cursive;
+      font-size: 48px;
+    }
+    .cover-main__bunga {
+      width: 220px; max-width: 60%;
+      margin: 24px auto 0;
+      aspect-ratio: 2 / 1;
+      background: radial-gradient(circle, #AC3E3E 30%, transparent 60%),
+                  radial-gradient(circle at 30% 50%, #5A0000 20%, transparent 40%),
+                  radial-gradient(circle at 70% 50%, #5A0000 20%, transparent 40%);
+      border-radius: 8px;
+    }
+
+    /* ============================================================
+       QUOTE
+       ============================================================ */
+    .quote {
+      padding: 80px 24px;
+      background: var(--sve-background-secondary);
+      text-align: center;
+    }
+    .quote__text {
+      max-width: 580px;
+      margin: 0 auto;
+      font-style: italic;
+      font-size: 15px;
+      line-height: 1.85;
+    }
+    .quote__source {
+      font-size: 12px;
+      color: var(--sve-text-secondary);
+      margin-top: 16px;
+      letter-spacing: 0.18em;
+    }
+
+    /* ============================================================
+       COUPLE
+       ============================================================ */
+    .couple { padding: 80px 20px; background: var(--sve-background-secondary); text-align: center; }
+    .couple__kicker {
+      font-family: "Aboreto", serif;
+      font-size: var(--sve-subheading-size);
+      color: var(--sve-text-primary);
+      margin-bottom: 8px;
+    }
+    .couple__doa {
+      max-width: 560px;
+      margin: 16px auto 36px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--sve-text-secondary);
+    }
+    .couple__grid {
+      display: grid;
+      gap: 40px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    @media (min-width: 720px) { .couple__grid { grid-template-columns: 1fr 1fr; gap: 32px; align-items: end; } }
+    .couple__card { text-align: center; }
+    .couple__photo {
+      width: 220px; max-width: 70%;
+      aspect-ratio: 3 / 4;
+      margin: 0 auto 16px;
+      border-radius: 4px;
+      background: linear-gradient(180deg, #e8d8c4 0%, #c8a888 100%);
+      border: 4px solid #5A0000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #5A0000;
+      font-family: "Pinyon Script", cursive;
+      font-size: 64px;
+    }
+    .couple__firstname {
+      font-family: var(--sve-font-heading);
+      font-size: 34px;
+      color: var(--sve-text-primary);
+      margin-bottom: 4px;
+    }
+    .couple__fullname {
+      font-family: "Aboreto", serif;
+      font-size: 14px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .couple__ornament {
+      width: 200px; max-width: 50%;
+      aspect-ratio: 1 / 1;
+      margin: 36px auto 0;
+      background: radial-gradient(ellipse at top, #5A0000 0%, transparent 70%),
+                  radial-gradient(ellipse at center, #AC3E3E 30%, transparent 80%);
+      border-radius: 4px;
+    }
+
+    /* ============================================================
+       EVENTS (Akad + Resepsi)
+       ============================================================ */
+    .events { padding: 80px 20px; background: var(--sve-background-primary); text-align: center; }
+    .events__heading {
+      font-family: var(--sve-font-heading);
+      font-size: 42px;
+      color: var(--sve-text-primary);
+      margin-bottom: 8px;
+    }
+    .events__prelude {
+      max-width: 540px;
+      margin: 12px auto 32px;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    .events__grid {
+      display: grid;
+      gap: 32px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .events__card {
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(90, 0, 0, 0.15);
+      border-radius: 8px;
+      padding: 28px 20px;
+    }
+    .events__name {
+      font-family: "Aboreto", serif;
+      font-size: 28px;
+      color: var(--sve-text-primary);
+      margin-bottom: 12px;
+    }
+    .events__date { font-size: 18px; margin-bottom: 4px; }
+    .events__time { font-size: 15px; margin-bottom: 12px; }
+    .events__venue { font-size: 14px; margin-bottom: 16px; line-height: 1.5; }
+    .events__map {
+      display: inline-block;
+      padding: 10px 20px;
+      font-family: "Aboreto", serif;
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--sve-button-primary-text);
+      background: linear-gradient(183deg, #AC3E3E, var(--sve-button-primary-bg));
+      border-radius: 25px;
+    }
+
+    /* ============================================================
+       LOVE STORY
+       ============================================================ */
+    .lovestory { padding: 80px 20px; background: var(--sve-background-secondary); text-align: center; }
+    .lovestory__heading {
+      font-family: var(--sve-font-heading);
+      font-size: 38px;
+      color: var(--sve-text-primary);
+      margin-bottom: 32px;
+    }
+    .lovestory__list { max-width: 640px; margin: 0 auto; display: grid; gap: 24px; text-align: left; }
+    .lovestory__item {
+      background: rgba(255, 255, 255, 0.6);
+      border-left: 3px solid var(--sve-text-primary);
+      padding: 18px 22px;
+      border-radius: 0 6px 6px 0;
+    }
+    .lovestory__date {
+      font-family: "Aboreto", serif;
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--sve-text-primary);
+      margin-bottom: 4px;
+    }
+    .lovestory__title {
+      font-family: var(--sve-font-heading);
+      font-size: 22px;
+      color: var(--sve-text-primary);
+      margin-bottom: 8px;
+    }
+    .lovestory__desc { font-size: 14px; line-height: 1.7; }
+
+    /* ============================================================
+       GALLERY
+       ============================================================ */
+    .gallery {
+      padding: 80px 20px;
+      background: linear-gradient(180deg, var(--sve-background-secondary), var(--sve-background-primary));
+      text-align: center;
+    }
+    .gallery__heading {
+      font-family: var(--sve-font-heading);
+      font-size: 42px;
+      color: #fff;
+      text-shadow: 0 2px 12px rgba(90, 0, 0, 0.5);
+      margin-bottom: 32px;
+    }
+    .gallery__grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    @media (min-width: 720px) { .gallery__grid { grid-template-columns: repeat(3, 1fr); } }
+    .gallery__item {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      border-radius: 4px;
+      background: linear-gradient(135deg, #e8d8c4 0%, #c8a888 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #5A0000;
+      font-family: "Pinyon Script", cursive;
+      font-size: 24px;
+    }
+    .gallery__item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+    .gallery__item:hover img { transform: scale(1.04); }
+
+    /* ============================================================
+       DRESS CODE
+       ============================================================ */
+    .dresscode { padding: 80px 20px; background: var(--sve-background-secondary); text-align: center; }
+    .dresscode__kicker {
+      font-family: "Aboreto", serif;
+      font-size: 13px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--sve-text-primary);
+      margin-bottom: 8px;
+    }
+    .dresscode__name {
+      font-family: "Aboreto", serif;
+      font-size: 28px;
+      color: var(--sve-text-primary);
+      margin-bottom: 24px;
+    }
+    .dresscode__palette {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      max-width: 480px;
+      margin: 0 auto 24px;
+    }
+    .dresscode__swatch { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; }
+    .dresscode__chip {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .dresscode__note { max-width: 560px; margin: 0 auto; font-size: 14px; line-height: 1.7; }
+
+    /* ============================================================
+       GIFT
+       ============================================================ */
+    .gift { padding: 80px 20px; background: var(--sve-background-primary); text-align: center; }
+    .gift__heading {
+      font-family: "Aboreto", serif;
+      font-size: 28px;
+      color: var(--sve-text-primary);
+      margin-bottom: 32px;
+    }
+    .gift__grid { display: grid; gap: 24px; max-width: 600px; margin: 0 auto; }
+    .gift__card { background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 4px 16px rgba(90, 0, 0, 0.08); }
+    .gift__logo {
+      width: 120px; height: 60px;
+      margin: 0 auto 12px;
+      background: linear-gradient(135deg, #f7f0e8 0%, #d8c8b8 100%);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #5A0000;
+      font-family: "Aboreto", serif;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .gift__name { font-family: "Aboreto", serif; font-size: 14px; }
+
+    /* ============================================================
+       WISHES
+       ============================================================ */
+    .wishes { padding: 80px 20px; background: var(--sve-background-secondary); text-align: center; }
+    .wishes__heading {
+      font-family: "Aboreto", serif;
+      font-size: 28px;
+      color: var(--sve-text-primary);
+      margin-bottom: 8px;
+    }
+    .wishes__prelude {
+      max-width: 520px;
+      margin: 12px auto 28px;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .wishes__form {
+      max-width: 520px;
+      margin: 0 auto 24px;
+      display: grid;
+      gap: 10px;
+    }
+    .wishes__form input,
+    .wishes__form textarea,
+    .wishes__form select {
+      font-family: var(--sve-font-body);
+      font-size: 14px;
+      padding: 10px 12px;
+      border: 1px solid rgba(90, 0, 0, 0.2);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--sve-text-primary);
+    }
+    .wishes__form textarea { min-height: 100px; resize: vertical; }
+    .wishes__form button {
+      background: linear-gradient(183deg, #AC3E3E, var(--sve-button-primary-bg));
+      color: var(--sve-button-primary-text);
+      font-family: "Aboreto", serif;
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      border-radius: 25px;
+    }
+    .wishes__list { max-width: 520px; margin: 0 auto; display: grid; gap: 10px; }
+    .wishes__entry {
+      background: #fff;
+      border-radius: 6px;
+      padding: 12px 16px;
+      text-align: left;
+      box-shadow: 0 2px 8px rgba(90, 0, 0, 0.05);
+    }
+    .wishes__name { font-family: "Aboreto", serif; font-size: 14px; color: var(--sve-text-primary); }
+    .wishes__msg { font-size: 14px; margin-top: 4px; }
+
+    /* ============================================================
+       FOOTER (immutable, locked)
+       ============================================================ */
+    .footer {
+      padding: 24px 20px;
+      background: var(--sve-button-primary-bg);
+      color: #fff;
+      text-align: center;
+      font-size: 13px;
+    }
+    .footer__brand { display: inline-flex; align-items: center; gap: 6px; color: #fff; }
+    .footer__logo {
+      width: 22px; height: 22px;
+      background: #AC3E3E;
+      color: #fff;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Aboreto", serif;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    /* ============================================================
+       AUDIO VINYL
+       ============================================================ */
+    .vinyl {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      z-index: 50;
+      padding: 0;
+    }
+    .vinyl__img {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      transition: transform 0.4s ease;
+    }
+    .vinyl.is-playing .vinyl__img { animation: vinylSpin 6s linear infinite; }
+    @keyframes vinylSpin { to { transform: rotate(360deg); } }
+
+    .anim { opacity: 0; transform: translateY(20px); transition: opacity 0.9s ease, transform 0.9s ease; }
+    .anim.in { opacity: 1; transform: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .anim { transition: none; }
+      .vinyl.is-playing .vinyl__img { animation: none; }
+    }
+  </style>
+</head>
+<body class="gate-closed">
+  <main id="svwWedding" data-sve-template="tema-art-48">
+
+    <div class="cover-gate" role="dialog" aria-label="Buka undangan">
+      <div class="cover-gate__bg" aria-hidden="true" style="background-image: none; background: linear-gradient(180deg, var(--sve-background-secondary) 0%, var(--sve-background-primary) 100%);"></div>
+      <div class="cover-gate__overlay">
+        <p class="cover-gate__sub" data-sve-field="invitation.openButtonLabel" data-sve-type="text" data-sve-label="Label Wedding Invitation">Wedding Invitation</p>
+        <p class="cover-gate__to-label" data-sve-field="invitation.guestLabel" data-sve-type="text" data-sve-label="Label Kepada">Kepada Yth,</p>
+        <p class="cover-gate__to-name" data-sve-guest-name data-sve-field="invitation.guestFallback" data-sve-type="text" data-sve-label="Nama Tamu Default">Tamu Undangan</p>
+        <button class="cover-gate__btn" id="svwOpenInvitation" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <span data-sve-field="invitation.openButtonLabel" data-sve-type="text" data-sve-label="Label Tombol">Buka Undangan</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="svw-content">
+
+      <section class="cover-main anim" data-section-id="cover" data-sve-visible-path="" id="svwCover">
+        <p class="cover-main__kicker" data-sve-field="opening.title" data-sve-type="text" data-sve-label="Judul Cover">The Wedding Of</p>
+        <p class="cover-main__name" data-sve-field="couple.bride.shortName" data-sve-type="text" data-sve-label="Nama Panggilan Mempelai Wanita">Rizky</p>
+        <p class="cover-main__and">&amp;</p>
+        <p class="cover-main__name" data-sve-field="couple.groom.shortName" data-sve-type="text" data-sve-label="Nama Panggilan Mempelai Pria">Wulan</p>
+        <div class="cover-main__ornament" data-sve-field="assets.coverOrnament" data-sve-type="image" data-sve-label="Ornamen Cover" style="height: 40px;"></div>
+        <p class="cover-main__date" data-sve-field="wedding.date" data-sve-type="datetime" data-sve-label="Tanggal Wedding">Sabtu, 30 September 2023</p>
+        <div class="cover-main__photo" data-sve-field="assets.coverPhoto" data-sve-type="image" data-sve-label="Foto Cover">R&amp;W</div>
+        <div class="cover-main__bunga" data-sve-field="assets.coverBunga" data-sve-type="image" data-sve-label="Bunga Cover"></div>
+      </section>
+
+      <section class="quote anim" data-section-id="quote" data-sve-visible-path="sections.quote" id="svwQuote">
+        <p class="quote__text" data-sve-field="quote.text" data-sve-type="textarea" data-sve-label="Teks Quote">
+          "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu
+          pasangan-pasangan dari jenismu sendiri, supaya kamu cenderung dan merasa
+          tenteram kepadanya, dan dijadikan-Nya diantaramu rasa kasih dan sayang.
+          Sesungguhnya pada yang demikian itu benar-benar terdapat tanda-tanda bagi
+          kaum yang berpikir."
+        </p>
+        <p class="quote__source" data-sve-field="quote.source" data-sve-type="text" data-sve-label="Sumber Quote">— QS. Ar-Rum: 21</p>
+      </section>
+
+      <section class="couple anim" data-section-id="couple" data-sve-visible-path="sections.couple" id="svwCouple">
+        <p class="couple__kicker" data-sve-field="couple.kickerLabel" data-sve-type="text" data-sve-label="Label Section Couple">Groom &amp; Bride</p>
+        <p class="couple__doa" data-sve-field="couple.doa" data-sve-type="textarea" data-sve-label="Doa Pembuka Couple">
+          Maha Suci Allah yang telah menciptakan makhluk-Nya berpasang-pasangan.
+          Ya Allah semoga ridho-Mu tercurah mengiringi pernikahan kami.
+        </p>
+        <div class="couple__grid">
+          <div class="couple__card">
+            <div class="couple__photo" data-sve-field="couple.bride.photo" data-sve-type="image" data-sve-label="Foto Mempelai Wanita">R</div>
+            <p class="couple__firstname" data-sve-field="couple.bride.shortName" data-sve-type="text" data-sve-label="Nama Panggilan Wanita">Rizky</p>
+            <p class="couple__fullname" data-sve-field="couple.bride.fullName" data-sve-type="text" data-sve-label="Nama Lengkap Wanita">Rizky Fauzi</p>
+          </div>
+          <div class="couple__card">
+            <div class="couple__photo" data-sve-field="couple.groom.photo" data-sve-type="image" data-sve-label="Foto Mempelai Pria">W</div>
+            <p class="couple__firstname" data-sve-field="couple.groom.shortName" data-sve-type="text" data-sve-label="Nama Panggilan Pria">Wulan</p>
+            <p class="couple__fullname" data-sve-field="couple.groom.fullName" data-sve-type="text" data-sve-label="Nama Lengkap Pria">Nur Wulandari</p>
+          </div>
+        </div>
+        <div class="couple__ornament" data-sve-field="couple.ornament" data-sve-type="image" data-sve-label="Ornamen Couple (Gunungan)"></div>
+      </section>
+
+      <section class="events anim" data-section-id="events" data-sve-visible-path="sections.events" id="svwEvents">
+        <p class="events__heading" data-sve-field="events.heading" data-sve-type="text" data-sve-label="Judul Section Events">Save The Date</p>
+        <p class="events__prelude" data-sve-field="events.prelude" data-sve-type="textarea" data-sve-label="Pembuka Events">
+          Dengan memohon rahmat dan ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i,
+          untuk menghadiri acara pernikahan kami:
+        </p>
+        <div class="events__grid" data-sve-repeater="events.items">
+          <div class="events__card" data-sve-item="events.items.0">
+            <h3 class="events__name" data-sve-field="events.items.0.title" data-sve-type="text" data-sve-label="Nama Acara">Akad Nikah</h3>
+            <p class="events__date" data-sve-field="events.items.0.dateLabel" data-sve-type="text" data-sve-label="Tanggal Acara">Sabtu, 30 September 2023</p>
+            <p class="events__time" data-sve-field="events.items.0.timeLabel" data-sve-type="text" data-sve-label="Waktu Acara">Pukul : 08.00 WIB</p>
+            <p class="events__venue" data-sve-field="events.items.0.venue" data-sve-type="textarea" data-sve-label="Alamat Acara">Kav a blok a jalan a desa rancangmajar kecamatan baleendah</p>
+            <a class="events__map" data-sve-field="events.items.0.mapsUrl" data-sve-type="url" data-sve-label="Link Google Maps" href="https://maps.google.com/?q=Kav+a+blok+a+jalan+a+desa+rancangmajar+kecamatan+baleendah" target="_blank" rel="noopener noreferrer">Google Map</a>
+          </div>
+          <div class="events__card" data-sve-item="events.items.1">
+            <h3 class="events__name" data-sve-field="events.items.1.title" data-sve-type="text" data-sve-label="Nama Acara">Resepsi</h3>
+            <p class="events__date" data-sve-field="events.items.1.dateLabel" data-sve-type="text" data-sve-label="Tanggal Acara">Jumat, 29 September 2023</p>
+            <p class="events__time" data-sve-field="events.items.1.timeLabel" data-sve-type="text" data-sve-label="Waktu Acara">Pukul : 12.00-15.00</p>
+            <p class="events__venue" data-sve-field="events.items.1.venue" data-sve-type="textarea" data-sve-label="Alamat Acara">Jalan alun alun bandung samping teras ngaji indonesia</p>
+            <a class="events__map" data-sve-field="events.items.1.mapsUrl" data-sve-type="url" data-sve-label="Link Google Maps" href="https://maps.google.com/?q=jalan+alun+alun+bandung+samping+teras+ngaji+indonesia" target="_blank" rel="noopener noreferrer">Google Map</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="lovestory anim" data-section-id="stories" data-sve-visible-path="sections.stories" id="svwStories">
+        <p class="lovestory__heading" data-sve-field="stories.heading" data-sve-type="text" data-sve-label="Judul Love Story">Love Story</p>
+        <div class="lovestory__list" data-sve-repeater="stories.items">
+          <article class="lovestory__item" data-sve-item="stories.items.0">
+            <p class="lovestory__date" data-sve-field="stories.items.0.date" data-sve-type="text" data-sve-label="Tanggal">May 5th, 2023</p>
+            <h3 class="lovestory__title" data-sve-field="stories.items.0.title" data-sve-type="text" data-sve-label="Judul">First Meeting</h3>
+            <p class="lovestory__desc" data-sve-field="stories.items.0.description" data-sve-type="textarea" data-sve-label="Deskripsi">Our story began on May 5th, 2023, when we met for the first time at a train station. Although the meeting had been planned, the moment felt unexpected and full of hope.</p>
+          </article>
+          <article class="lovestory__item" data-sve-item="stories.items.1">
+            <p class="lovestory__date" data-sve-field="stories.items.1.date" data-sve-type="text" data-sve-label="Tanggal">February 14, 2026</p>
+            <h3 class="lovestory__title" data-sve-field="stories.items.1.title" data-sve-type="text" data-sve-label="Judul">Engagement</h3>
+            <p class="lovestory__desc" data-sve-field="stories.items.1.description" data-sve-type="textarea" data-sve-label="Deskripsi">Every journey has its challenges, and ours was no exception. Yet each experience strengthened our bond and certainty. On February 14th, 2026, we took the next step together.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="gallery anim" data-section-id="gallery" data-sve-visible-path="sections.gallery" id="svwGallery">
+        <p class="gallery__heading" data-sve-field="gallery.heading" data-sve-type="text" data-sve-label="Judul Gallery">Our Gallery</p>
+        <div class="gallery__grid" data-sve-repeater="gallery.items">
+          <a class="gallery__item" data-sve-item="gallery.items.0" data-sve-field="gallery.items.0.src" data-sve-type="image" data-sve-label="Foto Gallery 1">1</a>
+          <a class="gallery__item" data-sve-item="gallery.items.1" data-sve-field="gallery.items.1.src" data-sve-type="image" data-sve-label="Foto Gallery 2">2</a>
+          <a class="gallery__item" data-sve-item="gallery.items.2" data-sve-field="gallery.items.2.src" data-sve-type="image" data-sve-label="Foto Gallery 3">3</a>
+          <a class="gallery__item" data-sve-item="gallery.items.3" data-sve-field="gallery.items.3.src" data-sve-type="image" data-sve-label="Foto Gallery 4">4</a>
+          <a class="gallery__item" data-sve-item="gallery.items.4" data-sve-field="gallery.items.4.src" data-sve-type="image" data-sve-label="Foto Gallery 5">5</a>
+          <a class="gallery__item" data-sve-item="gallery.items.5" data-sve-field="gallery.items.5.src" data-sve-type="image" data-sve-label="Foto Gallery 6">6</a>
+          <a class="gallery__item" data-sve-item="gallery.items.6" data-sve-field="gallery.items.6.src" data-sve-type="image" data-sve-label="Foto Gallery 7">7</a>
+          <a class="gallery__item" data-sve-item="gallery.items.7" data-sve-field="gallery.items.7.src" data-sve-type="image" data-sve-label="Foto Gallery 8">8</a>
+          <a class="gallery__item" data-sve-item="gallery.items.8" data-sve-field="gallery.items.8.src" data-sve-type="image" data-sve-label="Foto Gallery 9">9</a>
+        </div>
+      </section>
+
+      <section class="dresscode anim" data-section-id="dress" data-sve-visible-path="sections.dress" id="svwDress">
+        <p class="dresscode__kicker" data-sve-field="dress.title" data-sve-type="text" data-sve-label="Judul Section Dress">Dress Code</p>
+        <p class="dresscode__name" data-sve-field="dress.themeName" data-sve-type="text" data-sve-label="Tema Dress Code">Colorful Pastel</p>
+        <div class="dresscode__palette">
+          <div class="dresscode__swatch"><span class="dresscode__chip" style="background:#c8a2c8"></span><span>Lilac</span></div>
+          <div class="dresscode__swatch"><span class="dresscode__chip" style="background:#9bc4e2"></span><span>Baby Blue</span></div>
+          <div class="dresscode__swatch"><span class="dresscode__chip" style="background:#bfe3c2"></span><span>Mint Green</span></div>
+          <div class="dresscode__swatch"><span class="dresscode__chip" style="background:#f7c9a8"></span><span>Peach</span></div>
+          <div class="dresscode__swatch"><span class="dresscode__chip" style="background:#f4c4c4"></span><span>Blush Pink</span></div>
+        </div>
+        <p class="dresscode__note" data-sve-field="dress.note" data-sve-type="textarea" data-sve-label="Catatan Dress Code">
+          Tanpa mengurangi rasa hormat, harap gunakan salah satu warna dari Dress Code
+          di atas. Kombinasi warna sangat dibenarkan. Mohon hindari dress code putih,
+          hitam penuh &amp; merah mencolok.
+        </p>
+      </section>
+
+      <section class="gift anim" data-section-id="gifts" data-sve-visible-path="sections.gifts" id="svwGifts">
+        <p class="gift__heading" data-sve-field="gifts.title" data-sve-type="text" data-sve-label="Judul Gift">Tanda Kasih</p>
+        <div class="gift__grid" data-sve-repeater="gifts.items">
+          <div class="gift__card" data-sve-item="gifts.items.0">
+            <div class="gift__logo" data-sve-field="gifts.items.0.logo" data-sve-type="image" data-sve-label="Logo Bank">BCA</div>
+            <p class="gift__name" data-sve-field="gifts.items.0.bankName" data-sve-type="text" data-sve-label="Nama Bank">Bank Central Asia</p>
+          </div>
+          <div class="gift__card" data-sve-item="gifts.items.1">
+            <div class="gift__logo" data-sve-field="gifts.items.1.logo" data-sve-type="image" data-sve-label="Logo Bank">BNI</div>
+            <p class="gift__name" data-sve-field="gifts.items.1.bankName" data-sve-type="text" data-sve-label="Nama Bank">Bank Negara Indonesia</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="wishes anim" data-section-id="guestbook" data-sve-visible-path="sections.guestbook" id="svwGuestbook">
+        <p class="wishes__heading" data-sve-field="guestbook.title" data-sve-type="text" data-sve-label="Judul Guestbook">Ucapan Selamat &amp; Do'a</p>
+        <p class="wishes__prelude" data-sve-field="guestbook.description" data-sve-type="textarea" data-sve-label="Deskripsi Guestbook">
+          Merupakan suatu kebahagiaan dan kehormatan bagi kami, apabila Bapak/Ibu/Saudara/i,
+          berkenan hadir dan memberikan doa restu kepada kami.
+        </p>
+        <form class="wishes__form" onsubmit="return window.__svwSubmitWish(event)">
+          <input type="text" name="name" placeholder="Nama" required>
+          <select name="attendance" required>
+            <option value="">Konfirmasi Kehadiran</option>
+            <option value="hadir">Hadir</option>
+            <option value="tidak">Tidak Hadir</option>
+          </select>
+          <textarea name="message" placeholder="Ucapan &amp; Do'a" required></textarea>
+          <button type="submit">Kirim</button>
+        </form>
+        <div class="wishes__list" id="svwWishesList">
+          <div class="wishes__entry">
+            <p class="wishes__name">arif nasrullah</p>
+            <p class="wishes__msg">1234545</p>
+          </div>
+          <div class="wishes__entry">
+            <p class="wishes__name">rizwana aisha</p>
+            <p class="wishes__msg">129381293</p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer" data-section-id="footer" data-sve-visible-path="" id="svwFooter">
+        <p class="footer__brand">
+          <span class="footer__logo" data-sve-field="footer.logo" data-sve-type="image" data-sve-label="Logo Footer">N</span>
+          Made with <span aria-label="cinta">&#9829;</span> by Kondanganmu ID
+        </p>
+      </footer>
+
+    </div>
+
+    <button class="vinyl" id="svwAudioToggle" type="button" aria-label="Putar musik" aria-pressed="false">
+      <img class="vinyl__img" src="https://cdn.scalev.com/uploads/1787302284/pVC0F12HzYAjyCBjclIxUg/1787302283491-Black-vinyl-record.webp" alt="" width="64" height="64">
+    </button>
+    <audio id="svwAudio" preload="none" loop src="https://inv.kondanganmu.id/wp-content/uploads/2025/07/Denny-Caknan-Cundamani.mp3"></audio>
+
+  </main>
+
+  <script>
+    "use strict";
+
+    /* ============================================================
+       CONFIG — 21 section wedding contract (per STRICT-SYNC §4.2)
+       ============================================================ */
+    const CONFIG = {
+      "sectionOrder": [
+        "cover", "opening", "quote", "couple", "stories", "savedate",
+        "countdown", "gallery", "videos", "events", "dress", "rundown",
+        "rsvp", "live", "filter", "gifts", "prokes", "guestbook",
+        "families", "closing", "footer"
+      ],
+      "sections": {
+        "opening": true, "quote": true, "couple": true, "stories": true,
+        "savedate": true, "countdown": true, "gallery": true, "videos": true,
+        "events": true, "dress": true, "rundown": true, "rsvp": true,
+        "live": true, "filter": true, "gifts": true, "prokes": true,
+        "guestbook": true, "families": true, "closing": true, "footer": true
+      },
+      "invitation": {
+        "guestLabel": "Kepada Yth.",
+        "guestFallback": "Tamu Undangan",
+        "openButtonLabel": "Buka Undangan"
+      },
+      "wedding": {
+        "date": "2023-09-30T08:00:00+07:00",
+        "hashtag": "#AIIWEneediisLOve"
+      },
+      "couple": {
+        "bride": {
+          "shortName": "Rizky",
+          "fullName": "Rizky Fauzi",
+          "parents": "Putri dari Bapak dan Ibu",
+          "instagram": "",
+          "photo": "../media/assets/JAWA-COUPLE-2.png"
+        },
+        "groom": {
+          "shortName": "Wulan",
+          "fullName": "Nur Wulandari",
+          "parents": "Putra dari Bapak dan Ibu",
+          "instagram": "",
+          "photo": "../media/assets/JAWA-COUPLE-4.png"
+        },
+        "kickerLabel": "Groom & Bride",
+        "doa": "Maha Suci Allah yang telah menciptakan makhluk-Nya berpasang-pasangan. Ya Allah semoga ridho-Mu tercurah mengiringi pernikahan kami.",
+        "ornament": "../media/assets/JAWA-GUNUNGAN.png"
+      },
+      "opening": { "title": "The Wedding Of" },
+      "quote": {
+        "text": "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan-pasangan dari jenismu sendiri, supaya kamu cenderung dan merasa tenteram kepadanya, dan dijadikan-Nya diantaramu rasa kasih dan sayang. Sesungguhnya pada yang demikian itu benar-benar terdapat tanda-tanda bagi kaum yang berpikir.",
+        "source": "QS. Ar-Rum: 21"
+      },
+      "stories": {
+        "heading": "Love Story",
+        "items": [
+          { "date": "May 5th, 2023", "title": "First Meeting", "description": "Our story began on May 5th, 2023, when we met for the first time at a train station. Although the meeting had been planned, the moment felt unexpected and full of hope." },
+          { "date": "February 14, 2026", "title": "Engagement", "description": "Every journey has its challenges, and ours was no exception. Yet each experience strengthened our bond and certainty. On February 14th, 2026, we took the next step together." }
+        ]
+      },
+      "savedate": { "title": "Save The Date", "date": "2023-09-30T08:00:00+07:00" },
+      "countdown": { "title": "Menuju Hari Bahagia" },
+      "gallery": {
+        "heading": "Our Gallery",
+        "items": [
+          { "src": "../media/assets/Pastel-2-2.jpg", "alt": "Foto prewedding 1" },
+          { "src": "../media/assets/Pastel-3-2_cropped_1786150556170.jpg", "alt": "Foto prewedding 2" },
+          { "src": "../media/assets/Pastel-3-3-1.jpg", "alt": "Foto prewedding 3" },
+          { "src": "../media/assets/Pastel-4-1.jpg", "alt": "Foto prewedding 4" },
+          { "src": "../media/assets/Pastel-4-2.jpg", "alt": "Foto prewedding 5" },
+          { "src": "../media/assets/Pastel-5-1.jpg", "alt": "Foto prewedding 6" },
+          { "src": "../media/assets/Pastel-6.jpg", "alt": "Foto prewedding 7" },
+          { "src": "../media/assets/Pastel-7-1-1-1.jpg", "alt": "Foto prewedding 8" },
+          { "src": "../media/assets/Pastel-8-1.jpg", "alt": "Foto prewedding 9" }
+        ]
+      },
+      "videos": { "title": "Video", "items": [] },
+      "events": {
+        "heading": "Save The Date",
+        "prelude": "Dengan memohon rahmat dan ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i, untuk menghadiri acara pernikahan kami:",
+        "items": [
+          {
+            "title": "Akad Nikah",
+            "date": "2023-09-30",
+            "dateLabel": "Sabtu, 30 September 2023",
+            "startTime": "08:00",
+            "endTime": "",
+            "timeLabel": "Pukul : 08.00 WIB",
+            "venue": "Kav a blok a jalan a desa rancangmajar kecamatan baleendah",
+            "city": "Bandung",
+            "mapsUrl": "https://maps.google.com/?q=Kav+a+blok+a+jalan+a+desa+rancangmajar+kecamatan+baleendah"
+          },
+          {
+            "title": "Resepsi",
+            "date": "2023-09-29",
+            "dateLabel": "Jumat, 29 September 2023",
+            "startTime": "12:00",
+            "endTime": "15:00",
+            "timeLabel": "Pukul : 12.00-15.00",
+            "venue": "Jalan alun alun bandung samping teras ngaji indonesia",
+            "city": "Bandung",
+            "mapsUrl": "https://maps.google.com/?q=jalan+alun+alun+bandung+samping+teras+ngaji+indonesia"
+          }
+        ]
+      },
+      "dress": {
+        "title": "Dress Code",
+        "themeName": "Colorful Pastel",
+        "note": "Tanpa mengurangi rasa hormat, harap gunakan salah satu warna dari Dress Code di atas. Kombinasi warna sangat dibenarkan. Mohon hindari dress code putih, hitam penuh & merah mencolok."
+      },
+      "rundown": { "title": "Rundown", "items": [] },
+      "rsvp": { "title": "Konfirmasi Kehadiran", "submitLabel": "Kirim RSVP" },
+      "live": { "title": "Live Streaming", "url": "", "cover": "", "buttonLabel": "Tonton Live" },
+      "filter": { "title": "Wedding Filter", "preview": "", "url": "", "buttonLabel": "Gunakan Filter" },
+      "gifts": {
+        "title": "Tanda Kasih",
+        "items": [
+          { "logo": "../media/assets/bca.png", "bankName": "Bank Central Asia" },
+          { "logo": "../media/assets/bni.png", "bankName": "Bank Negara Indonesia" }
+        ]
+      },
+      "prokes": { "title": "Protokol Kesehatan", "items": [] },
+      "guestbook": {
+        "enabled": true,
+        "weddingId": "tema-art-48-rizky-wulan",
+        "endpoint": "https://ozdonprvactdvpiirnrq.supabase.co/functions/v1/wedding-guestbook",
+        "initialVisible": 10,
+        "pageSize": 10,
+        "title": "Ucapan Selamat dan Doa",
+        "description": "Tinggalkan doa terbaik untuk kami.",
+        "loadMoreLabel": "Muat Lebih Banyak"
+      },
+      "families": { "title": "Turut Mengundang", "items": [] },
+      "closing": { "title": "Terima Kasih", "names": "Rizky dan Wulan" },
+      "footer": {
+        "designerBy": "Designed by",
+        "logo": "../media/assets/xzcxczcxz.png",
+        "brandName": "Nikahin",
+        "creatorName": "Kreator Nikahin",
+        "whatsappLabel": "Chat WhatsApp · Upgrade Undangan",
+        "whatsappUrl": "https://wa.me/6282175274118",
+        "note": ""
+      },
+      "extensions": {
+        "rsvpBackend": { "mode": "none", "endpoint": "" }
+      },
+      "assets": {
+        "coverPhoto": "../media/assets/JAWA-COUPLE-2.png",
+        "coverOrnament": "../media/assets/1f381.svg",
+        "coverBunga": "../media/assets/bunga-qP61hl.webp",
+        "logo": "../media/assets/xzcxczcxz.png",
+        "audio": "https://inv.kondanganmu.id/wp-content/uploads/2025/07/Denny-Caknan-Cundamani.mp3"
+      },
+      "imageSettings": {
+        "assets.coverPhoto":  { "width": 100, "align": "center center", "fit": "cover",  "ratio": "off", "hidden": false },
+        "assets.coverOrnament":{ "width": 60, "align": "center center", "fit": "auto", "ratio": "off", "hidden": false },
+        "assets.coverBunga":  { "width": 60, "align": "center center", "fit": "auto", "ratio": "off", "hidden": false },
+        "couple.bride.photo": { "width": 100, "align": "center center", "fit": "cover", "ratio": "off", "hidden": false },
+        "couple.groom.photo": { "width": 100, "align": "center center", "fit": "cover", "ratio": "off", "hidden": false },
+        "couple.ornament":    { "width": 50, "align": "center center", "fit": "auto", "ratio": "off", "hidden": false },
+        "footer.logo":        { "width": 100, "align": "center center", "fit": "auto", "ratio": "off", "hidden": false }
+      },
+      "editorStyle": { "googleFonts": { "heading": "Pinyon Script", "body": "Cormorant Garamond" } }
+    };
+
+    /* ============================================================
+       SVE_SCHEMA — explicit, 21 section + locked cover/footer
+       ============================================================ */
+    const SVE_SCHEMA = {
+      "version": 1,
+      "template": { "name": "Tema Art 48 - Java Maroon Art" },
+      "audio": { "label": "Audio Undangan", "path": "assets.audio" },
+      "sections": [
+        { "id": "cover", "label": "Cover", "reorderable": false, "locked": true, "canHide": false, "visiblePath": null, "fields": [
+          { "type": "text", "label": "Judul Cover", "path": "opening.title" },
+          { "type": "image", "label": "Ornamen Cover", "path": "assets.coverOrnament" },
+          { "type": "datetime", "label": "Tanggal Wedding", "path": "wedding.date" },
+          { "type": "image", "label": "Foto Cover", "path": "assets.coverPhoto" },
+          { "type": "image", "label": "Bunga Cover", "path": "assets.coverBunga" }
+        ]},
+        { "id": "opening", "label": "Opening", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.opening", "fields": [
+          { "type": "text", "label": "Judul Opening", "path": "opening.title" }
+        ]},
+        { "id": "quote", "label": "Quote", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.quote", "fields": [
+          { "type": "textarea", "label": "Teks Quote", "path": "quote.text" },
+          { "type": "text", "label": "Sumber Quote", "path": "quote.source" }
+        ]},
+        { "id": "couple", "label": "The Couple", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.couple", "fields": [
+          { "type": "text", "label": "Label Section Couple", "path": "couple.kickerLabel" },
+          { "type": "textarea", "label": "Doa Pembuka", "path": "couple.doa" },
+          { "type": "text", "label": "Nama Panggilan Wanita", "path": "couple.bride.shortName" },
+          { "type": "text", "label": "Nama Lengkap Wanita", "path": "couple.bride.fullName" },
+          { "type": "text", "label": "Orang Tua Wanita", "path": "couple.bride.parents" },
+          { "type": "text", "label": "Instagram Wanita", "path": "couple.bride.instagram" },
+          { "type": "image", "label": "Foto Wanita", "path": "couple.bride.photo" },
+          { "type": "text", "label": "Nama Panggilan Pria", "path": "couple.groom.shortName" },
+          { "type": "text", "label": "Nama Lengkap Pria", "path": "couple.groom.fullName" },
+          { "type": "text", "label": "Orang Tua Pria", "path": "couple.groom.parents" },
+          { "type": "text", "label": "Instagram Pria", "path": "couple.groom.instagram" },
+          { "type": "image", "label": "Foto Pria", "path": "couple.groom.photo" },
+          { "type": "image", "label": "Ornamen Couple", "path": "couple.ornament" }
+        ]},
+        { "id": "stories", "label": "Our Story", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.stories", "fields": [
+          { "type": "text", "label": "Judul Love Story", "path": "stories.heading" },
+          { "type": "repeater", "label": "Item Love Story", "path": "stories.items", "itemLabelKey": "title", "canAdd": true, "canDelete": true, "max": 10, "fields": [
+            { "key": "date", "type": "text", "label": "Tanggal", "default": "" },
+            { "key": "title", "type": "text", "label": "Judul", "default": "" },
+            { "key": "description", "type": "textarea", "label": "Deskripsi", "default": "" }
+          ]}
+        ]},
+        { "id": "savedate", "label": "Save The Date", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.savedate", "fields": [
+          { "type": "text", "label": "Judul Save The Date", "path": "savedate.title" },
+          { "type": "datetime", "label": "Tanggal Save The Date", "path": "savedate.date" }
+        ]},
+        { "id": "countdown", "label": "Countdown", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.countdown", "fields": [
+          { "type": "text", "label": "Judul Countdown", "path": "countdown.title" }
+        ]},
+        { "id": "gallery", "label": "Photo Gallery", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.gallery", "fields": [
+          { "type": "text", "label": "Judul Gallery", "path": "gallery.heading" },
+          { "type": "repeater-image", "label": "Foto Gallery", "path": "gallery.items", "canAdd": true, "canDelete": true, "max": 30, "fields": [
+            { "key": "src", "type": "image", "label": "Foto", "default": "" },
+            { "key": "alt", "type": "text", "label": "Alt Text", "default": "Foto pernikahan" }
+          ]}
+        ]},
+        { "id": "videos", "label": "Video", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.videos", "fields": [
+          { "type": "repeater", "label": "Video", "path": "videos.items", "itemLabelKey": "title", "canAdd": true, "canDelete": true, "max": 5, "fields": [
+            { "key": "title", "type": "text", "label": "Judul", "default": "" },
+            { "key": "url", "type": "url", "label": "URL Video", "default": "" },
+            { "key": "thumbnail", "type": "image", "label": "Thumbnail", "default": "" }
+          ]}
+        ]},
+        { "id": "events", "label": "Wedding Events", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.events", "fields": [
+          { "type": "text", "label": "Judul Events", "path": "events.heading" },
+          { "type": "textarea", "label": "Pembuka Events", "path": "events.prelude" },
+          { "type": "repeater", "label": "Wedding Events", "path": "events.items", "itemLabelKey": "title", "canAdd": true, "canDelete": true, "max": 10, "fields": [
+            { "key": "title", "type": "text", "label": "Nama Acara", "default": "Acara Pernikahan" },
+            { "key": "date", "type": "date", "label": "Tanggal", "default": "" },
+            { "key": "dateLabel", "type": "text", "label": "Label Tanggal", "default": "" },
+            { "key": "startTime", "type": "time", "label": "Jam Mulai", "default": "" },
+            { "key": "endTime", "type": "time", "label": "Jam Selesai", "default": "" },
+            { "key": "timeLabel", "type": "text", "label": "Label Waktu", "default": "" },
+            { "key": "venue", "type": "textarea", "label": "Alamat", "default": "" },
+            { "key": "city", "type": "text", "label": "Kota", "default": "" },
+            { "key": "mapsUrl", "type": "url", "label": "Google Maps", "default": "" }
+          ]}
+        ]},
+        { "id": "dress", "label": "Dress Code", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.dress", "fields": [
+          { "type": "text", "label": "Judul Section", "path": "dress.title" },
+          { "type": "text", "label": "Tema Dress Code", "path": "dress.themeName" },
+          { "type": "textarea", "label": "Catatan", "path": "dress.note" }
+        ]},
+        { "id": "rundown", "label": "Rundown", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.rundown", "fields": [
+          { "type": "repeater", "label": "Rundown", "path": "rundown.items", "itemLabelKey": "title", "canAdd": true, "canDelete": true, "max": 20, "fields": [
+            { "key": "time", "type": "text", "label": "Waktu", "default": "" },
+            { "key": "title", "type": "text", "label": "Aktivitas", "default": "" },
+            { "key": "description", "type": "textarea", "label": "Keterangan", "default": "" }
+          ]}
+        ]},
+        { "id": "rsvp", "label": "RSVP", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.rsvp", "fields": [
+          { "type": "text", "label": "Judul RSVP", "path": "rsvp.title" },
+          { "type": "text", "label": "Label Tombol", "path": "rsvp.submitLabel" }
+        ]},
+        { "id": "live", "label": "Live Streaming", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.live", "fields": [
+          { "type": "text", "label": "Judul Live", "path": "live.title" },
+          { "type": "url", "label": "URL Live", "path": "live.url" },
+          { "type": "image", "label": "Cover Live", "path": "live.cover" },
+          { "type": "text", "label": "Label Tombol", "path": "live.buttonLabel" }
+        ]},
+        { "id": "filter", "label": "Wedding Filter", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.filter", "fields": [
+          { "type": "text", "label": "Judul Filter", "path": "filter.title" },
+          { "type": "image", "label": "Preview Filter", "path": "filter.preview" },
+          { "type": "url", "label": "URL Filter", "path": "filter.url" },
+          { "type": "text", "label": "Label Tombol", "path": "filter.buttonLabel" }
+        ]},
+        { "id": "gifts", "label": "Wedding Gift", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.gifts", "fields": [
+          { "type": "text", "label": "Judul Gift", "path": "gifts.title" },
+          { "type": "repeater", "label": "Rekening", "path": "gifts.items", "itemLabelKey": "bankName", "canAdd": true, "canDelete": true, "max": 5, "fields": [
+            { "key": "logo", "type": "image", "label": "Logo Bank", "default": "" },
+            { "key": "bankName", "type": "text", "label": "Nama Bank", "default": "" }
+          ]}
+        ]},
+        { "id": "prokes", "label": "Health Protocol", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.prokes", "fields": [
+          { "type": "text", "label": "Judul Prokes", "path": "prokes.title" },
+          { "type": "repeater", "label": "Item Prokes", "path": "prokes.items", "itemLabelKey": "title", "canAdd": true, "canDelete": true, "max": 10, "fields": [
+            { "key": "title", "type": "text", "label": "Judul", "default": "" },
+            { "key": "icon", "type": "image", "label": "Icon", "default": "" }
+          ]}
+        ]},
+        { "id": "guestbook", "label": "Ucapan dan Doa", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.guestbook", "fields": [
+          { "type": "text", "label": "Judul Guestbook", "path": "guestbook.title" },
+          { "type": "textarea", "label": "Deskripsi", "path": "guestbook.description" },
+          { "type": "text", "label": "Wedding ID", "path": "guestbook.weddingId" }
+        ]},
+        { "id": "families", "label": "Turut Mengundang", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.families", "fields": [
+          { "type": "repeater", "label": "Keluarga", "path": "families.items", "itemLabelKey": "name", "canAdd": true, "canDelete": true, "max": 20, "fields": [
+            { "key": "name", "type": "text", "label": "Nama", "default": "" },
+            { "key": "relation", "type": "text", "label": "Hubungan", "default": "" }
+          ]}
+        ]},
+        { "id": "closing", "label": "Closing", "reorderable": true, "locked": false, "canHide": true, "visiblePath": "sections.closing", "fields": [
+          { "type": "text", "label": "Judul Closing", "path": "closing.title" },
+          { "type": "text", "label": "Nama Penutup", "path": "closing.names" }
+        ]},
+        { "id": "footer", "label": "Footer", "reorderable": false, "locked": true, "canHide": false, "visiblePath": null, "fields": [
+          { "type": "text", "label": "Designer By", "path": "footer.designerBy" },
+          { "type": "image", "label": "Logo Designer / Brand", "path": "footer.logo" },
+          { "type": "text", "label": "Nama Brand", "path": "footer.brandName" },
+          { "type": "text", "label": "Nama Kreator", "path": "footer.creatorName" },
+          { "type": "text", "label": "Label WhatsApp", "path": "footer.whatsappLabel" },
+          { "type": "url", "label": "Link WhatsApp", "path": "footer.whatsappUrl" },
+          { "type": "textarea", "label": "Catatan Footer", "path": "footer.note" }
+        ]}
+      ]
+    };
+
+    /* ============================================================
+       RUNTIME
+       ============================================================ */
+    (function () {
+      "use strict";
+      const $ = (s, r) => (r || document).querySelector(s);
+      const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+
+      /* ---------- gate ---------- */
+      const body = document.body;
+      const openBtn = $("#svwOpenInvitation");
+      if (openBtn) openBtn.addEventListener("click", function () {
+        body.classList.remove("gate-closed");
+        body.classList.add("gate-open");
+        const audio = $("#svwAudio");
+        if (audio) {
+          audio.volume = 0.7;
+          const p = audio.play();
+          if (p && p.then) p.then(() => {
+            $("#svwAudioToggle").classList.add("is-playing");
+            $("#svwAudioToggle").setAttribute("aria-pressed", "true");
+          }).catch(() => {});
+        }
+      });
+
+      /* ---------- guest personalization ---------- */
+      (function personalize() {
+        const p = new URLSearchParams(window.location.search);
+        const raw = p.get("to") || p.get("dear") || p.get("kepada") || "";
+        const c = raw.replace(/\s+/g, " ").trim().slice(0, 80);
+        if (c) $$("[data-sve-guest-name]").forEach(el => el.textContent = c);
+      })();
+
+      /* ---------- audio toggle ---------- */
+      const audioEl = $("#svwAudio");
+      const audioBtn = $("#svwAudioToggle");
+      if (audioBtn && audioEl) audioBtn.addEventListener("click", function () {
+        if (audioEl.paused) audioEl.play().then(() => {
+          audioBtn.classList.add("is-playing");
+          audioBtn.setAttribute("aria-pressed", "true");
+        }).catch(() => {});
+        else { audioEl.pause(); audioBtn.classList.remove("is-playing"); audioBtn.setAttribute("aria-pressed", "false"); }
+      });
+
+      /* ---------- on-scroll reveal ---------- */
+      const anim = $$(".anim");
+      if ("IntersectionObserver" in window && anim.length) {
+        const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.15 });
+        anim.forEach(el => io.observe(el));
+      } else anim.forEach(el => el.classList.add("in"));
+
+      /* ---------- apply imageSettings ---------- */
+      (function applyImageSettings() {
+        const settings = CONFIG.imageSettings || {};
+        Object.keys(settings).forEach(function (path) {
+          const sel = '[data-sve-field="' + path + '"]';
+          const el = $(sel);
+          if (!el) return;
+          const s = settings[path];
+          if (s.hidden) el.style.display = "none";
+          if (typeof s.width === "number" && s.fit !== "auto") {
+            el.style.width = s.width + "%";
+            el.style.height = "auto";
+          }
+          if (s.fit && s.fit !== "auto") el.style.objectFit = s.fit;
+          if (s.align && s.align !== "default") el.style.objectPosition = s.align;
+        });
+      })();
+
+      /* ---------- wishes form (UI parity, no backend yet) ---------- */
+      window.__svwSubmitWish = function (e) {
+        e.preventDefault();
+        const f = e.target, n = (f.name.value || "").trim(), m = (f.message.value || "").trim();
+        if (!n || !m) return false;
+        const l = $("#svwWishesList");
+        if (l) {
+          const en = document.createElement("div"); en.className = "wishes__entry";
+          const np = document.createElement("p"); np.className = "wishes__name"; np.textContent = n;
+          const mp = document.createElement("p"); mp.className = "wishes__msg"; mp.textContent = m;
+          en.appendChild(np); en.appendChild(mp); l.insertBefore(en, l.firstChild);
+        }
+        f.reset(); return false;
+      };
+
+      /* ---------- SVE_REFRESH placeholder ---------- */
+      window.SVE_REFRESH = function () {
+        /* re-render section order, visibility, repeater DOM, image settings, audio source/toggle */
+      };
+    })();
+  </script>
+</body>
+</html>
