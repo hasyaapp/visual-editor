@@ -6889,11 +6889,11 @@
                 item.path
               )}"
               data-image-alignpos="default"
-              title="Alignment OFF — gunakan posisi dari CSS theme"
-              aria-label="Alignment OFF"
+              title="Default — gunakan posisi dari CSS theme"
+              aria-label="Default"
             >
               ${scalevAlignmentIcon("default")}
-              OFF
+              Default
             </button>
           </div>
 
