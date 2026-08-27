@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kirim Undangan</title>
+<link rel="preconnect" href="https://ozdonprvactdvpiirnrq.supabase.co" crossorigin>
+<link rel="preload" href="https://ozdonprvactdvpiirnrq.supabase.co/storage/v1/object/public/brand-assets/fonts/boldentia/Boldentia.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://ozdonprvactdvpiirnrq.supabase.co/storage/v1/object/public/brand-assets/fonts/gelica/gelica-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://ozdonprvactdvpiirnrq.supabase.co/storage/v1/object/public/brand-assets/fonts/gelica/gelica-bold.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Gelica";src:url("https://ozdonprvactdvpiirnrq.supabase.co/storage/v1/object/public/brand-assets/fonts/gelica/gelica-regular.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Gelica";src:url("https://ozdonprvactdvpiirnrq.supabase.co/storage/v1/object/public/brand-assets/fonts/gelica/gelica-bold.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Boldentia";src:url("https://ozdonprvactdvpiirnrq.supabase.co/storage/v1/object/public/brand-assets/fonts/boldentia/Boldentia.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+#svShareApp,#svShareApp *{box-sizing:border-box}
+#svShareApp{--font-mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--font-gelica:"Gelica","Gelica Fallback",Georgia,serif;--font-geist:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--paper:#fdfbf9;--paper-tint:#f7efe9;--ink:#171717;--cocoa:#2b1a07;--marker:#ff6f1e;--marker-dark:#b8460d;--muted:#6f675f;--line:rgba(43,26,7,.28);--danger:#913a34;--success:#356b3d;--radius-input:8px;--radius-card:12px;--radius-action:20px;--shadow-button:rgba(0,0,0,.25) 0 1px 2px;min-height:100dvh;padding:40px 24px 72px;background:var(--paper);color:var(--ink);font-family:var(--font-geist);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+#svShareApp .shell{width:min(100%,1120px);margin:auto}
+#svShareApp .header{max-width:620px;margin:20px 0 48px;text-align:left}
+#svShareApp h1,#svShareApp h2,#svShareApp .guest,#svShareApp .preview-name{font-family:var(--font-gelica);color:var(--cocoa);font-weight:400;letter-spacing:normal}
+#svShareApp h1{margin:0 0 8px;font-size:clamp(38px,5vw,54px);line-height:1.05}
+#svShareApp h2{margin:0 0 4px;font-size:24px;line-height:1.2}
+#svShareApp p{margin-top:0}
+#svShareApp .header-copy{margin:0;color:var(--muted);font-size:16px;line-height:1.5}
+#svShareApp .muted{color:var(--muted);overflow-wrap:anywhere}
+#svShareApp .workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,340px);min-width:0;align-items:start;gap:56px}
+#svShareApp .composer{position:relative;display:grid;min-width:0}
+#svShareApp .preview-title:after,#svShareApp .results:before,#svShareApp .guest-list:before,#svShareApp .guest-label:not(:last-child):after,#svShareApp .empty:before,#svShareApp .empty:after{content:"";display:block;height:2px;border-radius:999px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='602' height='2' viewBox='0 0 602 2'%3E%3Cpath d='M1 1H601' stroke='%23D2BBAD' stroke-width='2' stroke-linecap='round' stroke-dasharray='4 8'/%3E%3C/svg%3E");background-size:602px 2px;background-repeat:repeat-x}
+#svShareApp .form-section{position:relative;min-width:0;padding:32px 0}
+#svShareApp .section-head{margin-bottom:16px}
+#svShareApp .section-head .muted{margin:0;font-size:14px}
+#svShareApp .formgrid{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:12px}
+#svShareApp .field{display:grid;gap:6px}
+#svShareApp .field+.field{margin-top:12px}
+#svShareApp .formgrid .field+.field{margin-top:0}
+#svShareApp label{font-size:14px;font-weight:600;color:var(--ink)}
+#svShareApp input,#svShareApp textarea,#svShareApp select{width:100%;border:1px solid var(--ink);border-radius:var(--radius-input);background:var(--paper);color:var(--ink);font:inherit;outline:none;transition:border-color .15s ease,box-shadow .15s ease}
+#svShareApp input:focus,#svShareApp textarea:focus,#svShareApp select:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(255,111,30,.32)}
+#svShareApp input,#svShareApp select{min-height:44px;padding:10px 12px}
+#svShareApp textarea{min-height:130px;padding:12px;resize:vertical;line-height:1.55}
+#svShareApp textarea.message{min-height:280px}
+#svShareApp .buttons,#svShareApp .rowactions{display:flex;flex-wrap:wrap;gap:8px}
+#svShareApp .buttons{margin:12px 0}
+#svShareApp .btn{appearance:button;display:inline-flex;align-items:stretch;justify-content:center;margin:0;padding:4px;border:0;border-radius:20px;background:var(--paper);color:var(--cocoa);font:inherit;letter-spacing:inherit;box-shadow:0 1px 2px rgba(0,0,0,.25);opacity:1;pointer-events:auto;transition:all .2s cubic-bezier(.4,0,.2,1)}
+#svShareApp .btn-inner{display:flex;width:100%;min-height:44px;align-items:center;justify-content:center;gap:8px;padding:9px 16px;border:2.3px solid var(--cocoa);border-radius:16px;background:var(--paper)}
+#svShareApp .btn-label{color:var(--cocoa);font-family:var(--font-gelica);font-size:18px;font-weight:500;line-height:1.25;white-space:nowrap}
+#svShareApp .btn:hover{background:var(--paper)}
+#svShareApp .btn:active{box-shadow:0 1px 2px rgba(0,0,0,.25);transform:translateY(0)}
+#svShareApp .btn:focus-visible,#svShareApp .token:focus-visible{outline:3px solid var(--marker);outline-offset:3px}
+#svShareApp .btn.danger .btn-inner{border-color:var(--danger)}
+#svShareApp .btn.danger .btn-label{color:var(--danger)}
+#svShareApp .btn.small .btn-inner{min-height:36px;padding:6px 11px;border-width:1.8px;border-radius:14px}
+#svShareApp .btn.small .btn-label{font-size:14px;font-weight:500}
+#svShareApp .template[aria-pressed="true"]{box-shadow:0 0 0 2px var(--marker),0 1px 2px rgba(0,0,0,.25)}
+#svShareApp .tokens{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}
+#svShareApp .token{min-height:36px;padding:5px 10px;border:1px dashed var(--ink);border-radius:8px;background:var(--paper);color:var(--ink);font-family:var(--font-mono);font-size:12px;font-weight:500}
+#svShareApp .preview{position:sticky;top:24px;min-width:0;padding:24px;border:1px solid var(--cocoa);border-radius:var(--radius-card);background:var(--paper-tint)}
+#svShareApp .preview-title{position:relative;margin:0 0 32px;padding-bottom:20px;color:var(--muted);font-size:13px;font-weight:600}
+#svShareApp .preview-title:after{position:absolute;right:0;bottom:0;left:0}
+#svShareApp .invitation-card{text-align:center}
+#svShareApp .invitation-kicker{margin:0 0 14px;color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+#svShareApp .preview-name{display:block;margin-bottom:8px;font-size:32px;line-height:1.12}
+#svShareApp .preview-status{margin:0;color:var(--marker-dark);font-size:14px;font-weight:600}
+#svShareApp .results{position:relative;min-width:0;margin-top:72px;padding-top:40px}
+#svShareApp .results:before{position:absolute;top:0;right:0;left:0}
+#svShareApp .toolbar{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:24px}
+#svShareApp .guest-list{position:relative;display:grid;min-width:0;padding-top:12px}
+#svShareApp .guest-list:before{position:absolute;top:0;right:0;left:0}
+#svShareApp .guest-label{position:relative;display:grid;grid-template-columns:minmax(180px,.65fr) minmax(0,1.35fr);min-width:0;align-items:center;gap:24px;padding:20px 0}
+#svShareApp .guest-label:not(:last-child):after{position:absolute;right:0;bottom:0;left:0}
+#svShareApp .guest-meta{display:flex;min-width:0;align-items:flex-start;gap:12px}
+#svShareApp .guest-meta>div{min-width:0}
+#svShareApp .guest-number{flex:0 0 auto;color:var(--marker-dark);font-family:var(--font-mono);font-size:12px;font-weight:600}
+#svShareApp .guest{display:block;font-size:22px;line-height:1.2}
+#svShareApp .rowactions{display:flex;min-width:0;justify-content:flex-end;flex-wrap:wrap}
+#svShareApp .empty{position:relative;padding:20px 0 24px;color:var(--muted)}
+#svShareApp .empty:before{position:absolute;top:0;right:0;left:0}
+#svShareApp .empty:after{position:absolute;right:0;bottom:0;left:0}
+#svShareApp .results:before,#svShareApp .guest-list:before,#svShareApp .empty:before,#svShareApp .empty:after{display:none}
+#svShareApp .results.has-results:before,#svShareApp .results.has-results .guest-list:before{display:block}
+#svShareApp .status{display:none;margin-top:12px;padding:10px 0;color:var(--marker-dark);font-size:14px;font-weight:600}
+#svShareApp .status[data-show="true"]{display:block}
+#svShareApp code{padding:2px 5px;border-radius:5px;background:rgba(23,23,23,.07);font-family:var(--font-mono);font-size:.82em;overflow-wrap:anywhere;white-space:normal}
+@media(hover:hover){#svShareApp .btn:hover{box-shadow:0 4px 4px rgba(0,0,0,.15);transform:translateY(-4px)}}
+@media(min-width:768px){#svShareApp .btn:not(.small) .btn-inner{padding:10.7px 20px}#svShareApp .btn:not(.small) .btn-label{font-size:20px}}
+@media(max-width:900px){#svShareApp .workspace{grid-template-columns:1fr;gap:32px}#svShareApp .preview{position:relative;top:auto}#svShareApp .guest-label{grid-template-columns:1fr}#svShareApp .rowactions{justify-content:flex-start;padding-left:24px}}
+@media(max-width:640px){#svShareApp{padding:24px 16px 48px}#svShareApp .header{margin:8px 0 32px}#svShareApp h1{font-size:40px}#svShareApp .workspace{gap:24px}#svShareApp .form-section{padding:24px 0}#svShareApp .preview{padding:20px}#svShareApp .formgrid{grid-template-columns:1fr}#svShareApp .toolbar{align-items:flex-start;flex-direction:column}#svShareApp .toolbar .buttons{width:100%}#svShareApp .results{margin-top:48px}#svShareApp .rowactions{padding-left:0}#svShareApp .guest-label{gap:14px}#svShareApp textarea.message{min-height:240px}}
+@media(prefers-reduced-motion:reduce){#svShareApp *,#svShareApp *:before,#svShareApp *:after{scroll-behavior:auto!important;transition:none!important;transform:none!important}}
+/* Shared Nikahin visual system */
+body{margin:0;overflow-x:hidden}
+#svShareApp{--radius-card:16px;--radius-action-inner:16px;--shadow-button-hover:0 4px 4px rgba(0,0,0,.15);--shadow-card:0 14px 34px rgba(43,26,7,.08);padding:0;overflow-x:hidden}
+#svShareApp h1,#svShareApp h2,#svShareApp .guest,#svShareApp .preview-name{font-weight:400;letter-spacing:-.025em}
+#svShareApp .shell{width:min(calc(100% - 64px),1024px);margin-inline:auto}
+#svShareApp .site-header{padding-top:24px}
+#svShareApp .nav{display:flex;min-height:54px;align-items:center;justify-content:space-between;gap:24px;padding-bottom:18px}
+#svShareApp .brand,#svShareApp .footer-brand{color:var(--cocoa);font-family:var(--font-gelica);font-weight:700;text-decoration:none}
+#svShareApp .brand-word,#svShareApp .footer-brand .brand-word{font-family:"Boldentia",var(--font-gelica);font-weight:400}#svShareApp .brand-mark,#svShareApp .footer-brand .brand-mark{font-family:var(--font-gelica);font-weight:700}
+#svShareApp .brand{font-size:28px;line-height:1}
+#svShareApp .dash-line{width:100%;height:2px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='602' height='2' viewBox='0 0 602 2'%3E%3Cpath d='M1 1H601' stroke='%23D2BBAD' stroke-width='2' stroke-linecap='round' stroke-dasharray='4 8'/%3E%3C/svg%3E");background-repeat:repeat-x;background-size:602px 2px}
+#svShareApp .page-main{width:min(calc(100% - 64px),960px);padding:64px 0 0}
+#svShareApp .header{max-width:700px;margin:0 0 52px}
+#svShareApp h1{font-family:var(--font-gelica);font-weight:700;font-size:clamp(44px,6vw,64px);line-height:1}
+#svShareApp h2{font-size:clamp(26px,3vw,34px)}
+#svShareApp .header-copy{font-size:clamp(16px,1.8vw,18px)}
+#svShareApp input,#svShareApp select{min-height:48px;padding:12px 14px}
+#svShareApp textarea{padding:14px}
+#svShareApp .preview{border-width:1.5px;box-shadow:var(--shadow-card)}
+#svShareApp .btn{border-radius:var(--radius-action);box-shadow:var(--shadow-button);transition:box-shadow .2s cubic-bezier(.4,0,.2,1),transform .2s cubic-bezier(.4,0,.2,1)}
+#svShareApp .btn-inner{border-radius:var(--radius-action-inner)}
+#svShareApp .nav-order{flex:0 0 auto;text-decoration:none}
+#svShareApp .nav-order .btn-inner{width:42px;min-width:42px;height:42px;min-height:42px;padding:0}
+#svShareApp .nav-order .nav-icon{display:grid;place-items:center;width:21px;height:21px;min-height:0;padding:0;border:0;border-radius:0;background:transparent}
+#svShareApp .nav-order .nav-icon svg{width:21px;height:21px;stroke-width:2.3}
+#svShareApp .nav-order .nav-label{display:none;min-height:0;padding:0;border:0;background:transparent;font:inherit}
+#svShareApp .footer{margin-top:112px;padding:42px 0 80px}
+#svShareApp .footer-grid{display:grid;grid-template-columns:minmax(280px,1.5fr) repeat(3,minmax(130px,.7fr));gap:clamp(30px,5vw,68px);padding:50px 0 42px}
+#svShareApp .footer .footer-brand{color:var(--cocoa);font-family:var(--font-gelica);font-weight:700;text-decoration:none;font-size:34px;line-height:1}
+#svShareApp .footer-copy{max-width:350px;margin:18px 0 0;color:var(--muted);font-size:14px}
+#svShareApp .footer h3{margin:0 0 16px;color:var(--cocoa);font-size:14px;font-family:var(--font-gelica);font-weight:400;letter-spacing:.02em;text-transform:none}
+#svShareApp .footer ul{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+#svShareApp .footer li,#svShareApp .footer a{color:var(--muted);font-size:14px;text-decoration:none}
+#svShareApp .footer a:hover{color:var(--marker-dark)}
+#svShareApp .footer-bottom{display:flex;justify-content:space-between;gap:20px;border-top:1.5px solid rgba(43,26,7,.28);padding:22px 0 0;color:var(--muted);font-size:12px}
+#svShareApp .footer-legal{display:flex;flex-wrap:wrap;gap:8px 16px}
+#svShareApp .btn:active{box-shadow:var(--shadow-button);transform:translateY(0)}
+@media(hover:hover){#svShareApp .btn:hover{box-shadow:var(--shadow-button-hover)}}
+@media(max-width:980px){#svShareApp .footer-grid{grid-template-columns:1.3fr repeat(3,1fr)}}
+@media(max-width:800px){#svShareApp .shell{width:min(calc(100% - 64px),640px)}#svShareApp .page-main{width:min(calc(100% - 64px),700px);padding-top:52px}#svShareApp .footer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#svShareApp .footer-about{grid-column:1/-1}}
+@media(max-width:640px){#svShareApp{padding:0}#svShareApp .header{margin:0 0 36px}#svShareApp .page-main{padding:42px 0 0}}
+@media(min-width:768px){#svShareApp .nav-order .btn-inner{width:46px;min-width:46px;height:46px;min-height:46px;padding:0}}
+@media(max-width:520px){#svShareApp .shell,#svShareApp .page-main{width:min(calc(100% - 40px),480px)}#svShareApp .site-header{padding-top:18px}#svShareApp .nav{min-height:48px;padding-bottom:14px}#svShareApp .brand{font-size:24px}#svShareApp .nav-order .btn-inner{width:42px;min-width:42px;height:42px;min-height:42px;padding:0}#svShareApp .nav-order .btn-label{font-size:16px}#svShareApp h1{font-size:42px}#svShareApp .footer{margin-top:80px}#svShareApp .footer-grid{grid-template-columns:1fr;gap:30px;padding:42px 0 34px}#svShareApp .footer-about{grid-column:auto}#svShareApp .footer-bottom{display:grid}#svShareApp .footer-legal{gap:8px 14px}}
+</style>
+</head>
+<body style="margin:0">
+<div id="svShareApp">
+<header class="site-header shell">
+<nav class="nav" aria-label="Navigasi utama">
+<a class="brand" href="https://nikahin.myscalev.com/home"><span class="brand-word">Nikahin</span><span class="brand-mark"> ᝰ</span></a>
+<a class="btn nav-order" href="https://wa.me/6282175274118?text=Halo%20Nikahin%2C%20saya%20ingin%20menjadi%20kreator." target="_blank" rel="noreferrer" aria-label="kreator"><span class="btn-inner"><span class="nav-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg></span><span class="nav-label">kreator</span></span></a>
+</nav>
+<div class="dash-line" aria-hidden="true"></div>
+</header>
+<main class="shell page-main">
+<header class="header">
+<h1>Kirim undangan</h1>
+<p class="header-copy">Buat link personal untuk setiap tamu.</p>
+</header>
+
+<div class="workspace">
+<div class="composer">
+<section class="form-section">
+<div class="section-head"><h2>Link utama</h2><p class="muted">Tempel link undanganmu.</p></div>
+<div class="formgrid">
+<div class="field"><label for="invUrl">Link undangan utama</label><input id="invUrl" type="url" placeholder="https://domain.com/namira-dhito"></div>
+<div class="field"><label for="param">Parameter nama</label><select id="param"><option value="to">?to=</option><option value="dear">?dear=</option><option value="kepada">?kepada=</option></select></div>
+</div>
+</section>
+
+<section class="form-section">
+<div class="section-head"><h2>Nama tamu</h2><p class="muted">Satu nama per baris.</p></div>
+<div class="field"><label for="guests">Daftar nama tamu</label><textarea id="guests" placeholder="Bapak Ahmad &amp; Ibu Siti&#10;Keluarga Besar Budi&#10;Rizky, S.Kom."></textarea></div>
+</section>
+
+<section class="form-section">
+<div class="section-head"><h2>Teks pengantar</h2><p class="muted">Pilih template atau edit sendiri.</p></div>
+<div id="templateButtons" class="buttons"></div>
+<div class="tokens"><button class="token" type="button" data-token="[nama]">+ [nama]</button><button class="token" type="button" data-token="[link-undangan]">+ [link-undangan]</button></div>
+<div class="field"><label for="message">Template pesan</label><textarea id="message" class="message"></textarea></div>
+<div class="buttons"><button id="reset" class="btn alt" type="button"><span class="btn-inner"><span class="btn-label">reset form</span></span></button><button id="generate" class="btn" type="button"><span class="btn-inner"><span class="btn-label">buat daftar tamu</span></span></button></div>
+<div id="status" class="status"></div>
+</section>
+</div>
+
+<aside class="preview" aria-label="Preview undangan personal">
+<p class="preview-title">Pratinjau tamu pertama</p>
+<div class="invitation-card">
+<p class="invitation-kicker">kepada yth.</p>
+<strong id="previewName" class="preview-name">Nama tamu</strong>
+<p id="previewStatus" class="preview-status">isi link dulu</p>
+</div>
+</aside>
+</div>
+
+<section id="results" class="results">
+<div class="toolbar">
+<div><h2>Siap dikirim</h2><div id="count" class="muted">Belum ada tamu.</div></div>
+<div class="buttons" style="margin:0"><button id="copyAll" class="btn alt small" type="button"><span class="btn-inner"><span class="btn-label">salin semua pesan</span></span></button><button id="deleteAll" class="btn danger small" type="button"><span class="btn-inner"><span class="btn-label">hapus semua</span></span></button></div>
+</div>
+<div id="guestBody" class="guest-list"></div>
+<div id="empty" class="empty">Daftar tamu akan muncul di sini.</div>
+</section>
+</main>
+<footer class="footer shell">
+<div class="footer-grid">
+<div class="footer-about"><a class="footer-brand" href="https://nikahin.myscalev.com/home"><span class="brand-word">Nikahin</span><span class="brand-mark"> ᝰ</span></a><p class="footer-copy">Undangan digital yang personal dan mudah dibagikan.</p></div>
+<div><h3>Produk</h3><ul><li><a href="https://nikahin.myscalev.com/home">Desain undangan</a></li><li><a href="https://nikahin.myscalev.com/order">Form order</a></li><li><a href="https://nikahin.myscalev.com/share">Kirim undangan</a></li></ul></div>
+<div><h3>Portofolio</h3><ul><li><a href="https://nikahin.myscalev.com/home">Semua desain</a></li><li><a href="https://nikahin.myscalev.com/home">Desain minimalis</a></li><li><a href="https://wa.me/6282175274118?text=Halo%20Nikahin%2C%20saya%20ingin%20membuat%20desain%20custom." target="_blank" rel="noreferrer">Custom desain</a></li></ul></div>
+<div><h3>Hubungi kami</h3><ul><li><a href="https://wa.me/6282175274118" target="_blank" rel="noreferrer">WhatsApp</a></li><li>Senin sampai Sabtu</li><li>09.00 sampai 18.00 WIB</li></ul></div>
+</div>
+<div class="footer-bottom"><span>© 2026 Nikahin ᝰ</span><div class="footer-legal" aria-label="Informasi legal"><span>Panduan Pengguna</span><span>Privacy Policy</span><span>Terms &amp; Condition</span></div></div>
+</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var CONFIG={
+  defaultInvitationUrl:"",
+  defaultParam:"to",
+  storageKey:"scalev_invitation_sender_v1",
+  coupleName:"Namira & Dhito",
+  templates:{
+    formal:{label:"formal",message:`Yang Terhormat,
+Bapak/Ibu/Saudara/i
+*[nama]*
+______
+
+Dengan penuh kerendahan hati, kami mengundang Bapak/Ibu/Saudara/i untuk hadir dan memberikan doa restu pada acara pernikahan kami:
+
+🤍 Namira & Dhito 🤍
+
+*Untuk melihat info acara lebih lengkap klik link berikut:*
+[link-undangan]
+
+Undangan digital ini merupakan undangan resmi dari kami dan keluarga. Semoga maksud dan tujuan kami dapat tersampaikan.
+
+Kami akan sangat senang dan berterima kasih atas kehadiran Bapak/Ibu/Saudara/i serta teman-teman di acara pernikahan kami.
+
+Terima kasih atas perhatian dan doanya.
+
+Hormat kami,
+*Keluarga Besar Kedua Mempelai*`},
+    muslim:{label:"muslim",message:`Kepada Yth.
+Bapak/Ibu/Saudara/i
+*[nama]*
+______
+
+Bismillahirrahmanirrahim,
+Assalamualaikum Warahmatullahi Wabarakatuh
+
+Tanpa mengurangi rasa hormat, dengan segenap hati, izinkan kami mengundang Bapak/Ibu/Saudara/i untuk hadir dan memberikan doa restu pada acara pernikahan kami:
+
+🤍 Namira & Dhito 🤍
+
+*Untuk melihat info acara lebih lengkap klik link berikut:*
+[link-undangan]
+
+Undangan digital ini merupakan undangan resmi dari kami dan keluarga. Semoga maksud dan tujuan kami dapat tersampaikan.
+
+Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i dan teman-teman dapat berkenan hadir dan memberikan doa restu pada acara pernikahan kami.
+
+Terimakasih
+Wassalamualaikum Warahmatullahi Wabarakatuh
+
+Kami yang berbahagia,
+*Keluarga Besar Kedua Mempelai*`},
+    nasrani:{label:"nasrani",message:`Kepada Yth.
+Bapak/Ibu/Saudara/i
+*[nama]*
+______
+
+Dengan doa dan salam sejahtera,
+
+Dengan rasa hormat dan sukacita, kami mengundang Bapak/Ibu/Saudara/i untuk bergabung dan memberikan doa restu pada acara pernikahan kami:
+
+🤍 Namira & Dhito 🤍
+
+*Untuk melihat info acara lebih lengkap klik link berikut:*
+[link-undangan]
+
+Undangan digital ini adalah kiriman resmi dari kami dan keluarga. Semoga maksud dan harapan kami tersampaikan.
+
+Kami akan merasa sangat berbahagia dan berterima kasih atas kehadiran Bapak/Ibu/Saudara/i serta teman-teman dalam pernikahan kami.
+
+Terima kasih atas perhatian dan doa restu yang diberikan.
+
+Tuhan memberkati Anda,
+
+Kami yang berbahagia,
+*Keluarga Besar Kedua Mempelai*`},
+    hindu:{label:"hindu",message:`Om Swastiastu,
+
+Kepada Yth.
+Bapak/Ibu/Saudara/i
+*[nama]*
+
+Dengan penuh rasa hormat dan sukacita, kami mengundang Bapak/Ibu/Saudara/i untuk hadir dan memberikan restu pada acara pernikahan kami:
+
+Namira & Dhito
+
+*Untuk melihat informasi acara lebih lanjut, silakan kunjungi link berikut:*
+[link-undangan]
+
+Undangan digital ini kami kirimkan sebagai tanda kehormatan dari keluarga kami. Semoga semua tujuan kami tersampaikan.
+
+Kami akan sangat bahagia dan berterima kasih atas kehadiran Bapak/Ibu/Saudara/i serta teman-teman di pernikahan kami.
+
+Terima kasih atas perhatian dan doa restu yang diberikan.
+
+Om Shanti, Shanti, Shanti, Om.
+
+Dengan hormat,
+*Keluarga Besar Kedua Mempelai*`},
+    custom:{label:"custom",message:`Kepada Yth.
+*[nama]*
+
+Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara kami.
+
+Berikut link undangan kami untuk informasi lengkap acara:
+
+[link-undangan]
+
+Merupakan suatu kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.
+
+Terima kasih banyak atas perhatiannya.`}
+  }
+};
+
+var state={guests:[],selectedTemplate:"muslim"};
+function q(id){return document.getElementById(id)}
+function safeText(v,max){return String(v==null?"":v).replace(/[\u0000<>]/g,"").trim().slice(0,max||10000)}
+function esc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+function normalizeUrl(raw){var v=String(raw||"").trim();if(!v)return"";try{var u=new URL(v,location.href);if(!/^https?:$/i.test(u.protocol))return"";u.hash="";return u.toString().replace(/\/$/,"")}catch(_){return""}}
+function resolveUrl(){var p=new URLSearchParams(location.search),link=p.get("link");if(link){var a=normalizeUrl(link);if(a)return a}var id=safeText(p.get("id"),160);if(id){id=id.replace(/^\/+|\/+$/g,"").replace(/[^A-Za-z0-9._~!$&'()*+,;=:@%/-]/g,"");if(id)return location.origin.replace(/\/$/,"")+"/"+id}return normalizeUrl(CONFIG.defaultInvitationUrl)}
+function guestLink(name){var base=normalizeUrl(q("invUrl").value);if(!base)return"";try{var u=new URL(base),par=q("param").value||"to";u.searchParams.set(par,name);return u.toString()}catch(_){return""}}
+function rendered(tpl,name,link){return String(tpl||"").replace(/\*\[nama\]\*/g,"*"+name+"*").replace(/\[nama\]/g,name).replace(/\[link-undangan\]/g,link)}
+function status(msg){var n=q("status");n.textContent=msg;n.dataset.show="true";clearTimeout(status.t);status.t=setTimeout(function(){n.dataset.show="false"},2500)}
+function splitNames(raw){var seen={};return String(raw||"").split(/\r?\n/).map(function(n){return safeText(n.replace(/\s+/g," "),120)}).filter(function(n){if(!n)return false;var k=n.toLowerCase();if(seen[k])return false;seen[k]=1;return true}).slice(0,500)}
+function currentTemplate(){return q("message").value||""}
+function save(){try{localStorage.setItem(CONFIG.storageKey,JSON.stringify({inv:q("invUrl").value,param:q("param").value,names:q("guests").value,message:q("message").value,selected:state.selectedTemplate,guests:state.guests}))}catch(_){}}
+function load(){var runtime=resolveUrl();try{var raw=localStorage.getItem(CONFIG.storageKey);if(raw){var s=JSON.parse(raw);q("invUrl").value=runtime||normalizeUrl(s.inv)||"";q("param").value=["to","dear","kepada"].indexOf(s.param)>=0?s.param:CONFIG.defaultParam;q("guests").value=safeText(s.names,25000);state.selectedTemplate=CONFIG.templates[s.selected]?s.selected:"muslim";q("message").value=safeText(s.message,25000)||CONFIG.templates[state.selectedTemplate].message;state.guests=Array.isArray(s.guests)?s.guests.map(function(n){return safeText(n,120)}).filter(Boolean).slice(0,500):[];return}}catch(_){}q("invUrl").value=runtime||"";q("param").value=CONFIG.defaultParam;q("message").value=CONFIG.templates[state.selectedTemplate].message}
+function renderTemplates(){q("templateButtons").innerHTML=Object.keys(CONFIG.templates).map(function(k){var t=CONFIG.templates[k];return '<button type="button" class="btn alt small template" data-template="'+esc(k)+'" aria-pressed="'+(k===state.selectedTemplate?"true":"false")+'"><span class="btn-inner"><span class="btn-label">'+esc(t.label)+"</span></span></button>"}).join("")}
+function renderPreview(){
+  var names=splitNames(q("guests").value),name=names[0]||state.guests[0]||"nama tamu",link=name!=="nama tamu"?guestLink(name):"";
+  q("previewName").textContent=name;
+  q("previewStatus").textContent=link?"link personal siap":"isi link undangan dulu";
+}
+function renderGuests(){
+  var body=q("guestBody"),empty=q("empty");
+  renderPreview();
+  q("results").classList.toggle("has-results",state.guests.length>0);
+  if(!state.guests.length){
+    body.innerHTML="";
+    empty.style.display="";
+    q("count").textContent="belum ada tamu.";
+    return;
+  }
+  empty.style.display="none";
+  q("count").textContent=state.guests.length+" nama tamu siap dikirim.";
+  body.innerHTML=state.guests.map(function(name,i){
+    return `
+      <article class="guest-label">
+        <div class="guest-meta">
+          <span class="guest-number">${String(i+1).padStart(2,"0")}</span>
+          <div>
+          <span class="guest">${esc(name)}</span>
+          </div>
+        </div>
+        <div class="rowactions">
+          <button type="button" class="btn success small" data-action="wa" data-index="${i}"><span class="btn-inner"><span class="btn-label">whatsapp</span></span></button>
+          <button type="button" class="btn alt small" data-action="open" data-index="${i}"><span class="btn-inner"><span class="btn-label">buka</span></span></button>
+          <button type="button" class="btn alt small" data-action="link" data-index="${i}"><span class="btn-inner"><span class="btn-label">salin link</span></span></button>
+          <button type="button" class="btn alt small" data-action="text" data-index="${i}"><span class="btn-inner"><span class="btn-label">salin pesan</span></span></button>
+          <button type="button" class="btn danger small" data-action="delete" data-index="${i}"><span class="btn-inner"><span class="btn-label">hapus</span></span></button>
+        </div>
+      </article>`;
+  }).join("");
+}
+async function copyText(text){if(!text)return false;try{await navigator.clipboard.writeText(text);return true}catch(_){try{var a=document.createElement("textarea");a.value=text;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.select();var ok=document.execCommand("copy");a.remove();return ok}catch(_){return false}}}
+function rowData(i){var name=state.guests[i];if(!name)return null;var link=guestLink(name);return{name:name,link:link,message:rendered(currentTemplate(),name,link)}}
+function generate(){var base=normalizeUrl(q("invUrl").value);if(!base){status("Isi link undangan.");q("invUrl").focus();return}q("invUrl").value=base;var names=splitNames(q("guests").value);if(!names.length){status("Masukkan nama tamu.");q("guests").focus();return}state.guests=names;renderGuests();save();status(names.length+" tamu siap.")}
+function chooseTemplate(key){if(!CONFIG.templates[key])return;state.selectedTemplate=key;q("message").value=CONFIG.templates[key].message;renderTemplates();renderGuests();save();status("Template "+CONFIG.templates[key].label+" dipilih.")}
+function insertToken(token){var a=q("message"),s=a.selectionStart||0,e=a.selectionEnd||0;a.value=a.value.slice(0,s)+token+a.value.slice(e);a.focus();a.selectionStart=a.selectionEnd=s+token.length;save()}
+
+q("generate").addEventListener("click",generate);
+q("templateButtons").addEventListener("click",function(e){var b=e.target.closest("[data-template]");if(b)chooseTemplate(b.dataset.template)});
+document.querySelectorAll("#svShareApp [data-token]").forEach(function(b){b.addEventListener("click",function(){insertToken(b.dataset.token)})});
+q("guestBody").addEventListener("click",async function(e){var b=e.target.closest("[data-action]");if(!b)return;var i=Number(b.dataset.index),d=rowData(i);if(!d)return;switch(b.dataset.action){case"wa":if(!d.link){status("Link undangan belum valid.");return}window.open("https://wa.me/?text="+encodeURIComponent(d.message),"_blank","noopener,noreferrer");break;case"open":if(!d.link){status("Link undangan belum valid.");return}window.open(d.link,"_blank","noopener,noreferrer");break;case"link":status(await copyText(d.link)?"Link "+d.name+" berhasil disalin.":"Gagal menyalin link.");break;case"text":status(await copyText(d.message)?"Pesan "+d.name+" berhasil disalin.":"Gagal menyalin pesan.");break;case"delete":state.guests.splice(i,1);renderGuests();save();status("Nama tamu dihapus.");break}});
+q("copyAll").addEventListener("click",async function(){if(!state.guests.length){status("Belum ada daftar tamu.");return}var all=state.guests.map(function(_,i){var d=rowData(i);return d?d.message:""}).filter(Boolean).join("\n\n────────────────────\n\n");status(await copyText(all)?"Semua pesan berhasil disalin.":"Gagal menyalin semua pesan.")});
+q("deleteAll").addEventListener("click",function(){if(!state.guests.length)return;if(!confirm("Hapus seluruh daftar nama tamu?"))return;state.guests=[];renderGuests();save();status("Seluruh daftar tamu dihapus.")});
+q("reset").addEventListener("click",function(){if(!confirm("Reset nama tamu dan teks pengantar?"))return;q("guests").value="";state.guests=[];state.selectedTemplate="muslim";q("message").value=CONFIG.templates.muslim.message;renderTemplates();renderGuests();save();status("Form direset.")});
+["invUrl","param","guests","message"].forEach(function(id){q(id).addEventListener("input",function(){renderGuests();save()});q(id).addEventListener("change",function(){renderGuests();save()})});
+load();renderTemplates();renderGuests();
+})();
+</script>
+</body>
+</html>
