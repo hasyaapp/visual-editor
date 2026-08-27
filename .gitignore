@@ -1,0 +1,28 @@
+# OS
+.DS_Store
+
+# IDE / tooling
+.vscode/
+.idea/
+*.swp
+*~
+
+# Local-only
+.commandcode/
+.scripts/secrets/
+
+# Build outputs & experiments
+assets/
+canva-page/
+combined.css
+root_content.html
+scalev-html-clone-workspace/
+template-builder/
+templates/
+docs/
+pages/
+extensions/
+_selenamilo_work/
+
+# Files yang bukan untuk repo publik
+user_*.Í
