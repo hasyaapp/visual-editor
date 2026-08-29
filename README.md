@@ -1,23 +1,15 @@
 # Scalev Visual Editor
 
-Schema-first userscript untuk Scalev HTML Mode.
+Userscript untuk Scalev HTML Mode. Repo ini dipakai untuk hosting update
+Tampermonkey — file di sini yang ditarik saat auto-update.
 
-## Instalasi
+## Pasang
 
-Pasang melalui [link production](https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js) dengan Tampermonkey. Endpoint `.user.js` diperlukan agar Tampermonkey membuka halaman install/update, bukan source plaintext.
+Buka link berikut dengan Tampermonkey aktif:
+
+https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 
 ## Update
 
-Tampermonkey membaca `@updateURL` dan `@downloadURL` dari script yang sama. Untuk merilis perubahan, naikkan nilai `@version`, commit, lalu push ke branch `main`. Pengguna cukup memasang script sekali; pembaruan berikutnya mengikuti URL raw yang sama.
-
-## Batasan Gambar
-
-Editor menolak gambar raster base64 (`data:image/png;base64,...`, jpeg, webp, gif, avif) di tiga titik:
-
-- kolom URL gambar pada tab Gambar, termasuk tombol Paste URL;
-- import template HTML, baik dari Library maupun upload file lokal;
-- laporan Kompatibilitas — status berubah menjadi "Masalah" dan native Simpan ditahan.
-
-Icon kecil `data:image/svg+xml` tetap diterima. Data URI apa pun yang melewati 4 KB muncul sebagai peringatan, bukan blocker.
-
-Alur yang benar untuk desain Canva: download gambar dari Canva, upload ke hosting, lalu paste URL `https://` ke editor. Payload base64 membuat ukuran halaman melonjak, menyulitkan penggantian asset lewat Visual Editor, dan menghilangkan origin gambar dari manifest CSP.
+Otomatis. Tampermonkey membaca `@updateURL` dari script dan menarik versi
+baru saat `@version` naik. Cukup pasang sekali.
