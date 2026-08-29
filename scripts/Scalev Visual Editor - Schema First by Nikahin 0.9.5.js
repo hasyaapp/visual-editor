@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         Scalev Visual Editor - Schema First
 // @namespace    wedding-scalev
-// @version      0.24.6
-// @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.user.js
-// @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.user.js
+// @version      0.24.7
+// @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
+// @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @description  Schema-first Scalev Visual Editor: Template Library, 21-section accordion, realtime preview.
 // @match        https://app.scalev.com/pages/*
 // @grant        GM_xmlhttpRequest
@@ -37,7 +37,7 @@
     "~halooo mas Hasya, aku kreator undangan Nikahin dari Scalev panel...";
 
   const UPDATE_URL =
-    "https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.user.js";
+    "https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js";
 
   const CHECK_URL =
     UPDATE_URL;
