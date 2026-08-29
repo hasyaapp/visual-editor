@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Scalev Visual Editor - Schema First
 // @namespace    wedding-scalev
-// @version      0.24.5
+// @version      0.24.6
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/Scalev%20Visual%20Editor%20-%20Schema%20First%20by%20Nikahin%200.9.5.user.js
 // @description  Schema-first Scalev Visual Editor: Template Library, 21-section accordion, realtime preview.
@@ -17,7 +17,7 @@
   "use strict";
 
   const ID = "sve77";
-  const VERSION = "0.24.5";
+  const VERSION = "0.24.6";
   const SVE_LITE_MODE = false;
 
   /*
@@ -341,6 +341,112 @@
     }
 
     return parts;
+  }
+
+  /* =========================================================
+     EMBEDDED IMAGE POLICY
+
+     Canva copy/export menaruh raster image sebagai
+     data:image/...;base64,... yang bisa beberapa MB. Payload
+     seperti itu ditolak: gambar wajib memakai URL https dari
+     hosting. Icon kecil data:image/svg+xml tetap boleh, tapi
+     diberi warning bila ukurannya berlebihan.
+     ========================================================= */
+
+  const EMBEDDED_RASTER_IMAGE_REGEX =
+    /data:image\/(?!svg\+xml)[a-z0-9.+-]+;base64,/gi;
+
+  const DATA_URI_TOKEN_REGEX = /data:[a-z0-9.+-]+\/[a-z0-9.+-]+[;,][^\s"'`)<>]*/gi;
+
+  const LARGE_DATA_URI_BYTES = 4096;
+
+  function hasEmbeddedRasterImage(value) {
+    EMBEDDED_RASTER_IMAGE_REGEX.lastIndex = 0;
+    return EMBEDDED_RASTER_IMAGE_REGEX.test(String(value || ""));
+  }
+
+  /*
+   * Pure string-in/array-out supaya bisa diuji tanpa DOM.
+   * Payload match TIDAK pernah dikembalikan — hanya lokasi,
+   * jumlah, dan estimasi ukuran, agar panel Status tidak
+   * dibebani string multi-MB.
+   */
+  function findEmbeddedRasterImages(sourcesByLabel) {
+    const findings = [];
+
+    Object.entries(sourcesByLabel || {}).forEach(([label, source]) => {
+      const text = String(source || "");
+      if (!text) return;
+
+      EMBEDDED_RASTER_IMAGE_REGEX.lastIndex = 0;
+
+      let count = 0;
+      let payloadBytes = 0;
+      let match;
+
+      while ((match = EMBEDDED_RASTER_IMAGE_REGEX.exec(text))) {
+        count += 1;
+
+        const start = match.index + match[0].length;
+        let end = start;
+
+        while (end < text.length && /[A-Za-z0-9+/=]/.test(text[end])) {
+          end += 1;
+        }
+
+        payloadBytes += end - start;
+      }
+
+      if (!count) return;
+
+      findings.push({
+        where: label,
+        count,
+        approxKb: Math.max(1, Math.round((payloadBytes * 0.75) / 1024))
+      });
+    });
+
+    return findings;
+  }
+
+  function findOversizedDataUris(sourcesByLabel) {
+    const findings = [];
+
+    Object.entries(sourcesByLabel || {}).forEach(([label, source]) => {
+      const text = String(source || "");
+      if (!text) return;
+
+      DATA_URI_TOKEN_REGEX.lastIndex = 0;
+
+      let count = 0;
+      let largest = 0;
+      let match;
+
+      while ((match = DATA_URI_TOKEN_REGEX.exec(text))) {
+        const length = match[0].length;
+        if (length <= LARGE_DATA_URI_BYTES) continue;
+        if (hasEmbeddedRasterImage(match[0])) continue;
+
+        count += 1;
+        largest = Math.max(largest, length);
+      }
+
+      if (!count) return;
+
+      findings.push({
+        where: label,
+        count,
+        approxKb: Math.max(1, Math.round(largest / 1024))
+      });
+    });
+
+    return findings;
+  }
+
+  function describeEmbeddedImageFindings(findings) {
+    return findings
+      .map(item => item.where + " (" + item.count + "x, ±" + item.approxKb + " KB)")
+      .join(", ");
   }
 
   const RATIOS = {
@@ -2263,6 +2369,18 @@
     }
     if (/(service[_-]?role|database[_-]?password|private[_-]?api[_-]?key|secret[_-]?token)\s*[:=]/i.test(html)) {
       blockers.push("Kemungkinan credential rahasia terdeteksi");
+    }
+
+    const embeddedImages = findEmbeddedRasterImages({ "File template": html });
+
+    if (embeddedImages.length) {
+      const total = embeddedImages.reduce((sum, item) => sum + item.count, 0);
+      const kb = embeddedImages.reduce((sum, item) => sum + item.approxKb, 0);
+
+      blockers.push(
+        "Gambar base64 terdeteksi (" + total + " lokasi, ±" + kb +
+        " KB); upload gambar ke hosting lalu pakai URL https"
+      );
     }
 
     const ids = Array.isArray(schema?.sections)
@@ -10099,6 +10217,39 @@ ${end}`;
     );
   }
 
+  function editorSourcesByLabel() {
+    return {
+      "Body HTML": getValue("html"),
+      "CSS": getValue("css"),
+      "JavaScript": getValue("js"),
+      "Additional Head": getValue("head"),
+      "CONFIG": JSON.stringify(state.config || {})
+    };
+  }
+
+  function reportEmbeddedImagePolicy(addBlocker, addWarning, addPass) {
+    const sources = editorSourcesByLabel();
+    const embedded = findEmbeddedRasterImages(sources);
+
+    if (embedded.length) {
+      addBlocker(
+        "Gambar base64 terdeteksi di " + describeEmbeddedImageFindings(embedded) +
+        "; upload gambar ke hosting lalu pakai URL https"
+      );
+    } else {
+      addPass("Tidak ada gambar base64");
+    }
+
+    const oversized = findOversizedDataUris(sources);
+
+    if (oversized.length) {
+      addWarning(
+        "Data URI berukuran besar di " + describeEmbeddedImageFindings(oversized) +
+        "; pertimbangkan pindah ke file hosting"
+      );
+    }
+  }
+
   function customPageCompatibilityReport() {
     const blockers = [];
     const warnings = [];
@@ -10176,6 +10327,8 @@ ${end}`;
     if (/(service[_-]?role|database[_-]?password|private[_-]?api[_-]?key|secret[_-]?token)\s*[:=]/i.test(allSource)) {
       addBlocker("Kemungkinan secret/private credential terdeteksi");
     }
+
+    reportEmbeddedImagePolicy(addBlocker, addWarning, addPass);
 
     const cssSource = compatibilityCssSource();
     const missingTypographyTokens = STYLE_FIELDS
@@ -10298,6 +10451,8 @@ ${end}`;
     if (/(service[_-]?role|database[_-]?password|private[_-]?api[_-]?key|secret[_-]?token)\s*[:=]/i.test(allSource)) {
       addBlocker("Kemungkinan secret/private credential terdeteksi");
     }
+
+    reportEmbeddedImagePolicy(addBlocker, addWarning, addPass);
 
     const jsSource = getValue("js");
     if (!/\bconst\s+CONFIG\s*=/.test(jsSource)) warnings.push("CONFIG strict canonical sebaiknya memakai const");
@@ -10699,6 +10854,24 @@ ${end}`;
     );
   }
 
+  const EMBEDDED_IMAGE_INPUT_MESSAGE =
+    "Gambar base64 (copy dari Canva) tidak didukung. Upload gambar ke hosting, lalu paste URL https-nya.";
+
+  /*
+   * Menolak payload sebelum masuk CONFIG/CodeMirror — string
+   * base64 multi-MB tidak boleh sampai ke source editor.
+   */
+  function rejectEmbeddedRasterImageInput(input) {
+    if (!input || typeof input.setCustomValidity !== "function") return;
+
+    input.setCustomValidity(EMBEDDED_IMAGE_INPUT_MESSAGE);
+    input.reportValidity?.();
+
+    setTimeout(() => {
+      input.setCustomValidity("");
+    }, 4000);
+  }
+
 
   async function pasteImageUrlFromClipboard(root, path) {
     const input = imageUrlInput(root, path);
@@ -10723,6 +10896,11 @@ ${end}`;
       if (clipboardText === input.value.trim()) {
         input.focus({ preventScroll: true });
         return true;
+      }
+
+      if (hasEmbeddedRasterImage(clipboardText)) {
+        rejectEmbeddedRasterImageInput(input);
+        return false;
       }
 
       /*
@@ -11579,6 +11757,12 @@ ${end}`;
       const current = String(getPath(state.config, path) || "");
 
       if (next === current) {
+        return;
+      }
+
+      if (hasEmbeddedRasterImage(next)) {
+        imageInput.value = current;
+        rejectEmbeddedRasterImageInput(imageInput);
         return;
       }
 

@@ -19,10 +19,14 @@ root_content.html
 scalev-html-clone-workspace/
 template-builder/
 templates/
-docs/
 pages/
 extensions/
 _selenamilo_work/
+
+# Docs: hanya rule pembuatan template tema yang di-track
+docs/*
+!docs/CANVA-SCALEV-IMPORT-RUNBOOK.md
+!docs/STRICT-SYNC-RULE-v3.25.4-Scalev-Wedding.md
 
 # Files yang bukan untuk repo publik
 user_*.Í
