@@ -23,10 +23,8 @@ pages/
 extensions/
 _selenamilo_work/
 
-# Docs: hanya rule pembuatan template tema yang di-track
+# Docs: lokal semua — GitHub hanya untuk hosting update Tampermonkey
 docs/*
-!docs/CANVA-SCALEV-IMPORT-RUNBOOK.md
-!docs/STRICT-SYNC-RULE-v3.25.4-Scalev-Wedding.md
 
 # Files yang bukan untuk repo publik
 user_*.Í
