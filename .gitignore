@@ -26,6 +26,9 @@ _selenamilo_work/
 # Docs: lokal semua — GitHub hanya untuk hosting update Tampermonkey
 docs/*
 
+# Supabase: lokal saja — laci template final, tak dipublikasikan
+supabase/
+
 # Files yang bukan untuk repo publik
 user_*.Í
 
