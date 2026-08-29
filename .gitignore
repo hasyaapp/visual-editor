@@ -30,3 +30,9 @@ docs/*
 
 # Files yang bukan untuk repo publik
 user_*.Í
+
+# Tool copy referensi desain — lokal/pribadi, tidak dipublikaslikan
+scripts/copy-web-design-reference.js
+scripts/copy-web-design-reference-paste.js
+scripts/copy-web-design-reference-bookmarklet.js
+scripts/Copy Web Design Reference by Nikahin *.user.js
