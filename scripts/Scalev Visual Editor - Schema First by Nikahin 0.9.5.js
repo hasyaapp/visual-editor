@@ -2237,11 +2237,24 @@
         url,
         headers: options.headers || {},
         timeout: TEMPLATE_LIBRARY_CONFIG.timeoutMs,
-        onload: response => resolve(new Response(response.responseText || "", {
-          status: response.status,
-          statusText: response.statusText,
-          headers: { "Content-Type": response.responseHeaders?.match(/content-type:\s*([^\\r\\n]+)/i)?.[1]?.trim() || "text/plain" }
-        })),
+        onload: response => {
+          const status = Number(response.status);
+          const safeStatus = Number.isInteger(status) && status >= 200 && status <= 599
+            ? status
+            : 200;
+          const safeStatusText = String(response.statusText || "")
+            .replace(/[\r\n]+/g, " ")
+            .slice(0, 100);
+          const contentType = String(response.responseHeaders || "")
+            .match(/content-type:\s*([^\r\n]+)/i)?.[1]
+            ?.trim() || "text/plain";
+
+          resolve(new Response(response.responseText || "", {
+            status: safeStatus,
+            statusText: safeStatusText,
+            headers: { "Content-Type": contentType }
+          }));
+        },
         ontimeout: () => reject(new DOMException("The operation timed out", "AbortError")),
         onerror: () => reject(new TypeError("Userscript request failed"))
       });
