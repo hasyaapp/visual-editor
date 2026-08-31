@@ -2552,30 +2552,44 @@
     const library = state.templateLibrary;
     const template = library.templates.find(item => item.id === id);
 
-    if (!template) {
-      library.error = "Template tidak ditemukan";
+    const showLibraryError = message => {
+      library.previousSource = null;
+      library.importedId = "";
+      library.importedName = "";
       library.status = "error";
-      selectPanelTab("library");
+      library.error = message;
+      state.uiPrepared = false;
+      render();
+    };
+
+    if (!template) {
+      showLibraryError("Template tidak ditemukan");
       return;
     }
 
     if (!template.sourceUrl) {
-      library.error = "Source template belum tersedia";
-      library.status = "error";
-      selectPanelTab("library");
+      showLibraryError("Source template belum tersedia");
       return;
     }
 
+    library.status = "loading";
+    library.error = "";
+    state.uiPrepared = false;
+    render();
+
     try {
+      console.log("[SVE] Import template:", template.id, template.sourceUrl);
       const response = await fetchLibraryResource(template.sourceUrl, {
         headers: { Accept: "text/html" }
       });
 
+      console.log("[SVE] Fetch response:", response.status);
       if (!response.ok) {
         throw new Error("HTTP " + response.status);
       }
 
       const source = await response.text();
+      console.log("[SVE] Source length:", source.length);
       const filename = template.id.replace(/[^a-z0-9-]+/gi, "-") + ".html";
       const file = new File([source], filename, { type: "text/html" });
       await importCompleteHtmlFile(file, template.id, template.name);
@@ -2583,12 +2597,8 @@
       library.status = "ready";
       selectPanelTab("library");
     } catch (error) {
-      library.previousSource = null;
-      library.importedId = "";
-      library.importedName = "";
-      library.status = "error";
-      library.error = "Import gagal: " + String(error?.message || "source tidak terbaca");
-      selectPanelTab("library");
+      console.error("[SVE] Import gagal:", error);
+      showLibraryError("Import gagal: " + String(error?.message || "source tidak terbaca"));
     }
   }
 
