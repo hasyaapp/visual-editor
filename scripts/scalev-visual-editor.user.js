@@ -2249,13 +2249,22 @@
   }
 
   async function fetchLibraryResource(url, options = {}) {
-    try {
-      return await fetchWithTimeout(url, options);
-    } catch (error) {
-      const fallback = userscriptRequest(url, options);
-      if (!fallback) throw error;
-      return await fallback;
+    /*
+     * Halaman Scalev punya CSP connect-src yang ketat (hanya mengizinkan
+     * cdn.scalev.com, api.scalev.com, dll). Fetch biasa ke origin lain
+     * (mis. *.nikahin.workers.dev) selalu di-block browser, sehingga kita
+     * utamakan GM_xmlhttpRequest (bypass CSP via @connect) dan jadikan
+     * fetch biasa sebagai fallback.
+     */
+    if (typeof GM_xmlhttpRequest === "function") {
+      try {
+        return await userscriptRequest(url, options);
+      } catch (_) {
+        // lanjut ke fetch biasa
+      }
     }
+
+    return await fetchWithTimeout(url, options);
   }
 
   async function loadTemplateLibrary(force = false) {
