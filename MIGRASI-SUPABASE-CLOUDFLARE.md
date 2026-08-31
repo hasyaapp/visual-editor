@@ -129,23 +129,50 @@ Rollback tinggal mengarahkan endpoint kembali.
 
 ## 6. PENDING / yang belum beres
 
-1. **Import dari userscript belum terverifikasi end-to-end di browser.**
-   Server side sudah 100% OK (endpoint, CORS, HTML semua 200), tapi user
-   melaporkan "belum bisa import" dari panel Library. Belum tahu pesan error
-   persisnya. Kemungkinan: userscript belum auto-update di Tampermonkey
-   (masih `@connect supabase.co` / endpoint lama), atau perlu hard refresh.
-   **Langkah cek:** dashboard Tampermonkey → versi harus 0.24.8 + ada
-   `@connect nikahin.workers.dev` → hard refresh app.scalev.com → lihat pesan
-   error di panel Library / console.
-2. **Versi userscript belum di-bump.** Masih `0.24.8` padahal isi berubah —
-   idealnya bump (misal `0.24.9`) supaya auto-update Tampermonkey pasti
-   mendeteksi perubahan (beberapa setup butuh version bump untuk trigger update).
-3. **`r2-uploader` & `assets` Worker** — `assets` dipakai production (pages),
-   `r2-uploader` cuma utilitas; putuskan dihapus/dipertahankan.
-4. **Supabase masih hidup** — data & fungsi asli masih jalan. Keputusan:
+1. **`r2-uploader` Worker** — cuma utilitas migrasi; putuskan dihapus/dipertahankan.
+2. **Supabase masih hidup** — data & fungsi asli masih jalan. Keputusan:
    matikan/nonaktifkan setelah masa transisi, atau biarkan sebagai fallback.
-5. **Branch protection GitHub** — push langsung ke `main` kena bypass rule
+3. **Branch protection GitHub** — push langsung ke `main` kena bypass rule
    ("Changes must be made through a pull request"). PR besar nanti harus lewat PR.
+4. **6 template lama (jawa-pusaka, kinanti, modern-estetik, modern-estetik-align,
+   solena-minimal, valerie-james)** — sudah dibersihkan dari referensi Supabase
+   (font → `assets.nikahin.workers.dev`, guestbook → `wedding-guestbook.nikahin.workers.dev`).
+   Struktur diverifikasi tetap valid. Perlu di-import ulang & dicek satu per satu di editor.
+5. **`test-minimal`** — template uji yang tersisa di library (D1). Bisa dihapus
+   dari `template_catalog` + R2 setelah semua template lama terverifikasi.
+
+---
+
+## 6b. Debug import userscript (2026-08-31) — SUDAH BERES
+
+Awalnya import template dari library **tidak masuk ke editor** ("tidak ada respon").
+Akar masalah & fix beruntun:
+
+1. **CSP halaman Scalev memblokir `fetch` biasa** ke `*.nikahin.workers.dev`
+   (connect-src Scalev hanya mengizinkan cdn.scalev.com, api.scalev.com, dll).
+   Gejala console: `Connecting to 'https://template-library.nikahin.workers.dev/'
+   violates CSP directive connect-src ... blocked`.
+   - Fix: `fetchLibraryResource` **prioritaskan `GM_xmlhttpRequest`** (bypass CSP
+     via `@connect nikahin.workers.dev`), fetch biasa jadi fallback.
+2. **`new Response()` gagal "Invalid value"** dari respons GM_xmlhttpRequest
+   (status/statusText tidak valid, mis. status 0).
+   - Fix: sanitasi — status dipaksa rentang 200–599 (fallback 200), statusText
+     dibersihkan dari karakter ilegal, content-type di-parse aman.
+3. **Error import tersembunyi** — `selectPanelTab("library")` skip render kalau
+   user sudah di tab library, jadi `library.error` tidak pernah tampil.
+   - Fix: `showLibraryError()` paksa `state.uiPrepared = false; render()`.
+     Ditambah feedback loading + log `[SVE]` di tiap langkah import.
+4. **Versi tidak di-bump** — semua fix di atas tetap `@version 0.24.8`, sehingga
+   Tampermonkey "Check for updates" tidak menarik versi baru.
+   - Fix: bump ke `0.24.9`.
+
+Hasil akhir: **template `test-minimal` berhasil di-import 100% ke editor Scalev**.
+Rantai lengkap terbukti: R2 + D1 + Worker → template-library → GM_xmlhttpRequest
+(tembus CSP) → validasi SVE → handoff editor. Versi userscript terbaru: `0.24.9`.
+
+Template lama yang masih gagal import sebelumnya **bukan karena template rusak** —
+parser SVE asli berhasil parse CONFIG/SVE_SCHEMA semua template; masalahnya murni
+di runtime browser (CSP + Response + versi stale).
 
 ---
 
