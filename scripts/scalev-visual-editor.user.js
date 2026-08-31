@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Scalev Visual Editor - Schema First
 // @namespace    wedding-scalev
-// @version      0.24.8
+// @version      0.24.9
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @description  Schema-first Scalev Visual Editor: Template Library, 21-section accordion, realtime preview.
@@ -17,7 +17,7 @@
   "use strict";
 
   const ID = "sve77";
-  const VERSION = "0.24.8";
+  const VERSION = "0.24.9";
   const SVE_LITE_MODE = false;
 
   /*
