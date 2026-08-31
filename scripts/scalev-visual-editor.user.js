@@ -7,7 +7,7 @@
 // @description  Schema-first Scalev Visual Editor: Template Library, 21-section accordion, realtime preview.
 // @match        https://app.scalev.com/pages/*
 // @grant        GM_xmlhttpRequest
-// @connect      ozdonprvactdvpiirnrq.supabase.co
+// @connect      nikahin.workers.dev
 // @connect      api.github.com
 // @connect      raw.githubusercontent.com
 // @run-at       document-idle
@@ -22,11 +22,11 @@
 
   /*
    * Provider template library. The endpoint is intentionally public-facing,
-   * while the template bucket remains private. The Edge Function owns the
-   * service-role key and returns short-lived signed source URLs.
+   * while the template bucket remains private. The Worker reads the catalog
+   * from D1 and serves template HTML from R2 with CORS enabled.
    */
   const TEMPLATE_LIBRARY_CONFIG = Object.freeze({
-    endpoint: "https://ozdonprvactdvpiirnrq.supabase.co/functions/v1/template-library",
+    endpoint: "https://template-library.nikahin.workers.dev/",
     timeoutMs: 9000
   });
 
