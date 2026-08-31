@@ -5,6 +5,72 @@ Cloudflare. Dibuat 2026-08-31. Ini dokumen acuan untuk PR besar berikutnya —
 bukan sekadar ringkasan, tapi berisi detail yang bisa dipakai siapa pun untuk
 memverifikasi, melanjutkan, atau me-rollback.
 
+## Diagram arsitektur
+
+```mermaid
+flowchart LR
+    subgraph User["Browser (Tampermonkey)"]
+        SVE["Userscript SVE 0.24.9<br/>Scalev Visual Editor"]
+        GM["GM_xmlhttpRequest<br/>(bypass CSP Scalev)"]
+        ED["Editor Scalev<br/>app.scalev.com"]
+    end
+
+    subgraph Cloudflare["Cloudflare (nikahin.workers.dev)"]
+        TL["Worker template-library<br/>D1 + R2 binding"]
+        GB["Worker wedding-guestbook<br/>D1 binding"]
+        AS["Worker assets<br/>R2 binding"]
+        D1[("D1 nikahin-db<br/>template_catalog + wedding_comments")]
+        R2[("R2<br/>nikahin-template · brand-assets · icon-payment")]
+    end
+
+    subgraph Scalev["Platform Scalev"]
+        CSP["CSP connect-src ketat"]
+        API["Scalev API v3<br/>api.scalev.com"]
+    end
+
+    subgraph Supabase["Supabase (masih hidup, fallback)"]
+        SB[("ozdonprvactdvpiirnrq<br/>data asli")]
+    end
+
+    SVE -->|fetch diblokir CSP| CSP
+    SVE -->|GM_xmlhttpRequest @connect| GM
+    GM -->|GET /| TL
+    GM -->|GET /?weddingId=| GB
+    GM -->|GET /brand-assets/...| AS
+    TL --> D1
+    TL --> R2
+    GB --> D1
+    AS --> R2
+    SVE -->|import HTML| ED
+    ED --> API
+    SB -.->|fallback/rollback| SVE
+```
+
+**Alur import template (hasil debugging 2026-08-31):**
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant S as SVE 0.24.9
+    participant G as GM_xmlhttpRequest
+    participant T as Worker template-library
+    participant R as R2
+    participant E as Editor Scalev
+
+    U->>S: Klik "Gunakan" (test-minimal)
+    S->>S: set status loading + render
+    S->>G: fetch source_url (bypass CSP)
+    G->>T: GET /asset/test-minimal/index.html
+    T->>R: baca object
+    R-->>T: HTML 2956 bytes
+    T-->>G: 200 + CORS
+    G-->>S: Response (status disanitasi)
+    S->>S: validateCompleteTemplateDocument (LOLOS)
+    S->>E: assignNativeTemplateFile (handoff)
+    E-->>S: editor berubah (html/js beda)
+    S-->>U: Template masuk editor ✅
+```
+
 ---
 
 ## 1. Ringkasan
