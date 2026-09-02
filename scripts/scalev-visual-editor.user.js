@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Scalev Visual Editor - Schema First
 // @namespace    wedding-scalev
-// @version      0.24.9
+// @version      0.25.0
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
-// @description  Schema-first Scalev Visual Editor: Template Library, 21-section accordion, realtime preview.
+// @description  Schema-first Scalev Visual Editor: Template Library, 20-section accordion, realtime preview.
 // @match        https://app.scalev.com/pages/*
 // @grant        GM_xmlhttpRequest
 // @connect      nikahin.workers.dev
@@ -17,7 +17,7 @@
   "use strict";
 
   const ID = "sve77";
-  const VERSION = "0.24.9";
+  const VERSION = "0.25.0";
   const SVE_LITE_MODE = false;
 
   /*
@@ -269,8 +269,7 @@
     "live",
     "filter",
     "gifts",
-    "prokes",
-    "guestbook",
+    "adab",
     "families",
     "closing",
     "footer"
@@ -1034,9 +1033,12 @@
 
     return (
       (
-        path.includes(
+        (path.includes(
           "guestbook"
-        ) &&
+        ) ||
+        path.includes(
+          "rsvp"
+        )) &&
         compactPath.endsWith(
           "weddingid"
         )
@@ -1087,6 +1089,18 @@
     /*
      * Canonical strict-sync fallback.
      */
+    if (
+      state.config &&
+      getPath(
+        state.config,
+        "rsvp.weddingId"
+      ) !== undefined
+    ) {
+      paths.add(
+        "rsvp.weddingId"
+      );
+    }
+
     if (
       state.config &&
       getPath(
@@ -10376,7 +10390,7 @@ ${end}`;
     const csp = collectExternalOrigins();
     const externalCount = Object.values(csp).reduce((sum, list) => sum + list.length, 0);
     if (externalCount) addWarning("External origin terdeteksi; salin CSP manifest ke Scalev Security");
-    addPass("Custom page aktif; validasi 21 section wedding dilewati");
+    addPass("Custom page aktif; validasi " + CANONICAL_SECTION_IDS.length + " section wedding dilewati");
 
     return {
       status: blockers.length ? "BLOCKER" : warnings.length ? "WARNING" : "PASS",
@@ -10426,7 +10440,7 @@ ${end}`;
     });
 
     if (CANONICAL_SECTION_IDS.every(id => uniqueIds.has(id))) {
-      addPass("21 canonical sections tersedia");
+      addPass(CANONICAL_SECTION_IDS.length + " canonical sections tersedia");
     }
 
     const order = Array.isArray(state.config?.sectionOrder) ? state.config.sectionOrder : [];
@@ -10490,14 +10504,15 @@ ${end}`;
     if (!/\bconst\s+CONFIG\s*=/.test(jsSource)) warnings.push("CONFIG strict canonical sebaiknya memakai const");
     if (!/\bconst\s+SVE_SCHEMA\s*=/.test(jsSource)) warnings.push("SVE_SCHEMA strict canonical sebaiknya memakai const");
 
-    if (getPath(state.config, "sections.guestbook") === true) {
-      const enabled = getPath(state.config, "guestbook.enabled");
-      const endpoint = String(getPath(state.config, "guestbook.endpoint") || "");
-      if (enabled !== true) addBlocker("Guestbook visible tetapi guestbook.enabled bukan true");
-      if (!/^https:\/\//i.test(endpoint)) addBlocker("Guestbook visible tetapi endpoint HTTPS belum valid");
-    }
+    /*
+     * Section gabungan RSVP & Ucapan (guestbook melebur ke rsvp).
+     * Gate aktif lewat sections.rsvp; sections.guestbook dipertahankan
+     * sebagai legacy agar template lama tidak kehilangan validasi.
+     */
+    const rsvpVisible = getPath(state.config, "sections.rsvp") === true;
+    const guestbookVisibleLegacy = getPath(state.config, "sections.guestbook") === true;
 
-    if (getPath(state.config, "sections.rsvp") === true) {
+    if (rsvpVisible || guestbookVisibleLegacy) {
       const mode = String(getPath(state.config, "extensions.rsvpBackend.mode") || "none");
       if (mode !== "none" && mode !== "external") addBlocker("RSVP backend mode harus none atau external");
       if (mode === "external") {
@@ -10506,6 +10521,11 @@ ${end}`;
       } else {
         warnings.push("RSVP backend belum dikonfigurasi; public runtime wajib fail-closed");
       }
+
+      const guestEnabled = getPath(state.config, "guestbook.enabled");
+      const guestEndpoint = String(getPath(state.config, "guestbook.endpoint") || "");
+      if (guestEnabled !== true) addBlocker("Ucapan & Doa (guestbook) visible tetapi guestbook.enabled bukan true");
+      if (!/^https:\/\//i.test(guestEndpoint)) addBlocker("Ucapan & Doa (guestbook) visible tetapi endpoint HTTPS belum valid");
     }
 
     const cssSource = compatibilityCssSource();
