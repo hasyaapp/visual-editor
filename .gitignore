@@ -11,6 +11,9 @@
 .commandcode/
 .scripts/secrets/
 
+# Konfigurasi Cloudflare (berisi token API) — jangan pernah di-publish
+KONFIGURASI-CLOUDFLARE.md
+
 # Build outputs & experiments
 assets/
 canva-page/
@@ -28,6 +31,9 @@ docs/*
 
 # Supabase: lokal saja — laci template final, tak dipublikasikan
 supabase/
+
+# Plugin pihak ketiga (referensi lokal, 5.5MB) — bukan untuk repo publik
+weddingpress-plugin/
 
 # Files yang bukan untuk repo publik
 user_*.Í
