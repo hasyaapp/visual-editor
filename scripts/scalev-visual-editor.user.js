@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Scalev Visual Editor - Schema First
 // @namespace    wedding-scalev
-// @version      0.25.2
+// @version      0.25.3
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @description  Schema-first Scalev Visual Editor: Template Library, 20-section accordion, realtime preview.
@@ -19,7 +19,7 @@
   "use strict";
 
   const ID = "sve77";
-  const VERSION = "0.25.2";
+  const VERSION = "0.25.3";
   const SVE_LITE_MODE = false;
 
   /*
@@ -4306,35 +4306,13 @@
     requestDashboardPin("peek");
   }
 
-  async function copyDashboardPin(kind) {
+  async function copyDashboardPin() {
     const pinState = state.dashboardPin;
     if (!pinState.pin) return;
 
-    const link =
-      DASHBOARD_URL + "?w=" + encodeURIComponent(pinState.slug);
-
-    const value =
-      kind === "link"
-        ? link
-        : kind === "wa"
-          ? [
-              "Dashboard undangan sudah aktif.",
-              "",
-              "Link: " + link,
-              "PIN: " + pinState.pin,
-              "",
-              "Di dashboard ini bisa dilihat siapa saja yang sudah konfirmasi kehadiran, jumlah orang yang datang, dan semua ucapan dari tamu. Ucapan juga bisa disembunyikan kalau ada yang tidak pantas."
-            ].join("\n")
-          : pinState.pin;
-
     try {
-      await navigator.clipboard.writeText(value);
-      pinState.message =
-        kind === "link"
-          ? "Link tersalin."
-          : kind === "wa"
-            ? "Pesan tersalin."
-            : "PIN tersalin.";
+      await navigator.clipboard.writeText(pinState.pin);
+      pinState.message = "PIN tersalin.";
     } catch (_) {
       pinState.message = "Gagal menyalin. Salin manual dari kolom PIN.";
     }
@@ -4346,6 +4324,10 @@
     const host = $("#" + ID + "-pin-panel");
     if (host) {
       host.innerHTML = dashboardPinHTML();
+    }
+    const pill = $("#" + ID + "-pin-pill");
+    if (pill) {
+      pill.outerHTML = pinStatusPill();
     }
   }
 
@@ -4360,17 +4342,15 @@
 
     if (!slug) {
       return `
-        <div class="pin-row">
-          <input
-            class="content-control"
-            type="text"
-            value=""
-            placeholder="Slug URL belum ada"
-            data-auto-wedding-id="1"
-            readonly
-            aria-readonly="true"
-          >
-        </div>
+        <input
+          class="content-control"
+          type="text"
+          value=""
+          placeholder="Slug URL belum ada"
+          data-auto-wedding-id="1"
+          readonly
+          aria-readonly="true"
+        >
         <small class="auto-wedding-id-note">
           Isi Slug URL di Pengaturan Scalev dulu, lalu buka panel ini lagi.
         </small>
@@ -4379,27 +4359,28 @@
 
     if (pinState.status === "needkey") {
       return `
-        <div class="pin-row">
-          <input
-            id="${ID}-team-key"
-            class="content-control"
-            type="password"
-            autocomplete="off"
-            placeholder="Kunci tim"
-          >
-
-          <button
-            type="button"
-            class="button"
-            id="${ID}-team-key-save"
-          >
-            Simpan
-          </button>
+        <div class="pin-ctl">
+          <label for="${ID}-team-key">Kunci tim</label>
+          <div class="pin-ctl-box">
+            <input
+              id="${ID}-team-key"
+              type="password"
+              autocomplete="off"
+              placeholder="Kunci tim"
+            >
+            <button
+              type="button"
+              class="pin-ctl-save"
+              id="${ID}-team-key-save"
+            >
+              Simpan
+            </button>
+          </div>
+          <small class="auto-wedding-id-note">
+            Diketik sekali, lalu diingat di browser ini.
+          </small>
+          ${note(pinState.message)}
         </div>
-        <small class="auto-wedding-id-note">
-          Diketik sekali, lalu diingat di browser ini. Minta kunci ke owner.
-        </small>
-        ${note(pinState.message)}
       `;
     }
 
@@ -4408,65 +4389,79 @@
       pinState.pin &&
       pinState.slug === slug;
 
+    const busy =
+      pinState.busy ||
+      pinState.status === "loading";
+
+    const action =
+      showPin
+        ? `
+          <p
+            class="pin-ctl-action${busy ? " is-busy" : ""}"
+            id="${ID}-pin-generate"
+          >
+            Buat PIN baru
+          </p>
+        `
+        : `
+          <p
+            class="pin-ctl-action${busy ? " is-busy" : ""}"
+            id="${ID}-pin-peek"
+          >
+            ${pinState.status === "loading" ? "Memuat…" : "Lihat PIN"}
+          </p>
+        `;
+
     return `
-      <div class="pin-row">
-        <input
-          class="content-control pin-value"
-          type="text"
-          value="${esc(showPin ? pinState.pin : "")}"
-          placeholder="${
-            pinState.status === "loading"
-              ? "Mengambil PIN..."
-              : "Belum diambil"
-          }"
-          data-auto-wedding-id="1"
-          readonly
-          aria-readonly="true"
-        >
-
-        <button
-          type="button"
-          class="button"
-          id="${ID}-pin-peek"
-          ${pinState.busy ? "disabled" : ""}
-        >
-          ${showPin ? "Muat ulang" : "Lihat PIN"}
-        </button>
-
-        <button
-          type="button"
-          class="button"
-          id="${ID}-pin-copy"
-          ${showPin ? "" : "disabled"}
-        >
-          Salin
-        </button>
+      <div class="pin-ctl">
+        <div class="pin-ctl-box">
+          <input
+            id="${ID}-pin-value"
+            type="text"
+            value="${esc(showPin ? pinState.pin : "")}"
+            placeholder="${
+              pinState.status === "loading"
+                ? "Mengambil PIN…"
+                : "Belum diambil"
+            }"
+            readonly
+            aria-readonly="true"
+            aria-label="PIN"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          ${
+            showPin
+              ? `
+                <button
+                  type="button"
+                  class="pin-ctl-chip"
+                  id="${ID}-pin-copy"
+                  title="Salin PIN"
+                  aria-label="Salin PIN"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                    <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"></path>
+                  </svg>
+                  Salin PIN
+                </button>
+              `
+              : ""
+          }
+        </div>
+        <div class="pin-ctl-foot">
+          ${action}
+          <a
+            class="pin-ctl-link"
+            href="${DASHBOARD_URL}"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Dashboard ↗
+          </a>
+        </div>
+        ${note(pinState.message)}
       </div>
-
-      <div class="pin-row pin-row-secondary">
-        <button
-          type="button"
-          class="button"
-          id="${ID}-pin-copy-wa"
-          ${showPin ? "" : "disabled"}
-        >
-          Salin pesan WA
-        </button>
-
-        <button
-          type="button"
-          class="button danger"
-          id="${ID}-pin-generate"
-          ${pinState.busy ? "disabled" : ""}
-        >
-          Buat PIN baru
-        </button>
-      </div>
-
-      <small class="auto-wedding-id-note">
-        Untuk ${esc(slug)} · tersimpan di server, tidak ikut ke undangan tamu.
-      </small>
-      ${note(pinState.message)}
     `;
   }
 
@@ -6114,6 +6109,36 @@
     );
   }
 
+  function pinStatusPill() {
+    const pinState = state.dashboardPin;
+    const slug = dashboardPinSlug();
+    const showPin =
+      pinState.status === "ready" &&
+      pinState.pin &&
+      pinState.slug === slug;
+
+    let label = "Belum diambil";
+    let tone = "idle";
+
+    if (!slug) {
+      label = "Slug kosong";
+    } else if (pinState.busy || pinState.status === "loading") {
+      label = "Memuat…";
+      tone = "loading";
+    } else if (pinState.status === "needkey") {
+      label = "Perlu kunci";
+      tone = "warn";
+    } else if (pinState.status === "error") {
+      label = "Gagal";
+      tone = "error";
+    } else if (showPin) {
+      label = "Aktif";
+      tone = "ok";
+    }
+
+    return `<span id="${ID}-pin-pill" class="pin-pill ${tone}">${label}</span>`;
+  }
+
   function renderContent() {
     if (!state.config) {
       return debugHTML();
@@ -6147,6 +6172,14 @@
       );
 
     return `
+      <div class="pin-zone">
+        <div class="pin-zone-head">
+          <span class="pin-zone-title">PIN Dashboard</span>
+          ${pinStatusPill()}
+        </div>
+        <div id="${ID}-pin-panel">${dashboardPinHTML()}</div>
+      </div>
+
       ${sections
         .map(section => {
           const id =
@@ -6325,11 +6358,6 @@
         })
         .join("")
       }
-
-      <div class="pin-zone">
-        <div class="pin-zone-head">PIN Dashboard</div>
-        <div id="${ID}-pin-panel">${dashboardPinHTML()}</div>
-      </div>
 
       <div class="reset-zone">
         <button
@@ -11584,19 +11612,10 @@ ${end}`;
 
         if (
           event.target.closest(
-            "#" + ID + "-pin-copy-wa"
-          )
-        ) {
-          copyDashboardPin("wa");
-          return;
-        }
-
-        if (
-          event.target.closest(
             "#" + ID + "-pin-copy"
           )
         ) {
-          copyDashboardPin("pin");
+          copyDashboardPin();
           return;
         }
 
@@ -15426,43 +15445,236 @@ input:checked
 }
 
 #${ID} .pin-zone {
-  margin-top: 20px;
-  padding: 12px;
-  border: 2px solid var(--line);
-  border-radius: 10px;
-  background: #fbfcfd;
+  margin: 0 0 14px;
+  padding: 0 0 14px;
+  border-bottom: 1px solid var(--line);
 }
 
 #${ID} .pin-zone-head {
-  margin-bottom: 8px;
-  color: #536174;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .02em;
-}
-
-#${ID} .pin-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
   align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-#${ID} .pin-row > input {
-  flex: 1 1 120px;
-  min-width: 0;
+#${ID}-body .pin-zone-title {
+  color: #5b6675;
+  font-family: "Roboto", sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
-#${ID} .pin-row-secondary {
-  margin-top: 6px;
-}
-
-#${ID} input.pin-value {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 16px;
+#${ID} .pin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: .22em;
-  text-align: center;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+#${ID} .pin-pill::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #b9c2cd;
+}
+
+#${ID} .pin-pill.ok {
+  color: #1a7f4b;
+}
+
+#${ID} .pin-pill.ok::before {
+  background: #1a7f4b;
+}
+
+#${ID} .pin-pill.loading {
+  color: var(--p);
+}
+
+#${ID} .pin-pill.loading::before {
+  background: var(--p);
+}
+
+#${ID} .pin-pill.warn {
+  color: #9a6b1f;
+}
+
+#${ID} .pin-pill.warn::before {
+  background: #d9a63a;
+}
+
+#${ID} .pin-pill.error {
+  color: #c0392b;
+}
+
+#${ID} .pin-pill.error::before {
+  background: #c0392b;
+}
+
+/* PIN Dashboard — native Scalev field (label + readonly input + copy chip).
+   Mirrors the Scalev "Client ID" control: wrapper border-2 rounded, input
+   38px, gray chip copy icon, primary text-link action below. */
+#${ID}-body .pin-ctl {
+  display: block;
+  margin: 0;
+}
+
+#${ID}-body .pin-ctl > label {
+  display: block;
+  margin: 0 0 10px;
+  color: #223548;
+  font-family: "Roboto", var(--system-font-quill);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+#${ID}-body .pin-ctl-box {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  border: 2px solid #e5e7eb;
+  border-radius: 4px;
+  background: #eef1f4;
+  transition: border-color .15s ease;
+}
+
+#${ID}-body .pin-ctl-box:focus-within {
+  border-color: #09afed;
+}
+
+#${ID}-body .pin-ctl-box > input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  margin: 0;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 12px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #223548;
+  font-family: "Roboto", var(--system-font-quill);
+  font-size: 13px !important;
+  font-weight: 400;
+  line-height: 20px;
+  cursor: default;
+}
+
+#${ID}-body .pin-ctl-box > input:focus {
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+#${ID}-body .pin-ctl-box > input::placeholder {
+  color: #8a94a3;
+  font-weight: 400;
+}
+
+#${ID}-body .pin-ctl-chip,
+#${ID}-body .pin-ctl-save {
+  flex: 0 0 auto;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  font-family: "Roboto", var(--system-font-quill);
+  line-height: 1;
+  cursor: pointer;
+}
+
+#${ID}-body .pin-ctl-chip {
+  gap: 4px;
+  padding: 0 8px;
+  border-left: 1px solid #dbdfe5;
+  background: #fff;
+  color: #0899cf;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+#${ID}-body .pin-ctl-chip:hover {
+  background: #f6f9fc;
+  color: #0788bb;
+}
+
+#${ID}-body .pin-ctl-save {
+  padding: 0 14px;
+  background: #09afed;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#${ID}-body .pin-ctl-save:hover {
+  background: #0899cf;
+}
+
+#${ID}-body .pin-ctl-action {
+  display: block;
+  margin: 8px 0 0;
+  color: #0899cf;
+  font-family: "Roboto", var(--system-font-quill);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#${ID}-body .pin-ctl-action:hover {
+  text-decoration: underline;
+}
+
+#${ID}-body .pin-ctl-action.is-busy {
+  color: #8a94a3;
+  cursor: default;
+  text-decoration: none;
+}
+
+#${ID}-body .pin-ctl-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 8px;
+}
+
+#${ID}-body .pin-ctl-foot .pin-ctl-action {
+  margin: 0;
+}
+
+#${ID}-body .pin-ctl-link {
+  color: #0899cf;
+  font-family: "Roboto", var(--system-font-quill);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#${ID}-body .pin-ctl-link:hover {
+  text-decoration: underline;
 }
 
 #${ID} .savebar {
