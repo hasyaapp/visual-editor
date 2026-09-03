@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name         Scalev Visual Editor - Schema First
 // @namespace    wedding-scalev
-// @version      0.25.0
+// @version      0.25.2
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @description  Schema-first Scalev Visual Editor: Template Library, 20-section accordion, realtime preview.
 // @match        https://app.scalev.com/pages/*
 // @grant        GM_xmlhttpRequest
+// @grant        GM_setValue
+// @grant        GM_getValue
 // @connect      nikahin.workers.dev
 // @connect      api.github.com
 // @connect      raw.githubusercontent.com
@@ -17,7 +19,7 @@
   "use strict";
 
   const ID = "sve77";
-  const VERSION = "0.25.0";
+  const VERSION = "0.25.2";
   const SVE_LITE_MODE = false;
 
   /*
@@ -101,6 +103,20 @@
 
     scalevSlug: "",
     pendingWeddingIdSlug: "",
+
+    /*
+     * PIN dashboard. Sengaja hanya di state runtime — JANGAN pernah
+     * menulisnya ke CONFIG/SVE_SCHEMA, karena CONFIG ikut terkirim ke
+     * setiap tamu yang membuka undangan.
+     */
+    dashboardPin: {
+      status: "idle",
+      slug: "",
+      pin: "",
+      version: 0,
+      message: "",
+      busy: false
+    },
 
     templateLibrary: {
       status: "idle",
@@ -719,7 +735,7 @@
   }
 
   /* =========================================================
-     SCALEV SLUG -> GUESTBOOK WEDDING ID
+     SCALEV SLUG -> RSVP & UCAPAN WEDDING ID
      ========================================================= */
 
   function normalizeScalevSlug(
@@ -2244,11 +2260,13 @@
 
   function userscriptRequest(url, options = {}) {
     if (typeof GM_xmlhttpRequest !== "function") return null;
+    const method = options.method || "GET";
 
     return new Promise((resolve, reject) => {
       GM_xmlhttpRequest({
-        method: options.method || "GET",
+        method,
         url,
+        data: options.body,
         headers: options.headers || {},
         timeout: TEMPLATE_LIBRARY_CONFIG.timeoutMs,
         onload: response => {
@@ -4136,6 +4154,322 @@
     render();
   }
 
+  /* =========================================================
+     PIN DASHBOARD
+     PIN diturunkan di worker dari (PIN_SECRET, slug, version),
+     jadi nilai yang sama selalu bisa ditampilkan lagi saat editor
+     dibuka ulang tanpa PIN itu tersimpan di mana pun.
+
+     PIN TIDAK BOLEH masuk CONFIG/SVE_SCHEMA — CONFIG ikut terkirim
+     ke setiap tamu yang membuka undangan.
+     ========================================================= */
+
+  const DASHBOARD_PIN_API =
+    "https://wedding-guestbook.nikahin.workers.dev/admin/reveal";
+
+  const DASHBOARD_URL =
+    "https://nikahin.myscalev.com/dashboard";
+
+  const TEAM_KEY_STORE = "nikahin_team_key";
+
+  function readTeamKey() {
+    try {
+      if (typeof GM_getValue !== "function") return "";
+      return String(GM_getValue(TEAM_KEY_STORE, "") || "").trim();
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function writeTeamKey(value) {
+    try {
+      if (typeof GM_setValue !== "function") return false;
+      GM_setValue(TEAM_KEY_STORE, String(value || "").trim());
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  const DASHBOARD_PIN_ERRORS = {
+    unauthorized: "Kunci tim salah. Perbaiki lalu coba lagi.",
+    team_key_not_configured: "Worker belum punya TEAM_KEY.",
+    pin_secret_not_configured: "Worker belum punya PIN_SECRET.",
+    pin_set_manually: "PIN undangan ini diatur manual. Pakai Buat PIN baru kalau memang ingin menggantinya.",
+    invalid_wedding_id: "Slug undangan tidak valid.",
+    rate_limited: "Terlalu sering. Tunggu beberapa menit."
+  };
+
+  function dashboardPinSlug() {
+    return (
+      normalizeScalevSlug(
+        state.scalevSlug ||
+        readScalevSlug()
+      ) || ""
+    );
+  }
+
+  async function requestDashboardPin(mode) {
+    const pinState = state.dashboardPin;
+    if (pinState.busy) return;
+
+    const slug = dashboardPinSlug();
+    if (!slug) {
+      pinState.status = "error";
+      pinState.message = "Slug URL belum diisi di Pengaturan Scalev.";
+      renderDashboardPinPanel();
+      return;
+    }
+
+    const teamKey = readTeamKey();
+    if (!teamKey) {
+      pinState.status = "needkey";
+      pinState.message = "";
+      renderDashboardPinPanel();
+      return;
+    }
+
+    if (mode === "generate" && pinState.pin) {
+      const confirmed = window.confirm(
+        "Buat PIN baru untuk " + slug + "?\n\n" +
+        "PIN lama langsung tidak berlaku. Kalau sudah dikirim ke klien, " +
+        "PIN baru ini harus dikirim ulang."
+      );
+      if (!confirmed) return;
+    }
+
+    pinState.busy = true;
+    pinState.status = "loading";
+    pinState.message = "";
+    renderDashboardPinPanel();
+
+    try {
+      const response = await fetchLibraryResource(DASHBOARD_PIN_API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-team-key": teamKey
+        },
+        body: JSON.stringify({
+          weddingId: slug,
+          mode: mode === "generate" ? "generate" : "peek"
+        })
+      });
+
+      const data = await response.json();
+
+      if (!data || data.ok !== true) {
+        pinState.status = "error";
+        pinState.pin = "";
+        pinState.message =
+          DASHBOARD_PIN_ERRORS[data && data.error] ||
+          "Gagal mengambil PIN.";
+      } else {
+        pinState.status = "ready";
+        pinState.slug = slug;
+        pinState.pin = String(data.pin || "");
+        pinState.version = Number(data.version) || 0;
+        pinState.message =
+          data.regenerated
+            ? "PIN baru dibuat. Kirim ulang ke klien."
+            : "";
+      }
+    } catch (_) {
+      pinState.status = "error";
+      pinState.pin = "";
+      pinState.message = "Tidak bisa menghubungi server.";
+    }
+
+    pinState.busy = false;
+    renderDashboardPinPanel();
+  }
+
+  function saveTeamKeyFromInput() {
+    const input = $("#" + ID + "-team-key");
+    const value = input ? input.value.trim() : "";
+    const pinState = state.dashboardPin;
+
+    if (!value) {
+      pinState.message = "Kunci tim belum diisi.";
+      renderDashboardPinPanel();
+      return;
+    }
+
+    if (!writeTeamKey(value)) {
+      pinState.message = "Tampermonkey menolak menyimpan kunci.";
+      renderDashboardPinPanel();
+      return;
+    }
+
+    pinState.status = "idle";
+    pinState.message = "";
+    requestDashboardPin("peek");
+  }
+
+  async function copyDashboardPin(kind) {
+    const pinState = state.dashboardPin;
+    if (!pinState.pin) return;
+
+    const link =
+      DASHBOARD_URL + "?w=" + encodeURIComponent(pinState.slug);
+
+    const value =
+      kind === "link"
+        ? link
+        : kind === "wa"
+          ? [
+              "Dashboard undangan sudah aktif.",
+              "",
+              "Link: " + link,
+              "PIN: " + pinState.pin,
+              "",
+              "Di dashboard ini bisa dilihat siapa saja yang sudah konfirmasi kehadiran, jumlah orang yang datang, dan semua ucapan dari tamu. Ucapan juga bisa disembunyikan kalau ada yang tidak pantas."
+            ].join("\n")
+          : pinState.pin;
+
+    try {
+      await navigator.clipboard.writeText(value);
+      pinState.message =
+        kind === "link"
+          ? "Link tersalin."
+          : kind === "wa"
+            ? "Pesan tersalin."
+            : "PIN tersalin.";
+    } catch (_) {
+      pinState.message = "Gagal menyalin. Salin manual dari kolom PIN.";
+    }
+
+    renderDashboardPinPanel();
+  }
+
+  function renderDashboardPinPanel() {
+    const host = $("#" + ID + "-pin-panel");
+    if (host) {
+      host.innerHTML = dashboardPinHTML();
+    }
+  }
+
+  function dashboardPinHTML() {
+    const pinState = state.dashboardPin;
+    const slug = dashboardPinSlug();
+
+    const note = message =>
+      message
+        ? `<small class="auto-wedding-id-note">${esc(message)}</small>`
+        : "";
+
+    if (!slug) {
+      return `
+        <div class="pin-row">
+          <input
+            class="content-control"
+            type="text"
+            value=""
+            placeholder="Slug URL belum ada"
+            data-auto-wedding-id="1"
+            readonly
+            aria-readonly="true"
+          >
+        </div>
+        <small class="auto-wedding-id-note">
+          Isi Slug URL di Pengaturan Scalev dulu, lalu buka panel ini lagi.
+        </small>
+      `;
+    }
+
+    if (pinState.status === "needkey") {
+      return `
+        <div class="pin-row">
+          <input
+            id="${ID}-team-key"
+            class="content-control"
+            type="password"
+            autocomplete="off"
+            placeholder="Kunci tim"
+          >
+
+          <button
+            type="button"
+            class="button"
+            id="${ID}-team-key-save"
+          >
+            Simpan
+          </button>
+        </div>
+        <small class="auto-wedding-id-note">
+          Diketik sekali, lalu diingat di browser ini. Minta kunci ke owner.
+        </small>
+        ${note(pinState.message)}
+      `;
+    }
+
+    const showPin =
+      pinState.status === "ready" &&
+      pinState.pin &&
+      pinState.slug === slug;
+
+    return `
+      <div class="pin-row">
+        <input
+          class="content-control pin-value"
+          type="text"
+          value="${esc(showPin ? pinState.pin : "")}"
+          placeholder="${
+            pinState.status === "loading"
+              ? "Mengambil PIN..."
+              : "Belum diambil"
+          }"
+          data-auto-wedding-id="1"
+          readonly
+          aria-readonly="true"
+        >
+
+        <button
+          type="button"
+          class="button"
+          id="${ID}-pin-peek"
+          ${pinState.busy ? "disabled" : ""}
+        >
+          ${showPin ? "Muat ulang" : "Lihat PIN"}
+        </button>
+
+        <button
+          type="button"
+          class="button"
+          id="${ID}-pin-copy"
+          ${showPin ? "" : "disabled"}
+        >
+          Salin
+        </button>
+      </div>
+
+      <div class="pin-row pin-row-secondary">
+        <button
+          type="button"
+          class="button"
+          id="${ID}-pin-copy-wa"
+          ${showPin ? "" : "disabled"}
+        >
+          Salin pesan WA
+        </button>
+
+        <button
+          type="button"
+          class="button danger"
+          id="${ID}-pin-generate"
+          ${pinState.busy ? "disabled" : ""}
+        >
+          Buat PIN baru
+        </button>
+      </div>
+
+      <small class="auto-wedding-id-note">
+        Untuk ${esc(slug)} · tersimpan di server, tidak ikut ke undangan tamu.
+      </small>
+      ${note(pinState.message)}
+    `;
+  }
+
   function resetAll() {
     if (!state.defaults) {
       return;
@@ -5991,6 +6325,11 @@
         })
         .join("")
       }
+
+      <div class="pin-zone">
+        <div class="pin-zone-head">PIN Dashboard</div>
+        <div id="${ID}-pin-panel">${dashboardPinHTML()}</div>
+      </div>
 
       <div class="reset-zone">
         <button
@@ -10505,27 +10844,37 @@ ${end}`;
     if (!/\bconst\s+SVE_SCHEMA\s*=/.test(jsSource)) warnings.push("SVE_SCHEMA strict canonical sebaiknya memakai const");
 
     /*
-     * Section gabungan RSVP & Ucapan (guestbook melebur ke rsvp).
-     * Gate aktif lewat sections.rsvp; sections.guestbook dipertahankan
-     * sebagai legacy agar template lama tidak kehilangan validasi.
+     * RSVP dan Ucapan & Doa memakai satu section dan satu payload.
+     * Konfigurasi baru tinggal di rsvp.*; guestbook.* hanya fallback untuk
+     * template lama yang masih memiliki section legacy.
      */
     const rsvpVisible = getPath(state.config, "sections.rsvp") === true;
     const guestbookVisibleLegacy = getPath(state.config, "sections.guestbook") === true;
+    const unifiedRsvpEndpoint = String(getPath(state.config, "rsvp.endpoint") || "");
+    const unifiedRsvpEnabled = getPath(state.config, "rsvp.enabled");
+    const unifiedRsvpConfigured = !!unifiedRsvpEndpoint || unifiedRsvpEnabled !== undefined;
 
-    if (rsvpVisible || guestbookVisibleLegacy) {
-      const mode = String(getPath(state.config, "extensions.rsvpBackend.mode") || "none");
-      if (mode !== "none" && mode !== "external") addBlocker("RSVP backend mode harus none atau external");
-      if (mode === "external") {
-        const endpoint = String(getPath(state.config, "extensions.rsvpBackend.endpoint") || "");
-        if (!/^https:\/\//i.test(endpoint)) addBlocker("RSVP external membutuhkan endpoint HTTPS");
+    if (rsvpVisible) {
+      if (unifiedRsvpConfigured) {
+        if (unifiedRsvpEnabled !== true) addBlocker("RSVP & Ucapan visible tetapi rsvp.enabled bukan true");
+        if (!/^https:\/\//i.test(unifiedRsvpEndpoint)) addBlocker("RSVP & Ucapan membutuhkan endpoint HTTPS");
       } else {
-        warnings.push("RSVP backend belum dikonfigurasi; public runtime wajib fail-closed");
+        const mode = String(getPath(state.config, "extensions.rsvpBackend.mode") || "none");
+        if (mode !== "none" && mode !== "external") addBlocker("RSVP backend mode harus none atau external");
+        if (mode === "external") {
+          const endpoint = String(getPath(state.config, "extensions.rsvpBackend.endpoint") || "");
+          if (!/^https:\/\//i.test(endpoint)) addBlocker("RSVP external membutuhkan endpoint HTTPS");
+        } else {
+          warnings.push("RSVP backend belum dikonfigurasi; public runtime wajib fail-closed");
+        }
       }
+    }
 
+    if (guestbookVisibleLegacy) {
       const guestEnabled = getPath(state.config, "guestbook.enabled");
       const guestEndpoint = String(getPath(state.config, "guestbook.endpoint") || "");
-      if (guestEnabled !== true) addBlocker("Ucapan & Doa (guestbook) visible tetapi guestbook.enabled bukan true");
-      if (!/^https:\/\//i.test(guestEndpoint)) addBlocker("Ucapan & Doa (guestbook) visible tetapi endpoint HTTPS belum valid");
+      if (guestEnabled !== true) addBlocker("Ucapan & Doa legacy visible tetapi guestbook.enabled bukan true");
+      if (!/^https:\/\//i.test(guestEndpoint)) addBlocker("Ucapan & Doa legacy visible tetapi endpoint HTTPS belum valid");
     }
 
     const cssSource = compatibilityCssSource();
@@ -11203,6 +11552,51 @@ ${end}`;
           state.contentCommitMessage = "";
           state.contentStateDirty = false;
           resetAll();
+          return;
+        }
+
+        if (
+          event.target.closest(
+            "#" + ID + "-team-key-save"
+          )
+        ) {
+          saveTeamKeyFromInput();
+          return;
+        }
+
+        if (
+          event.target.closest(
+            "#" + ID + "-pin-peek"
+          )
+        ) {
+          requestDashboardPin("peek");
+          return;
+        }
+
+        if (
+          event.target.closest(
+            "#" + ID + "-pin-generate"
+          )
+        ) {
+          requestDashboardPin("generate");
+          return;
+        }
+
+        if (
+          event.target.closest(
+            "#" + ID + "-pin-copy-wa"
+          )
+        ) {
+          copyDashboardPin("wa");
+          return;
+        }
+
+        if (
+          event.target.closest(
+            "#" + ID + "-pin-copy"
+          )
+        ) {
+          copyDashboardPin("pin");
           return;
         }
 
@@ -15029,6 +15423,46 @@ input:checked
   gap: 8px;
 
   margin-top: 20px;
+}
+
+#${ID} .pin-zone {
+  margin-top: 20px;
+  padding: 12px;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: #fbfcfd;
+}
+
+#${ID} .pin-zone-head {
+  margin-bottom: 8px;
+  color: #536174;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+#${ID} .pin-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+#${ID} .pin-row > input {
+  flex: 1 1 120px;
+  min-width: 0;
+}
+
+#${ID} .pin-row-secondary {
+  margin-top: 6px;
+}
+
+#${ID} input.pin-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: .22em;
+  text-align: center;
 }
 
 #${ID} .savebar {
