@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Scalev Visual Editor - Schema First
 // @namespace    wedding-scalev
-// @version      0.26.3
+// @version      0.26.4
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @description  Schema-first Scalev Visual Editor: Template Library, 20-section accordion, realtime preview.
@@ -19,7 +19,7 @@
   "use strict";
 
   const ID = "sve77";
-  const VERSION = "0.26.3";
+  const VERSION = "0.26.4";
   const SVE_LITE_MODE = false;
 
   /*
@@ -31,6 +31,10 @@
     endpoint: "https://template-library.nikahin.workers.dev/",
     timeoutMs: 9000
   });
+
+  /* Harga jual ditentukan paket (D1 packages). Komisi kreator = commission_rate
+   * dari template_catalog, dihitung dari harga paket — bukan harga template. */
+  const PACKAGES_URL = "https://nikahin.myscalev.com/home#paket";
 
   const SUPPORT_WHATSAPP_NUMBER =
     "6282175274118";
@@ -2206,6 +2210,9 @@
       id,
       name: name.slice(0, 120),
       version: String(record.version || "").trim().slice(0, 32),
+      commissionRate: Number.isFinite(Number(record.commission_rate))
+        ? Number(record.commission_rate)
+        : 60,
       sourceUrl: safeLibraryUrl(record.source_url || record.sourceUrl)
     };
   }
@@ -11094,9 +11101,13 @@ ${end}`;
         <article class="library-card${active ? " is-active" : ""}" role="listitem"${active ? ' aria-current="true"' : ""}>
           <div class="library-card-row">
             <div class="library-card-copy">
-            <div class="library-card-heading">
-              <h3>${esc(template.name)}</h3>
-            </div>
+              <div class="library-card-heading">
+                <h3>${esc(template.name)}</h3>
+              </div>
+              <p class="library-commission-note">
+                <span>Komisi <strong>${esc(String(template.commissionRate))}%</strong> dari harga paket</span>
+                <a href="${PACKAGES_URL}" target="_blank" rel="noopener noreferrer">Lihat paket →</a>
+              </p>
             </div>
             <div class="library-card-actions">
               <button
@@ -14138,6 +14149,33 @@ input[data-auto-wedding-id="1"]:focus {
   color: var(--muted);
   font-size: 11px;
   line-height: 16px;
+}
+
+#${ID} .library-commission-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 6px;
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+#${ID} .library-commission-note strong {
+  color: inherit;
+  font-weight: 600;
+}
+
+#${ID} .library-commission-note a {
+  color: var(--p);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+#${ID} .library-commission-note a:hover {
+  text-decoration: underline;
 }
 
 #${ID} .library-import-button {
