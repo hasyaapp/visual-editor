@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Scalev Visual Editor - Schema First
 // @namespace    wedding-scalev
-// @version      0.25.3
+// @version      0.26.3
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @description  Schema-first Scalev Visual Editor: Template Library, 20-section accordion, realtime preview.
@@ -19,7 +19,7 @@
   "use strict";
 
   const ID = "sve77";
-  const VERSION = "0.25.3";
+  const VERSION = "0.26.3";
   const SVE_LITE_MODE = false;
 
   /*
@@ -301,6 +301,7 @@
     "date",
     "time",
     "datetime",
+    "color",
     "select",
     "boolean",
     "image",
@@ -2205,12 +2206,6 @@
       id,
       name: name.slice(0, 120),
       version: String(record.version || "").trim().slice(0, 32),
-      priceIdr: Number.isFinite(Number(record.price_idr))
-        ? Number(record.price_idr)
-        : 100000,
-      commissionRate: Number.isFinite(Number(record.commission_rate))
-        ? Number(record.commission_rate)
-        : 60,
       sourceUrl: safeLibraryUrl(record.source_url || record.sourceUrl)
     };
   }
@@ -2223,20 +2218,6 @@
         : [];
 
     return rows.map(normalizeTemplateRecord).filter(Boolean);
-  }
-
-  function formatTemplatePrice(value) {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0
-    }).format(Number(value) || 0).replace(/^Rp\s*/i, "Rp");
-  }
-
-  function templateCommission(template) {
-    const price = Number(template.priceIdr) || 0;
-    const rate = Number(template.commissionRate) || 0;
-    return Math.round(price * rate / 100);
   }
 
   async function fetchWithTimeout(url, options = {}) {
@@ -5645,7 +5626,8 @@
               </strong>
 
               ${
-                field.canDelete !== false
+                field.canDelete !== false &&
+                items.length > (Number.isFinite(field.min) ? field.min : 0)
                   ? `
                     <button
                       type="button"
@@ -11115,15 +11097,6 @@ ${end}`;
             <div class="library-card-heading">
               <h3>${esc(template.name)}</h3>
             </div>
-            <div class="library-commission">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M2 7C2 5.34315 3.34315 4 5 4H15C16.6569 4 18 5.34315 18 7V8H19C20.6569 8 22 9.34315 22 11V17C22 18.6569 20.6569 20 19 20H9C7.34315 20 6 18.6569 6 17V16H5C3.34315 16 2 14.6569 2 13V7ZM8 17C8 17.5523 8.4477 18 9 18H19C19.5523 18 20 17.5523 20 17V11C20 10.4477 19.5523 10 19 10H9C8.4477 10 8 10.4477 8 11V17ZM16 8H9C7.34315 8 6 9.34315 6 11V14H5C4.44771 14 4 13.5523 4 13V7C4 6.44771 4.44771 6 5 6H15C15.5523 6 16 6.44771 16 7V8ZM14 13C13.4477 13 13 13.5523 14 15C14.5523 15 15 15 15 14C15 13.4477 14.5523 13 14 13ZM11 14C11 12.3431 12.3431 11 14 11C15.6569 11 17 12.3431 17 14C17 15.6569 15.6569 17 14 17C12.3431 17 11 15.6569 11 14Z" fill="currentColor"></path>
-              </svg>
-              <svg width="17" height="17" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true" focusable="false"><path d="M320 96L192 96 144.6 24.9C137.5 14.2 145.1 0 157.9 0L354.1 0c12.8 0 20.4 14.2 13.3 24.9L320 96zM192 128l128 0c3.8 2.5 8.1 5.3 13 8.4C389.7 172.7 512 250.9 512 416c0 53-43 96-96 96L96 512c-53 0-96-43-96-96C0 250.9 122.3 172.7 179 136.4c4.8-3.1 9.2-5.9 13-8.4zm84 88c0-11-9-20-20-20s-20 9-20 20l0 14c-7.6 1.7-15.2 4.4-22.2 8.5c-13.9 8.3-25.9 22.8-25.8 43.9c.1 20.3 12 33.1 24.7 40.7c11 6.6 24.7 10.8 35.6 14l1.7 .5c12.6 3.8 21.8 6.8 28 10.7c5.1 3.2 5.8 5.4 5.9 8.2c.1 5-1.8 8-5.9 10.5c-5 3.1-12.9 5-21.4 4.7c-11.1-.4-21.5-3.9-35.1-8.5c-2.3-.8-4.7-1.6-7.2-2.4c-10.5-3.5-21.8 2.2-25.3 12.6s2.2 21.8 12.6 25.3c1.9 .6 4 1.3 6.1 2.1c8.3 2.9 17.9 6.2 28.2 8.4l0 14.6c0 11 9 20 20 20s20-9 20-20l0-13.8c8-1.7 16-4.5 23.2-9c14.3-8.9 25.1-24.1 24.8-45c-.3-20.3-11.7-33.4-24.6-41.6c-11.5-7.2-25.9-11.6-37.1-15l-.7-.2c-12.8-3.9-21.9-6.7-28.3-10.5c-5.2-3.1-5.3-4.9-5.3-6.7c0-3.7 1.4-6.5 6.2-9.3c5.4-3.2 13.6-5.1 21.5-5c9.6 .1 20.2 2.2 31.2 5.2c10.7 2.8 21.6-3.5 24.5-14.2s-3.5-21.6-14.2-24.5c-6.5-1.7-13.7-3.4-21.1-4.7l0-13.9z"></path></svg>
-              <span>${esc(formatTemplatePrice(template.priceIdr))}</span>
-              <span aria-hidden="true">→</span>
-              <span>${esc(formatTemplatePrice(templateCommission(template)))}</span>
-            </div>
             </div>
             <div class="library-card-actions">
               <button
@@ -11543,6 +11516,30 @@ ${end}`;
             return;
           }
 
+          const deleteField =
+            schemaSections()
+              .flatMap(
+                section =>
+                  section.fields || []
+              )
+              .find(
+                field =>
+                  field.type === "repeater" &&
+                  field.path === remove.dataset.repeatDelete
+              );
+
+          const minItems =
+            Number.isFinite(deleteField?.min)
+              ? deleteField.min
+              : 0;
+
+          if (array.length <= minItems) {
+            flushContentCommit(
+              "Minimal " + minItems + " item"
+            );
+            return;
+          }
+
           array.splice(
             Number(
               remove.dataset.repeatIndex
@@ -11651,6 +11648,18 @@ ${end}`;
             card.dataset.sectionCard;
 
           if (willOpen) {
+            /*
+             * Accordion: membuka satu section otomatis menutup section lain
+             * yang masih terbuka supaya daftar tidak menumpuk.
+             */
+            $$("[data-section-card].open", root).forEach(other => {
+              if (other === card) return;
+              other.classList.remove("open");
+              const otherId = other.dataset.sectionCard;
+              if (otherId) state.contentOpenSections.delete(otherId);
+              touchContentSection(other);
+            });
+            pruneClosedContentSections(root);
             state.contentOpenSections.add(id);
             ensureContentSectionLoaded(card);
           } else {
@@ -14129,48 +14138,6 @@ input[data-auto-wedding-id="1"]:focus {
   color: var(--muted);
   font-size: 11px;
   line-height: 16px;
-}
-
-#${ID} .library-commission {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 16px;
-}
-
-#${ID} .library-commission svg {
-  width: 17px;
-  height: 17px;
-  flex: 0 0 17px;
-  color: var(--muted);
-  vertical-align: middle;
-}
-
-#${ID} .library-card.is-active .library-commission > svg {
-  color: var(--p);
-}
-
-#${ID} .library-commission > svg:nth-of-type(2) {
-  display: none;
-}
-
-#${ID} .library-commission > svg:nth-of-type(1) {
-  order: 1;
-}
-
-#${ID} .library-commission > span:nth-of-type(1) {
-  order: 2;
-}
-
-#${ID} .library-commission > span:nth-of-type(2) {
-  order: 3;
-}
-
-#${ID} .library-commission > span:nth-of-type(3) {
-  order: 4;
 }
 
 #${ID} .library-import-button {
