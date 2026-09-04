@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Scalev Visual Editor - Schema First
 // @namespace    wedding-scalev
-// @version      0.26.1
+// @version      0.26.2
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @description  Schema-first Scalev Visual Editor: Template Library, 20-section accordion, realtime preview.
@@ -19,7 +19,7 @@
   "use strict";
 
   const ID = "sve77";
-  const VERSION = "0.26.1";
+  const VERSION = "0.26.2";
   const SVE_LITE_MODE = false;
 
   /*
@@ -5646,7 +5646,8 @@
               </strong>
 
               ${
-                field.canDelete !== false
+                field.canDelete !== false &&
+                items.length > (Number.isFinite(field.min) ? field.min : 0)
                   ? `
                     <button
                       type="button"
@@ -11541,6 +11542,30 @@ ${end}`;
             );
 
           if (!Array.isArray(array)) {
+            return;
+          }
+
+          const deleteField =
+            schemaSections()
+              .flatMap(
+                section =>
+                  section.fields || []
+              )
+              .find(
+                field =>
+                  field.type === "repeater" &&
+                  field.path === remove.dataset.repeatDelete
+              );
+
+          const minItems =
+            Number.isFinite(deleteField?.min)
+              ? deleteField.min
+              : 0;
+
+          if (array.length <= minItems) {
+            flushContentCommit(
+              "Minimal " + minItems + " item"
+            );
             return;
           }
 
