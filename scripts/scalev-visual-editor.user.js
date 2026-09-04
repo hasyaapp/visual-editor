@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Scalev Visual Editor - Schema First
 // @namespace    wedding-scalev
-// @version      0.25.3
+// @version      0.26.1
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @description  Schema-first Scalev Visual Editor: Template Library, 20-section accordion, realtime preview.
@@ -19,7 +19,7 @@
   "use strict";
 
   const ID = "sve77";
-  const VERSION = "0.25.3";
+  const VERSION = "0.26.1";
   const SVE_LITE_MODE = false;
 
   /*
@@ -301,6 +301,7 @@
     "date",
     "time",
     "datetime",
+    "color",
     "select",
     "boolean",
     "image",
@@ -11651,6 +11652,18 @@ ${end}`;
             card.dataset.sectionCard;
 
           if (willOpen) {
+            /*
+             * Accordion: membuka satu section otomatis menutup section lain
+             * yang masih terbuka supaya daftar tidak menumpuk.
+             */
+            $$("[data-section-card].open", root).forEach(other => {
+              if (other === card) return;
+              other.classList.remove("open");
+              const otherId = other.dataset.sectionCard;
+              if (otherId) state.contentOpenSections.delete(otherId);
+              touchContentSection(other);
+            });
+            pruneClosedContentSections(root);
             state.contentOpenSections.add(id);
             ensureContentSectionLoaded(card);
           } else {

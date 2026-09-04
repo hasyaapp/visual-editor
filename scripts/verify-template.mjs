@@ -9,7 +9,7 @@ const CANONICAL = [
 ];
 
 const FIELD_TYPES = new Set([
-  "text","textarea","url","email","tel","number","date","time","datetime",
+  "text","textarea","url","email","tel","number","date","time","datetime","color",
   "select","boolean","image","repeater","repeater-image"
 ]);
 
