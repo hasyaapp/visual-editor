@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Scalev Visual Editor - Schema First
 // @namespace    wedding-scalev
-// @version      0.26.5
+// @version      0.26.6
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @description  Schema-first Scalev Visual Editor: Template Library, 20-section accordion, realtime preview.
@@ -19,7 +19,7 @@
   "use strict";
 
   const ID = "sve77";
-  const VERSION = "0.26.5";
+  const VERSION = "0.26.6";
   const SVE_LITE_MODE = false;
 
   /*
@@ -205,9 +205,8 @@
     ["Button Secondary", "Text", "--sve-button-secondary-text", "#332a24"]
   ];
 
-  /* Skala tema islami-syari butuh sampai Display 96px / tanggal 128px. */
   const SCALEV_FONT_SIZES = Array.from(
-    { length: 75 },
+    { length: 31 },
     (_, index) => (12 + index * 2) + "px"
   );
 
@@ -238,12 +237,12 @@
   ];
 
   const TYPOGRAPHY_ROLES = [
-    { key: "display", label: "Display / Hero (nama & angka besar)", size: "96px", weight: "700", lineheight: "1.0" },
-    { key: "heading", label: "Heading (judul section)", size: "42px", weight: "700", lineheight: "1.2" },
-    { key: "subheading", label: "Subheading / Quote (ayat & brand)", size: "48px", weight: "700", lineheight: "1.3" },
-    { key: "body", label: "Body (isi & form)", size: "18px", weight: "400", lineheight: "1.5" },
-    { key: "small", label: "Small / Meta / Label (keterangan)", size: "12px", weight: "700", lineheight: "1.4" },
-    { key: "button", label: "Button / CTA", size: "18px", weight: "700", lineheight: "1.2" }
+    { key: "display", label: "Display / Hero", size: "56px", weight: "400", lineheight: "1.0" },
+    { key: "heading", label: "Heading", size: "40px", weight: "400", lineheight: "1.2" },
+    { key: "subheading", label: "Subheading / Card Title", size: "26px", weight: "500", lineheight: "1.3" },
+    { key: "body", label: "Body", size: "16px", weight: "400", lineheight: "1.5" },
+    { key: "small", label: "Small / Meta / Label", size: "12px", weight: "500", lineheight: "1.4" },
+    { key: "button", label: "Button / CTA", size: "14px", weight: "700", lineheight: "1.2" }
   ];
 
   const STYLE_FIELDS = TYPOGRAPHY_ROLES.flatMap(role => [
