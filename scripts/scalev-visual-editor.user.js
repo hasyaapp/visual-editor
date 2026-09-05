@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Scalev Visual Editor - Schema First
 // @namespace    wedding-scalev
-// @version      0.26.6
+// @version      0.26.7
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-visual-editor.user.js
 // @description  Schema-first Scalev Visual Editor: Template Library, 20-section accordion, realtime preview.
@@ -19,7 +19,7 @@
   "use strict";
 
   const ID = "sve77";
-  const VERSION = "0.26.6";
+  const VERSION = "0.26.7";
   const SVE_LITE_MODE = false;
 
   /*
@@ -5916,53 +5916,77 @@
     state.contentPrewarmHandle = runWhenIdle(warm, 1200);
   }
 
+  /*
+   * Elementor-style category rendering.
+   * Setiap field boleh punya property "category". Field-field yang
+   * berurutan dengan kategori sama dirender di bawah satu header
+   * kategori (.sv-category). Field tanpa kategori tetap tampil apa
+   * adanya, jadi skema lama tidak perlu dirombak.
+   */
   function renderContentSectionBody(section) {
     const fields =
       contentFieldsForSection(
         section
       );
 
-    return fields
-      .map(field => {
-        if (
-          field.type ===
-          "repeater"
-        ) {
-          return `
-            <div class="group">
-              <div class="group-title">
-                ${esc(
-                  field.label ||
-                  "Daftar"
-                )}
-              </div>
+    const chunks = [];
+    let previousCategory = "";
 
+    const categoryHeader = category => {
+      const raw = String(category || "").trim();
+      if (!raw || raw === previousCategory) return "";
+      previousCategory = raw;
+      return `
+        <div class="sv-category" data-sv-category="${esc(raw)}">
+          ${esc(raw)}
+        </div>
+      `;
+    };
+
+    fields.forEach(field => {
+      const category = String(field.category || "").trim();
+      if (!category) previousCategory = "";
+
+      if (field.type === "repeater") {
+        const groupTitle = !category
+          ? `
+            <div class="group-title">
+              ${esc(field.label || "Daftar")}
+            </div>
+          `
+          : "";
+
+        chunks.push(
+          categoryHeader(category) +
+          `
+            <div class="group">
+              ${groupTitle}
               <div class="group-body">
                 ${renderRepeater(field)}
               </div>
             </div>
-          `;
-        }
+          `
+        );
+        return;
+      }
 
-        return `
+      chunks.push(
+        categoryHeader(category) +
+        `
           <div class="group">
             <div class="group-title">
-              ${esc(
-                field.label ||
-                field.path
-              )}
+              ${esc(field.label || field.path)}
             </div>
 
             <div class="group-body">
-              ${simpleField({
-                ...field,
-                hideVisibleLabel: true
-              })}
+              ${simpleField({ ...field, hideVisibleLabel: true })}
             </div>
           </div>
-        `;
-      })
-      .join("");
+        `
+      );
+    });
+
+    return chunks.join("");
   }
 
   function contentSectionById(id) {
@@ -13450,6 +13474,31 @@ html.sve77-panel-open
   font-size: 11px;
 
   font-weight: 700;
+}
+
+#${ID} .sv-category {
+  padding:
+    14px 10px 4px;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.09em;
+
+  text-transform: uppercase;
+
+  color: var(--muted);
+
+  line-height: 1.3;
+}
+
+#${ID} .sv-category:first-child {
+  padding-top: 8px;
+}
+
+#${ID} .sv-category + .group {
+  margin-top: 0;
 }
 
 #${ID} .typography-summary {
