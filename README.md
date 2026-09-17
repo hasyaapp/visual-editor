@@ -19,8 +19,8 @@ Rilis 0.26.10 diuji melalui Tampermonkey 5.5.0 di Brave/Chromium 152 dengan
 CodeMirror 5.65.21. Sembilan pemeriksaan mencakup pemasangan, edit source,
 preview, cek update, Library, dan API penyimpanan/PIN di bawah CSP ketat.
 Halaman Scalev dan respons layanan memakai fixture lokal; ekstensi, CodeMirror,
-dan API `GM_*` yang digunakan adalah implementasi asli. Lihat
-[bukti pengujian](audits/sve-0.26.10-tampermonkey.md).
+dan API `GM_*` yang digunakan adalah implementasi asli. Bukti pengujian
+disimpan lokal di repositori kerja, tidak dipublikasikan.
 
 ## Inspect di versi 0.27.0
 
@@ -136,4 +136,4 @@ node scripts/benchmark-sve.mjs /path/to/userscript-sebelum-perbaikan.js
 ```
 
 Hasil pengujian dan benchmark ditulis ke `test-results/`. Catatan perbaikan
-v0.26.9 tersedia di [laporan verifikasi](audits/sve-0.26.9-fixes.md).
+per versi disimpan lokal di repositori kerja.
