@@ -1,0 +1,999 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Dashboard Founder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js" defer></script>
+<style>
+:root { color-scheme: light; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: #fdfdfd; }
+#svDash {
+  --neutral-0: #fff;
+  --neutral-25: #fdfdfd;
+  --neutral-100: #f5f5f5;
+  --neutral-200: #e5e5e5;
+  --neutral-300: #d4d4d4;
+  --neutral-500: #707070;
+  --neutral-700: #404040;
+  --neutral-900: #171717;
+  --brand-50: #e6ffed;
+  --brand-200: #00d66f;
+  --brand-600: #006635;
+  --brand-900: #011e0f;
+  --ink: var(--neutral-900);
+  --muted: var(--neutral-500);
+  --paper: var(--neutral-0);
+  --line: rgba(0, 0, 0, .08);
+  --danger: #c0123c;
+  --success: var(--brand-600);
+  --radius: 12px;
+  --radius-group: 14px;
+  --radius-button: 9999px;
+  --sidebar-width: 256px;
+  --detail-width: 400px;
+  --pane-header-height: 60px;
+  --hairline: .5px;
+  --font-body: Inter, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --ease: cubic-bezier(.2, 1, .25, 1);
+  --button-sheen: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0));
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+  --shadow-menu: 0 4px 16px rgba(0,0,0,.08);
+  min-height: 100svh;
+  background: var(--neutral-25);
+  color: var(--ink);
+  font: 420 14px/20px var(--font-body);
+  letter-spacing: -.21px;
+  -webkit-font-smoothing: antialiased;
+  font-synthesis-weight: none;
+}
+#svDash *, #svDash *::before, #svDash *::after { box-sizing: border-box; }
+#svDash [hidden] { display: none !important; }
+#svDash :is(button,input,select,textarea) { font: inherit; letter-spacing: inherit; }
+#svDash button { cursor: pointer; }
+#svDash :is(a,button,input,select,textarea):focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+#svDash :is(h1,h2,h3,p) { margin: 0; }
+#svDash :is(h1,h2,h3) { font-weight: 600; letter-spacing: inherit; text-wrap: pretty; }
+#svDash :is(h1,h2)[tabindex="-1"]:focus { outline: none; }
+#svDash h1 { font-size: 24px; line-height: 32px; }
+#svDash h2 { font-size: 20px; line-height: 28px; }
+#svDash h3 { font-size: 16px; line-height: 24px; }
+#svDash a { color: inherit; text-decoration: none; }
+#svDash button:disabled { opacity: .5; cursor: default; }
+#svDash svg, #svDash [data-lucide] { display: inline-block; width: 20px; height: 20px; flex: none; vertical-align: middle; pointer-events: none; stroke-width: 2; }
+.skip-link { position: fixed; left: 12px; top: 12px; padding: 12px 16px; color: white !important; background: var(--ink); border-radius: 8px; z-index: 40; transform: translateY(-160%); }
+.skip-link:focus { transform: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.brand { display: inline-flex; align-items: center; gap: 7px; font-size: 21px; font-weight: 650; line-height: 24px; letter-spacing: -.7px; }
+.brand-symbol { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--brand-200); color: var(--brand-900); }
+#svDash .brand-symbol svg { width: 15px; height: 15px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px 24px; border: 0; border-radius: var(--radius-button); color: var(--ink); background: var(--button-sheen), var(--neutral-100); font-weight: 500 !important; line-height: 16px; text-align: center; transition: background .15s var(--ease), transform .3s var(--ease); }
+.btn-inner { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn.primary { color: white; background: var(--button-sheen), var(--ink); box-shadow: var(--shadow-xs); }
+.btn.danger { color: var(--danger); background: #fef4f6; }
+.btn.ghost { background: transparent; }
+.btn.small { min-height: 36px; padding: 8px 16px; font-size: 14px; line-height: 16px; }
+#svDash .btn svg { width: 16px; height: 16px; }
+.icon-btn { width: 36px; height: 36px; min-width: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 50%; background: transparent; color: var(--ink); transition: background .15s var(--ease), transform .3s var(--ease); }
+#svDash .icon-btn svg { width: 16px; height: 16px; }
+.btn:active, .icon-btn:active, .nav-link:active { transform: scale(.95); }
+@media (hover:hover) {
+  .btn:hover { background: rgba(0,0,0,.04); }
+  .btn.primary:hover { background: var(--button-sheen), linear-gradient(rgba(255,255,255,.08),rgba(255,255,255,.08)),var(--ink); }
+  .btn.danger:hover { background: #fde9ee; }
+  .icon-btn:hover, .profile-button:hover { background: rgba(0,0,0,.02); }
+  .nav-link:hover { background: rgba(0,0,0,.02); }
+  .guest-row:hover { background: var(--neutral-100); }
+}
+#authView { min-height: 100svh; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 64px; }
+.auth-header { width: 100%; display: flex; align-items: center; justify-content: space-between; }
+.auth-header .brand { line-height: 20px; }
+.auth-header .brand-symbol { width: 20px; height: 20px; }
+.auth-header .auth-help { display: none; }
+.auth-main { flex: 1; width: 100%; max-width: 400px; display: flex; align-items: center; }
+.gate { width: 100%; text-align: center; }
+.gate-heading { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 24px; }
+.auth-icon { width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid var(--neutral-200); border-radius: 16px; margin-bottom: 12px; background: var(--paper); }
+.gate .intro { font-size: 16px; line-height: 24px; color: var(--muted); text-wrap: pretty; }
+.field { display: grid; gap: 8px; text-align: left; margin-bottom: 24px; }
+.field label { font-weight: 500; color: var(--neutral-700); }
+.field input { width: 100%; min-height: 52px; border: 0; border-radius: var(--radius); padding: 16px; background: var(--neutral-100); color: var(--ink); font-size: 16px !important; }
+.field input::placeholder { color: var(--muted); }
+#svDash .pin-wrap { position: relative; height: 56px; width: 100%; }
+#svDash .pin-boxes { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); width: 100%; gap: 8px; height: 100%; pointer-events: none; }
+#svDash .pin-boxes span { display: grid; place-items: center; border-radius: var(--radius); background: var(--neutral-100); font-size: 24px; font-weight: 600; transition: box-shadow 80ms ease-out; }
+#svDash .pin-wrap:focus-within .pin-boxes span.is-current { background: var(--paper); box-shadow: inset 0 0 0 1.5px var(--ink); }
+#svDash .pin-wrap:has(input[aria-invalid="true"]) .pin-boxes span { box-shadow: inset 0 0 0 1.5px var(--danger); }
+#svDash .pin-wrap input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .01; cursor: text; padding: 0 !important; }
+#svDash .pin-help { font-size: 12px; line-height: 16px; color: var(--muted); text-align: center; margin-top: 4px !important; }
+.gate .btn.primary { width: 100%; min-height: 52px; padding: 8px 32px; font-size: 16px !important; line-height: 20px; }
+.auth-footer { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; font-size: 14px; line-height: 16px; }
+.footer-links { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 16px; min-height: 20px; color: var(--muted); }
+.footer-links a:hover { text-decoration: underline; }
+.msg { font-size: 13px; line-height: 20px; color: var(--muted); overflow-wrap: anywhere; }
+.msg:empty { display: none; }
+.gate .msg { margin-top: 16px; }
+.msg[data-kind="error"] { color: var(--danger); }
+.msg[data-kind="ok"] { color: var(--success); }
+.app-shell { display: grid; grid-template-columns: var(--sidebar-width) minmax(0,1fr); min-height: 100svh; height: 100svh; padding: 8px 8px 8px 0; background: var(--neutral-100); }
+.sidebar { min-height: 0; display: flex; flex-direction: column; padding: 0 16px 16px; z-index: 10; }
+.sidebar-brand { height: var(--pane-header-height); display: flex; flex: none; align-items: center; padding: 0 12px; }
+.nav-links { display: grid; gap: 0; }
+.nav-link { display: flex; align-items: center; gap: 12px; height: 36px; padding: 8px 12px; border: 0; border-radius: 10px; background: transparent; color: var(--ink); font-weight: 500 !important; text-align: left; transition: background .15s var(--ease), transform .3s var(--ease); }
+#svDash .nav-link svg { width: 16px; height: 16px; }
+.nav-link[aria-current="page"] { background: rgba(0,0,0,.04); }
+.nav-count { margin-left: auto; color: var(--neutral-700); font-size: 12px; font-variant-numeric: tabular-nums; }
+.sidebar-footer { margin-top: auto; padding-top: 12px; position: relative; border-top: var(--hairline) solid var(--line); }
+.profile-button { display: flex; gap: 12px; align-items: center; width: 100%; padding: 8px 12px; border: 0; border-radius: 10px; color: var(--ink); background: transparent; text-align: left; }
+.avatar { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--neutral-100); color: var(--neutral-700); font-size: 12px; font-weight: 500; text-transform: uppercase; }
+.avatar.brand-avatar { background: var(--brand-200); color: var(--brand-900); font-size: 16px; }
+.profile-info { min-width: 0; flex: 1; }
+.profile-name { font-weight: 500; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-caption { display: block; color: var(--muted); font-size: 12px; line-height: 16px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-button:hover .profile-caption { color: var(--neutral-700); }
+#svDash .profile-button>svg { width: 16px; height: 16px; }
+.profile-menu { position: absolute; bottom: 68px; left: 0; right: 0; background: var(--paper); padding: 4px; border: var(--hairline) solid rgba(0,0,0,.12); border-radius: 12px; box-shadow: var(--shadow-menu); z-index: 12; }
+.profile-menu :is(button,a) { display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); text-align: left; min-height: 36px; }
+.profile-menu :is(button,a):hover { background: var(--neutral-100); }
+.profile-menu .menu-danger { color: var(--danger); }
+.mobile-header, .mobile-account { display: none; }
+.workspace { min-width: 0; min-height: 0; display: grid; grid-template-columns: minmax(0,1fr) var(--detail-width); grid-template-rows: var(--pane-header-height) minmax(0,1fr); overflow: hidden; background: var(--neutral-25); border: var(--hairline) solid rgba(0,0,0,.12); border-radius: var(--radius-group); box-shadow: var(--shadow-xs), inset 0 0 0 1px white; }
+.pane-header { grid-column: 1; grid-row: 1; min-height: var(--pane-header-height); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: var(--hairline) solid var(--line); }
+#svDash .pane-header h1 { font-size: 20px; line-height: 28px; }
+.head-actions { display: flex; align-items: center; gap: 4px; }
+.records-layout { display: contents; }
+.list-pane { grid-column: 1; grid-row: 2; min-height: 0; min-width: 0; display: flex; flex-direction: column; overflow-y: auto; scrollbar-width: thin; }
+.list-toolbar { padding: 16px 24px 8px; }
+.list-context { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; color: var(--muted); font-size: 12px; }
+.list-context strong { font-weight: 500; color: var(--ink); white-space: nowrap; }
+.search-wrap { position: relative; margin-bottom: 12px; }
+#svDash .search-wrap>svg { position: absolute; left: 12px; top: 12px; width: 16px; height: 16px; color: var(--muted); }
+.filter-search { display: block; width: 100%; min-height: 40px; border: 0; border-radius: var(--radius); background: var(--neutral-100); color: var(--ink); padding: 10px 36px; }
+.filter-search::placeholder { color: var(--muted); }
+.filter-pills { display: flex; gap: 4px; flex-wrap: wrap; }
+.fbtn { min-height: 28px; padding: 4px 12px; border: 0; border-radius: var(--radius-button); color: var(--muted); background: transparent; font-size: 12px !important; line-height: 20px; white-space: nowrap; }
+.fbtn[aria-pressed="true"] { background: var(--neutral-100); color: var(--ink); font-weight: 500 !important; }
+.list { padding: 0 12px; min-width: 0; }
+.list-group-label { padding: 10px 12px; color: var(--muted); font-size: 12px; line-height: 16px; font-weight: 500; }
+.guest-row { display: grid; grid-template-columns: 24px minmax(0,8fr) minmax(0,8fr) 72px minmax(88px,3fr); gap: 12px; width: 100%; min-height: 40px; padding: 8px 12px; border: 0; border-radius: 10px; background: transparent; color: var(--ink); font-size: 14px; text-align: left; align-items: center; position: relative; transition: background .15s var(--ease); }
+.guest-row+.guest-row::before { content: ""; position: absolute; top: 0; left: 48px; right: 12px; height: var(--hairline); background: var(--line); }
+.guest-row[aria-current="true"] { background: var(--neutral-100); }
+.guest-row[aria-current="true"]::before, .guest-row[aria-current="true"]+.guest-row::before, .guest-row:hover::before, .guest-row:hover+.guest-row::before { background: transparent; }
+.guest-row>.avatar { grid-column: 1; grid-row: 1; width: 24px; height: 24px; border-radius: 6px; font-size: 10px; }
+.guest-summary, .guest-trailing { display: contents; }
+.guest-name { grid-column: 2; grid-row: 1; font-weight: 420; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.guest-caption { grid-column: 3; grid-row: 1; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.guest-date { grid-column: 4; grid-row: 1; color: var(--muted); white-space: nowrap; }
+.chip { display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; grid-column: 5; grid-row: 1; font-size: 12px; line-height: 20px; color: var(--muted); white-space: nowrap; }
+#svDash .chip svg { width: 12px; height: 12px; }
+.chip.hadir { color: var(--success); }
+.chip.tidak { color: var(--neutral-700); }
+.empty { width: 100%; max-width: 400px; padding: 64px 24px; text-align: center; margin: auto; color: var(--muted); }
+.empty-icon { display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid var(--neutral-200); border-radius: 16px; margin: 0 auto 20px; background: var(--paper); }
+.empty strong { display: block; color: var(--ink); font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.empty p { font-size: 14px; line-height: 20px; }
+.empty .btn { margin-top: 20px; }
+.pagination-bar { padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; color: var(--muted); font-size: 12px; }
+.pagination-info { width: 100%; }
+.pagination-nav, .page-numbers, .pagination-size, .size-buttons { display: flex; align-items: center; gap: 4px; }
+.pnum-btn, .size-btn { border: 0; border-radius: 50%; background: transparent; color: var(--muted); padding: 4px 8px; min-width: 32px; height: 32px; font-size: 12px !important; }
+.pnum-btn.active, .size-btn.active { background: var(--neutral-100); color: var(--ink); font-weight: 600 !important; }
+.pnum-btn:hover, .size-btn:hover { background: var(--neutral-100); }
+.size-btn[data-setsize="all"] { border-radius: var(--radius-button); }
+.pnum-ellipsis { padding: 0 2px; }
+.pnav-btn.btn.small { padding: 0; width: 32px; min-height: 32px; background: transparent; }
+.pnav-btn .btn-inner>span { display: none; }
+.page-indicator-mobile { display: none; }
+.pagination-size { margin-left: auto; }
+.size-label { margin-right: 4px; }
+.detail-pane { grid-column: 2; grid-row: 1 / 3; min-height: 0; min-width: 0; border-left: var(--hairline) solid var(--line); background: var(--neutral-25); overflow-y: auto; scrollbar-width: thin; }
+.detail-header { display: flex; height: var(--pane-header-height); align-items: center; gap: 8px; padding-inline: 24px; border-bottom: var(--hairline) solid var(--line); color: var(--muted); font-size: 14px; }
+.detail-header>span { visibility: hidden; }
+.detail-back { display: none; }
+#guestDetail { padding: 36px 24px 24px; }
+.detail-heading { text-align: center; padding-bottom: 24px; }
+.detail-heading .avatar { width: 56px; height: 56px; font-size: 20px; margin-bottom: 16px; border-radius: 16px; }
+.detail-heading h2 { overflow-wrap: anywhere; }
+.detail-heading .detail-subtitle { color: var(--muted); margin-top: 4px; overflow-wrap: anywhere; }
+.detail-heading .detail-value { font-size: 24px; line-height: 32px; font-weight: 600; margin-top: 8px; }
+.detail-value small { font-size: 14px; font-weight: 420; color: var(--muted); }
+.detail-group { margin: 0; padding: 4px; border-radius: var(--radius-group); background: var(--neutral-100); overflow: hidden; }
+.detail-line { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 36px; padding: 8px 12px; font-size: 14px; line-height: 20px; border-radius: 12px; }
+.detail-line dt { color: var(--ink); }
+.detail-line dd { margin: 0; text-align: right; color: var(--muted); max-width: 60%; overflow-wrap: anywhere; }
+#svDash .detail-section-title { font-size: 14px; line-height: 20px; font-weight: 500; margin: 24px 0 8px; }
+.message-card { background: var(--neutral-100); border-radius: var(--radius-group); padding: 16px; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; white-space: pre-wrap; }
+.message-card.reply { margin-top: 8px; background: var(--brand-50); }
+.reply-label { display: block; color: var(--success); font-size: 12px; font-weight: 500; margin-bottom: 8px; }
+#guestDetail > .message-card + .msg { margin: 12px 4px 0; }
+.detail-actions { display: grid; gap: 8px; margin-top: 16px; }
+.detail-action { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; border: 0; border-radius: var(--radius); background: var(--neutral-100); padding: 12px 16px; color: var(--ink); text-align: left; min-height: 44px; }
+.detail-action>span { display: flex; align-items: center; gap: 12px; min-width: 0; }
+#svDash .detail-action>span>svg { width: 16px; height: 16px; }
+#svDash .detail-action>svg { width: 12px; height: 12px; color: var(--muted); }
+.detail-action.danger { color: var(--danger); background: transparent; }
+.detail-action:hover { background: rgba(0,0,0,.04); }
+.row-reply-form { margin: 24px 0 16px; display: grid; gap: 12px; }
+.row-reply-label { font-size: 14px; font-weight: 500; }
+.row-reply-textarea { width: 100%; min-height: 112px; padding: 16px; border: 0; border-radius: var(--radius); background: var(--neutral-100); color: var(--ink); line-height: 22px; resize: vertical; }
+.row-reply-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.detail-empty { padding-top: 64px; }
+.panel-message { position: fixed; bottom: 24px; left: calc(var(--sidebar-width) + 24px); max-width: min(460px,calc(100vw - var(--sidebar-width) - 48px)); padding: 12px 16px; border: var(--hairline) solid rgba(0,0,0,.12); border-radius: var(--radius); background: var(--paper); box-shadow: var(--shadow-menu); z-index: 25; }
+.workspace:has(.records-layout[hidden]) .pane-header { grid-column: 1 / -1; }
+.home-view, .settings-view { grid-column: 1 / -1; grid-row: 2; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+.home-view { width: 100%; padding: 40px max(24px,calc((100% - 800px)/2)); }
+.home-heading { margin-bottom: 32px; }
+#svDash .home-heading h2 { font-size: 28px; line-height: 36px; letter-spacing: -.588px; }
+.home-intro { color: var(--muted); margin-top: 4px !important; font-size: 16px; line-height: 24px; }
+.home-summary { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 24px; margin-bottom: 32px; }
+.attendance-card { padding: 24px; border-radius: 16px; background: var(--neutral-100); display: flex; flex-direction: column; align-items: flex-start; }
+.attendance-card .stat-label { font-size: 14px; }
+.attendance-card .stat-value { font-size: 40px; line-height: 48px; letter-spacing: -.8px; margin-top: 8px; }
+.attendance-card .stat-note { margin: 4px 0 16px; }
+.attendance-card .btn { background: var(--paper); margin-top: auto; }
+.stats { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px 16px; padding: 8px 0; }
+.stat { min-width: 0; }
+.stat-label, .stat-note { color: var(--muted); font-size: 12px; line-height: 16px; }
+.stat-value { font-size: 24px; line-height: 32px; font-weight: 600; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.stat-note { margin-top: 4px; }
+.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
+.quick-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin: 0 0 32px; }
+.quick-action { border-radius: var(--radius-group); padding: 16px; display: flex; align-items: center; gap: 12px; background: var(--neutral-100); }
+.quick-action strong { display: block; font-weight: 500; }
+.quick-action small { display: block; color: var(--muted); font-size: 12px; line-height: 16px; margin-top: 4px; }
+.quick-action:hover { background: var(--neutral-200); }
+.quick-action:hover small { color: var(--neutral-700); }
+.settings-view { width: 100%; padding: 40px max(24px,calc((100% - 480px)/2)); }
+.settings-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 40px; padding-top: 16px; border-top: var(--hairline) solid var(--line); color: var(--muted); font-size: 12px; }
+.settings-meta .footer-links { justify-content: flex-start; gap: 12px; min-height: 0; }
+#confirmDialog { width: min(400px,calc(100vw - 32px)); padding: 24px; border: var(--hairline) solid rgba(0,0,0,.12); border-radius: 16px; background: var(--paper); color: var(--ink); box-shadow: 0 15px 35px rgba(0,0,0,.12); }
+#confirmDialog::backdrop { background: rgba(23,23,23,.2); }
+#confirmDialog p { margin-top: 8px; font-size: 14px; line-height: 20px; color: var(--muted); }
+.confirm-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
+@media (min-width:801px) and (max-width:1200px) {
+  .guest-row { grid-template-columns: 24px minmax(0,1fr) 80px minmax(88px,.6fr); }
+  .guest-caption { display: none; }
+  .guest-date { grid-column: 3; }
+  .chip { grid-column: 4; }
+}
+@media (min-width:801px) and (max-width:1100px) {
+  .workspace { grid-template-columns: minmax(0,1fr); }
+  .detail-pane { display: none; }
+  .records-layout.detail-open .list-pane { display: none; }
+  .records-layout.detail-open .detail-pane { display: block; grid-column: 1; grid-row: 2; border-left: 0; }
+  .detail-header { border-bottom: 0; }
+  .detail-header>span { visibility: visible; }
+  .detail-back { display: inline-flex; }
+  #guestDetail { max-width: 448px; margin: auto; padding-top: 16px; }
+}
+@media (max-width:800px) {
+  #authView { padding: 24px; gap: 32px; }
+  .auth-footer { gap: 12px; }
+  .auth-footer .btn.small { min-height: 36px; }
+  .footer-links { gap: 12px; font-size: 12px; }
+  .footer-links a { display: inline-flex; align-items: center; min-height: 44px; }
+  .app-shell { display: block; min-height: 100svh; height: auto; padding: 0 0 calc(76px + env(safe-area-inset-bottom)); background: var(--neutral-25); }
+  .sidebar { position: fixed; inset: auto 0 0; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); border-top: var(--hairline) solid var(--line); background: var(--neutral-25); }
+  .sidebar-brand, .sidebar-footer { display: none; }
+  .nav-links { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 4px; }
+  .nav-link { flex-direction: column; gap: 4px; height: 56px; justify-content: center; padding: 8px 2px; font-size: 12px !important; line-height: 16px; }
+  #svDash .nav-link svg { width: 20px; height: 20px; }
+  .nav-link[aria-current="page"] { background: var(--neutral-100); }
+  .nav-count { display: none; }
+  .workspace { display: block; border: 0; border-radius: 0; box-shadow: none; overflow: visible; }
+  .mobile-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px 0; min-height: 56px; }
+  .mobile-header .brand { font-size: 20px; }
+  .mobile-account { display: inline-flex; border: 0; background: transparent; padding: 6px; }
+  .pane-header { position: relative; padding: 8px 20px; min-height: 60px; border-bottom: 0; }
+  #svDash .pane-header h1 { font-size: 18px; line-height: 28px; }
+  .pane-header .head-actions { gap: 4px; }
+  .pane-header .btn { min-height: 44px; }
+  .head-actions .btn-text-desktop { display: none; }
+  .records-layout { display: block; min-height: calc(100svh - 196px); }
+  .list-pane { overflow: visible; }
+  .list-toolbar { padding: 8px 20px; }
+  .list-context { margin-bottom: 12px; }
+  .filter-search { min-height: 44px; font-size: 16px !important; }
+  #svDash .search-wrap>svg { top: 14px; }
+  .filter-pills { flex-wrap: nowrap; gap: 4px; justify-content: space-between; }
+  .fbtn { min-height: 44px; min-width: 44px; padding: 8px; font-size: 12px !important; }
+  .list { padding: 0 20px; }
+  .list-group-label { padding: 16px 0 8px; color: var(--ink); font-size: 20px; line-height: 28px; font-weight: 600; }
+  .guest-row { grid-template-columns: 44px minmax(0,1fr) minmax(0,max-content); grid-template-rows: 20px 20px; gap: 4px 16px; min-height: 60px; padding: 8px 0; border-radius: 12px; font-size: 16px; }
+  .guest-row>.avatar { grid-row: 1 / 3; width: 44px; height: 44px; border-radius: 12px; font-size: 14px; }
+  .guest-row+.guest-row::before { display: none; }
+  .guest-row[aria-current="true"] { background: transparent; }
+  .guest-name { grid-column: 2; grid-row: 1; font-weight: 500; }
+  .guest-caption { display: none; }
+  .guest-date { grid-column: 2; grid-row: 2; font-size: 14px; }
+  .chip { grid-column: 3; grid-row: 1 / 3; justify-self: end; font-size: 12px; max-width: 116px; }
+  .pagination-bar { padding: 24px 20px; gap: 12px; }
+  .size-btn, .pnum-btn, .pnav-btn.btn.small { min-width: 44px; min-height: 44px; height: 44px; }
+  .page-numbers { display: none; }
+  .page-indicator-mobile { display: inline-block; margin-inline: 6px; }
+  .pagination-size { width: 100%; justify-content: space-between; }
+  .detail-pane { display: none; border-left: 0; overflow: visible; }
+  .records-layout.detail-open .list-pane { display: none; }
+  .records-layout.detail-open .detail-pane { display: block; }
+  .detail-header { padding: 0 20px; border-bottom: 0; height: 52px; }
+  .detail-header>span { visibility: visible; }
+  .detail-back { display: inline-flex; width: 44px; height: 44px; }
+  #guestDetail { max-width: 448px; padding: 16px 20px 24px; margin: auto; }
+  .detail-heading { padding-bottom: 24px; }
+  .detail-group { padding: 0; }
+  .detail-line { min-height: 52px; padding: 12px 16px; }
+  .detail-action { min-height: 52px; }
+  .row-reply-textarea { font-size: 16px !important; scroll-margin: 100px 0 120px; }
+  .home-view { padding: 16px 20px 24px; overflow: visible; }
+  #svDash .home-heading h2 { font-size: 24px; line-height: 32px; letter-spacing: -.504px; }
+  .home-heading { margin-bottom: 24px; }
+  .home-summary { grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; }
+  .stats { gap: 24px; padding: 0; }
+  .quick-actions { grid-template-columns: 1fr; margin-bottom: 24px; }
+  .settings-view { padding: 24px 20px; overflow: visible; }
+  .panel-message { left: 16px; right: 16px; bottom: calc(88px + env(safe-area-inset-bottom)); max-width: none; }
+  .settings-meta { margin-top: 32px; }
+  .btn.small { min-height: 44px; }
+  .empty { padding: 40px 24px; }
+}
+@media (max-width:360px) {
+  .filter-pills { gap: 2px; }
+  .fbtn { padding-inline: 4px; font-size: 11px !important; }
+  .guest-row { gap: 4px 12px; }
+  .chip { font-size: 11px; max-width: 104px; }
+  .pin-boxes { gap: 8px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  html { scroll-behavior: auto; }
+  #svDash *, #svDash *::before, #svDash *::after { transition: none !important; animation: none !important; }
+}
+</style>
+<style>
+.gate-note { margin-top: 24px !important; color: var(--muted); font-size: 13px; line-height: 20px; }
+.gate-note a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+.btn-spinner { display: none; width: 14px; height: 14px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; }
+#gateSubmit[aria-busy="true"] .btn-spinner { display: inline-block; }
+#gateSubmit[aria-busy="true"] .btn-login-icon { display: none; }
+.fd-shell { min-height: 100svh; display: grid; grid-template-columns: 264px minmax(0, 1fr); background: var(--neutral-25); }
+.fd-invite-pane { position: sticky; top: 0; align-self: start; height: 100svh; min-width: 0; display: flex; flex-direction: column; padding: 18px 12px 12px; border-right: 1px solid var(--line); background: var(--paper); }
+.fd-brand-row { display: flex; align-items: center; justify-content: space-between; padding: 0 8px 22px; }
+.fd-founder-mark { display: grid; place-items: center; width: 32px; height: 32px; color: var(--brand-700); }
+.fd-founder-mark svg { width: 18px; height: 18px; }
+.fd-invite-heading { display: flex; align-items: baseline; justify-content: space-between; padding: 0 8px 10px; }
+.fd-invite-heading h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.fd-invite-count, .fd-muted { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.fd-search { position: relative; margin: 0 4px 10px; }
+.fd-search svg { position: absolute; top: 50%; left: 11px; width: 16px; height: 16px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.fd-search input { box-sizing: border-box; width: 100%; min-height: 44px; padding: 8px 10px 8px 34px; border: 0; border-radius: var(--radius); background: var(--neutral-100); color: var(--ink); font-size: 14px; }
+.fd-search input:focus-visible, .fd-edit-textarea:focus-visible { outline: 2px solid var(--brand-600) !important; outline-offset: 1px; }
+.fd-invite-list { display: grid; align-content: start; gap: 2px; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+.fd-invite { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 52px; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); text-align: left; cursor: pointer; }
+.fd-invite:hover, .fd-invite[aria-current="true"] { background: var(--neutral-100); }
+.fd-invite[aria-current="true"] { box-shadow: inset 2px 0 var(--brand-600); }
+.fd-invite-text { min-width: 0; }
+.fd-invite-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-invite-name { font-size: 13px; font-weight: 550; }
+.fd-list-empty { padding: 14px 10px; color: var(--muted); font-size: 13px; }
+.fd-logout { margin-top: auto; padding: 10px 4px 0; border-top: 1px solid var(--line); }
+.fd-logout .fd-icon-button { width: 100%; justify-content: flex-start; gap: 10px; border-radius: var(--radius-button); }
+.fd-logout-label { font-size: 13px; }
+.fd-main { min-width: 0; }
+.fd-main-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 94px; padding: 16px clamp(16px, 3vw, 40px); border-bottom: 1px solid var(--line); background: var(--paper); }
+.fd-heading-copy { min-width: 0; }
+.fd-eyebrow { margin: 0 0 3px; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.fd-main-header h1 { overflow-wrap: anywhere; margin: 0; font-size: 21px; line-height: 28px; font-weight: 600; }
+.fd-subtitle { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+.fd-head-actions { display: flex; align-items: center; gap: 4px; }
+.fd-icon-button { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; text-decoration: none; }
+.fd-icon-button:hover { background: var(--neutral-100); color: var(--ink); }
+.fd-icon-button:focus-visible, .fd-invite:focus-visible, .fd-filter:focus-visible { outline: 2px solid var(--brand-600); outline-offset: 2px; }
+.fd-icon-button svg { width: 16px; height: 16px; }
+.fd-icon-button.danger { color: var(--danger); }
+.fd-icon-button.danger:hover { background: var(--neutral-100); }
+.fd-head-actions .fd-logout-mobile { display: none; }
+.fd-content { width: 100%; max-width: 1080px; box-sizing: border-box; margin: 0 auto; padding: 20px clamp(16px, 3vw, 40px) 48px; }
+.fd-status { min-height: 20px; margin: 0 0 10px !important; }
+.fd-invite-info { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 14px 16px; border: 0; border-radius: var(--radius-group); background: var(--neutral-100); }
+.fd-meta { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 7px 16px; margin: 0; font-size: 12px; }
+.fd-meta dt { color: var(--muted); }
+.fd-meta dd { min-width: 0; margin: 0; overflow-wrap: anywhere; color: var(--ink); }
+.fd-meta a { color: var(--brand-700); text-underline-offset: 2px; }
+.fd-meta a svg { width: 13px; height: 13px; vertical-align: -2px; }
+.fd-delete-invite { margin: -5px -7px 0 0; }
+.fd-section { margin-top: 24px; }
+.fd-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.fd-section-heading h2 { margin: 0; font-size: 15px; font-weight: 600; }
+.fd-section-heading span { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.fd-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.fd-comment-search { width: min(320px, 100%); margin: 0; }
+.fd-filters { display: flex; gap: 4px; }
+.fd-filter { min-height: 40px; padding: 5px 12px; border: 0; border-radius: var(--radius-button); background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; }
+.fd-filter[aria-pressed="true"] { background: var(--neutral-100); color: var(--ink); }
+.fd-select-all { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+.fd-select-all input { width: 17px; height: 17px; margin: 0; accent-color: var(--brand-700); }
+.fd-bulk { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+.fd-bulk[hidden] { display: none; }
+.fd-bulk-count { padding: 0 5px; color: var(--muted); font-size: 12px; }
+.fd-bulk .fd-icon-button { width: 44px; height: 44px; }
+.fd-record-list { display: grid; gap: 8px; }
+.fd-record { min-width: 0; padding: 13px 14px; border: 0; border-radius: var(--radius-group); background: var(--neutral-100); }
+.fd-record-top { display: flex; align-items: flex-start; gap: 10px; }
+.fd-check-target { display: grid; place-items: start center; flex: none; width: 44px; height: 44px; }
+.fd-record-check { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--brand-700); }
+.fd-record-main { flex: 1; min-width: 0; }
+.fd-record-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.fd-record-title strong { overflow-wrap: anywhere; font-size: 13px; font-weight: 600; }
+.fd-record-message { margin: 8px 0 10px; color: var(--ink); font-size: 13px; line-height: 20px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.fd-record-message.is-empty { color: var(--muted); font-style: italic; }
+.fd-record-actions { display: flex; align-items: center; gap: 2px; margin: -7px -7px 0 0; }
+.fd-record-actions .fd-icon-button { width: 44px; height: 44px; }
+.fd-record-state { flex: none; color: var(--muted); font-size: 11px; }
+.fd-record-state[data-visible="true"] { color: var(--brand-700); }
+.fd-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px 14px; margin: 0; padding-top: 9px; border-top: 1px solid var(--neutral-25); }
+.fd-record > .fd-fields:first-child { padding-top: 0; border-top: 0; }
+.fd-field { min-width: 0; }
+.fd-field dt { margin: 0 0 2px; color: var(--muted); font-size: 11px; }
+.fd-field dd { margin: 0; color: var(--ink); font-size: 12px; line-height: 17px; overflow-wrap: anywhere; white-space: pre-wrap; }
+.fd-empty { padding: 28px 16px; border: 1px dashed var(--line); border-radius: 9px; color: var(--muted); font-size: 13px; text-align: center; }
+.fd-edit-form { display: grid; gap: 8px; margin: 8px 0 10px; }
+.fd-edit-textarea { box-sizing: border-box; width: 100%; min-height: 88px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--neutral-25); color: var(--ink); font: inherit; font-size: 13px; line-height: 20px; resize: vertical; }
+.fd-edit-actions { display: flex; justify-content: flex-end; gap: 6px; }
+.fd-edit-actions .btn { min-height: 44px; }
+@media (max-width: 800px) {
+  .fd-shell { display: block; }
+  .fd-invite-pane { position: static; height: auto; padding: calc(10px + env(safe-area-inset-top)) 12px 8px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .fd-brand-row { padding: 0 6px 10px; }
+  .fd-invite-heading { padding: 0 6px 7px; }
+  .fd-search { margin: 0 2px 7px; }
+  .fd-search input { font-size: 16px !important; }
+  .fd-invite-list { display: flex; overflow-x: auto; overflow-y: hidden; padding: 0 0 3px; scroll-snap-type: x proximity; }
+  .fd-invite { flex: 0 0 190px; min-height: 48px; scroll-snap-align: start; }
+  .fd-logout { display: none; }
+  .fd-head-actions .fd-logout-mobile { display: inline-flex; }
+  .fd-main-header { min-height: 82px; padding: 12px 16px; }
+  .fd-content { padding-top: 14px; }
+}
+@media (max-width: 520px) {
+  .fd-main-header h1 { font-size: 18px; line-height: 24px; }
+  .fd-subtitle { max-width: 29ch; }
+  .fd-content { padding: 12px 12px calc(28px + env(safe-area-inset-bottom)); }
+  .fd-invite-info { padding: 11px; }
+  .fd-meta { gap: 6px 9px; font-size: 11px; }
+  .fd-toolbar { align-items: stretch; }
+  .fd-comment-search { width: 100%; }
+  .fd-filters { flex: 1; justify-content: space-between; }
+  .fd-filter { flex: 1; min-height: 44px; padding-inline: 5px; }
+  .fd-record { padding: 11px; }
+  .fd-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #svDash *, #svDash *::before, #svDash *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div id="svDash">
+<a class="skip-link" id="skipLink" href="#gateTitle">Langsung ke konten</a>
+
+<div id="authView">
+  <header class="auth-header"><a class="brand" href="https://nikahin.myscalev.com/home" aria-label="Beranda Nikahin"><span class="brand-symbol"><i data-lucide="mail" aria-hidden="true"></i></span><span>Nikahin</span></a></header>
+  <main class="auth-main">
+    <section id="gate" class="gate" aria-labelledby="gateTitle">
+      <div class="gate-heading">
+        <div class="auth-icon"><i data-lucide="lock" aria-hidden="true"></i></div>
+        <h1 id="gateTitle" tabindex="-1">Dashboard Founder</h1>
+        <p class="intro">Masuk untuk mengelola undangan dan data tamu.</p>
+      </div>
+      <form id="gateForm" novalidate>
+        <div class="field">
+          <label for="pinInput">PIN (6 digit)</label>
+          <div class="pin-wrap">
+            <div class="pin-boxes" aria-hidden="true"><span class="is-current"></span><span></span><span></span><span></span><span></span><span></span></div>
+            <input id="pinInput" name="pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="6" pattern="[0-9]{6}" placeholder="••••••" aria-describedby="pinHelp gateMsg" aria-label="PIN 6 digit">
+          </div>
+          <p class="pin-help" id="pinHelp">Gunakan PIN founder untuk membuka panel pengelolaan.</p>
+        </div>
+        <p class="msg" id="gateMsg" role="status" aria-live="polite"></p>
+        <button class="btn primary" type="submit" id="gateSubmit"><span class="btn-inner"><span class="btn-spinner" aria-hidden="true"></span><span class="btn-login-icon"><i data-lucide="log-in" aria-hidden="true"></i></span><span>Masuk</span></span></button>
+      </form>
+      <p class="gate-note">Halaman ini untuk owner. Klien memakai <a href="https://nikahin.myscalev.com/dashboard">dashboard undangannya sendiri</a>.</p>
+    </section>
+  </main>
+</div>
+
+<div id="panel" hidden>
+  <div class="fd-shell" id="mainContent">
+    <aside class="fd-invite-pane" aria-label="Daftar undangan">
+      <div class="fd-brand-row">
+        <a class="brand" href="https://nikahin.myscalev.com/home" aria-label="Beranda Nikahin"><span class="brand-symbol"><i data-lucide="mail" aria-hidden="true"></i></span><span>Nikahin</span></a>
+        <span class="fd-founder-mark" title="Founder" aria-label="Founder"><i data-lucide="shield-check" aria-hidden="true"></i></span>
+      </div>
+      <div class="fd-invite-heading"><h2>Undangan</h2><span class="fd-invite-count" id="inviteCount">0</span></div>
+      <label class="fd-search">
+        <span class="sr-only">Cari undangan</span><i data-lucide="search" aria-hidden="true"></i>
+        <input id="inviteSearch" type="search" placeholder="Cari undangan…" autocomplete="off">
+      </label>
+      <nav class="fd-invite-list" id="inviteList" aria-label="Pilih undangan"></nav>
+      <div class="fd-logout"><button class="fd-icon-button" type="button" data-logout aria-label="Keluar" title="Keluar"><i data-lucide="log-out" aria-hidden="true"></i><span class="fd-logout-label">Keluar</span></button></div>
+    </aside>
+
+    <main class="fd-main">
+      <header class="fd-main-header">
+        <div class="fd-heading-copy">
+          <p class="fd-eyebrow">Data undangan</p>
+          <h1 id="panelTitle" tabindex="-1">Pilih undangan</h1>
+          <p class="fd-subtitle" id="activeSubtitle">Semua data undangan tersimpan di D1.</p>
+        </div>
+        <div class="fd-head-actions">
+          <button class="fd-icon-button" type="button" id="refreshBtn" aria-label="Muat ulang data" title="Muat ulang data"><i data-lucide="rotate-cw" aria-hidden="true"></i></button>
+          <a class="fd-icon-button" id="previewLink" href="#" target="_blank" rel="noopener noreferrer" aria-label="Lihat pratinjau undangan" title="Lihat pratinjau" hidden><i data-lucide="external-link" aria-hidden="true"></i></a>
+          <button class="fd-icon-button danger fd-delete-invite" type="button" id="deleteWeddingBtn" aria-label="Hapus undangan dan semua data" title="Hapus undangan dan semua data" hidden><i data-lucide="trash-2" aria-hidden="true"></i></button>
+          <button class="fd-icon-button fd-logout-mobile" type="button" data-logout aria-label="Keluar" title="Keluar"><i data-lucide="log-out" aria-hidden="true"></i></button>
+        </div>
+      </header>
+
+      <div class="fd-content">
+        <p class="msg fd-status" id="panelMsg" role="status" aria-live="polite"></p>
+        <section class="fd-invite-info" id="invitationInfo" aria-label="Informasi undangan"></section>
+
+        <section class="fd-section" aria-labelledby="commentsTitle">
+          <div class="fd-section-heading"><h2 id="commentsTitle">Komentar</h2><span id="commentsCount"></span></div>
+          <div class="fd-toolbar">
+            <label class="fd-search fd-comment-search"><span class="sr-only">Cari komentar</span><i data-lucide="search" aria-hidden="true"></i><input id="commentSearch" type="search" placeholder="Cari komentar…" autocomplete="off"></label>
+            <div class="fd-filters" role="group" aria-label="Filter komentar">
+              <button class="fd-filter" type="button" data-filter="all" aria-pressed="true">Semua</button>
+              <button class="fd-filter" type="button" data-filter="visible" aria-pressed="false">Tampil</button>
+              <button class="fd-filter" type="button" data-filter="hidden" aria-pressed="false">Tersembunyi</button>
+            </div>
+            <label class="fd-select-all"><input id="selectAllComments" type="checkbox"><span>Pilih semua</span></label>
+            <div class="fd-bulk" id="bulkToolbar" hidden>
+              <span class="fd-bulk-count" id="bulkCount">0 dipilih</span>
+              <button class="fd-icon-button" type="button" data-bulk-action="show" aria-label="Tampilkan pilihan" title="Tampilkan pilihan"><i data-lucide="eye" aria-hidden="true"></i></button>
+              <button class="fd-icon-button" type="button" data-bulk-action="hide" aria-label="Sembunyikan pilihan" title="Sembunyikan pilihan"><i data-lucide="eye-off" aria-hidden="true"></i></button>
+              <button class="fd-icon-button danger" type="button" data-bulk-action="delete" aria-label="Hapus pilihan" title="Hapus pilihan"><i data-lucide="trash-2" aria-hidden="true"></i></button>
+            </div>
+          </div>
+          <div class="fd-record-list" id="commentsList"></div>
+        </section>
+
+        <section class="fd-section" aria-labelledby="rsvpTitle">
+          <div class="fd-section-heading"><h2 id="rsvpTitle">RSVP</h2><span id="rsvpCount"></span></div>
+          <div class="fd-record-list" id="rsvpList"></div>
+        </section>
+
+        <section class="fd-section" aria-labelledby="trackingTitle">
+          <div class="fd-section-heading"><h2 id="trackingTitle">Pelacakan tamu</h2><span id="trackingCount"></span></div>
+          <div class="fd-record-list" id="trackingList"></div>
+        </section>
+
+        <section class="fd-section" aria-labelledby="metadataTitle">
+          <div class="fd-section-heading"><h2 id="metadataTitle">Metadata undangan</h2></div>
+          <div class="fd-record-list" id="metadataList"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+</div>
+<script>
+(function () {
+  "use strict";
+
+  var API = "https://wedding-guestbook.nikahin.workers.dev";
+  var LUCIDE_SVGS = {
+    "mail": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-mail\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7\"/><rect x=\"2\" y=\"4\" width=\"20\" height=\"16\" rx=\"2\"/></svg>",
+    "lock": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-lock\" aria-hidden=\"true\" focusable=\"false\"><rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\"/><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/></svg>",
+    "log-in": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-log-in\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m10 17 5-5-5-5\"/><path d=\"M15 12H3\"/><path d=\"M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4\"/></svg>",
+    "log-out": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-log-out\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m16 17 5-5-5-5\"/><path d=\"M21 12H9\"/><path d=\"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4\"/></svg>",
+    "rotate-cw": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-rotate-cw\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8\"/><path d=\"M21 3v5h-5\"/></svg>",
+    "search": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-search\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m21 21-4.34-4.34\"/><circle cx=\"11\" cy=\"11\" r=\"8\"/></svg>",
+    "shield-check": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-shield-check\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"m9 12 2 2 4-4\"/></svg>",
+    "external-link": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-external-link\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M15 3h6v6\"/><path d=\"M10 14 21 3\"/><path d=\"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\"/></svg>",
+    "trash-2": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-trash-2\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M10 11v6\"/><path d=\"M14 11v6\"/><path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\"/><path d=\"M3 6h18\"/><path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/></svg>",
+    "pencil": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-pencil\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\"/><path d=\"m15 5 4 4\"/></svg>",
+    "eye": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-eye\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg>",
+    "eye-off": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-eye-off\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49\"/><path d=\"M14.084 14.158a3 3 0 0 1-4.242-4.242\"/><path d=\"M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143\"/><path d=\"m2 2 20 20\"/></svg>"
+  };
+  function q(id) { return document.getElementById(id); }
+  function qa(selector) { return Array.prototype.slice.call(document.querySelectorAll(selector)); }
+  function esc(value) {
+    return String(value == null ? "" : value).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function say(node, text, kind) {
+    node.textContent = text || "";
+    if (kind) node.dataset.kind = kind; else node.removeAttribute("data-kind");
+  }
+  function updateIcons(root) {
+    var scope = root || q("svDash");
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      try { window.lucide.createIcons({ root: scope, attrs: { "aria-hidden": "true", "focusable": "false", "stroke-width": 2 } }); return; } catch (_) {}
+    }
+    scope.querySelectorAll("i[data-lucide]").forEach(function (el) {
+      var name = el.getAttribute("data-lucide");
+      if (LUCIDE_SVGS[name]) el.outerHTML = LUCIDE_SVGS[name];
+    });
+  }
+  function updatePinBoxes() {
+    var input = q("pinInput");
+    input.value = input.value.replace(/\D/g, "").slice(0, 6);
+    input.removeAttribute("aria-invalid");
+    qa(".pin-boxes span").forEach(function (box, index) {
+      box.textContent = index < input.value.length ? "•" : "";
+      box.classList.toggle("is-current", index === Math.min(input.value.length, 5));
+    });
+  }
+  var state = {
+    pin: "", weddings: [], activeId: "", data: null, inviteSearch: "", commentSearch: "",
+    filter: "all", editKey: "", selectedComments: new Set(), detailRequest: 0, session: 0, busy: false
+  };
+  async function callApi(path, body) {
+    var session = state.session;
+    var controller = new AbortController();
+    var timeout = setTimeout(function () { controller.abort(); }, 20000);
+    try {
+      var response = await fetch(API + path, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: controller.signal
+      });
+      var data = null;
+      try { data = await response.json(); } catch (_) {}
+      if (session !== state.session) return { status: 0, data: null };
+      return { status: response.status, data: data };
+    } catch (_) {
+      return { status: 0, data: null };
+    } finally { clearTimeout(timeout); }
+  }
+  var ERRORS = {
+    pin_required: "PIN belum diisi.", pin_invalid: "PIN salah.", dashboard_not_set: "PIN founder belum diatur.",
+    invalid_wedding_id: "Undangan tidak dikenali.", id_required: "Data tidak dikenali.", message_required: "Isi komentar tidak boleh kosong.",
+    invalid_target: "Jenis data tidak dikenali.", invalid_action: "Aksi tidak dikenali.", invalid_selection: "Pilihan komentar tidak valid.",
+    duplicate_selection: "Ada data terpilih lebih dari sekali.", confirmation_mismatch: "Konfirmasi ID undangan tidak cocok.",
+    rate_limited: "Terlalu banyak percobaan. Tunggu beberapa menit.", not_found: "Data tidak ditemukan. Muat ulang lalu coba lagi.",
+    internal_error: "Ada gangguan di server. Coba lagi sebentar."
+  };
+  function errorText(data) { return data && ERRORS[data.error] ? ERRORS[data.error] : "Gagal menghubungi server. Periksa koneksi lalu coba lagi."; }
+  function activeWedding() { return state.weddings.find(function (item) { return item.wedding_id === state.activeId; }) || null; }
+  function fmt(value, key) {
+    if (value == null || value === "") return "—";
+    if (key === "created_at" || key === "replied_at" || key === "last_viewed") {
+      var date = new Date(value);
+      if (!isNaN(date.getTime())) return date.toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    }
+    if (typeof value === "number") return value.toLocaleString("id-ID");
+    return String(value);
+  }
+  var FIELD_LABELS = {
+    id: "ID", wedding_id: "Wedding ID", name: "Nama", phone: "No. HP", attendance: "Kehadiran",
+    guests_count: "Jumlah tamu", session: "Sesi", message: "Ucapan", side: "Pihak", arrival_time: "Waktu tiba",
+    reply_message: "Balasan", replied_at: "Waktu dibalas", is_visible: "Status tampil", created_at: "Dibuat",
+    token: "Token", guest_name: "Nama tamu", view_count: "Jumlah buka", last_viewed: "Terakhir dibuka",
+    label: "Nama undangan", pin_version: "Versi PIN"
+  };
+  function fieldsMarkup(values) {
+    return '<dl class="fd-fields">' + values.map(function (item) {
+      return '<div class="fd-field"><dt>' + esc(FIELD_LABELS[item[0]] || item[0]) + '</dt><dd>' + esc(fmt(item[1], item[0])) + '</dd></div>';
+    }).join("") + '</dl>';
+  }
+  function listEmpty(text) { return '<div class="fd-empty">' + esc(text) + '</div>'; }
+  function previewUrl(id) {
+    return "https://nikahin.myscalev.com/" + encodeURIComponent(id) + "?to=Tamu%20Undangan&u=demo";
+  }
+  function invitationUrl(id) { return "https://nikahin.myscalev.com/" + encodeURIComponent(id); }
+  function renderInvites() {
+    var search = state.inviteSearch.trim().toLocaleLowerCase("id-ID");
+    var rows = state.weddings.filter(function (item) {
+      return !search || (item.wedding_id + " " + (item.label || "")).toLocaleLowerCase("id-ID").includes(search);
+    });
+    q("inviteCount").textContent = state.weddings.length.toLocaleString("id-ID");
+    q("inviteList").innerHTML = rows.length ? rows.map(function (item) {
+      var selected = item.wedding_id === state.activeId;
+      return '<button class="fd-invite" type="button" data-wedding="' + esc(item.wedding_id) + '" aria-label="' + esc((item.label || item.wedding_id) + ' — ' + item.wedding_id) + '" aria-current="' + selected + '">' +
+        '<span class="fd-invite-text"><span class="fd-invite-name">' + esc(item.label || item.wedding_id) + '</span></span></button>';
+    }).join("") : listEmpty(search ? "Undangan tidak ditemukan." : "Belum ada undangan.");
+  }
+  function updateMessageFields(data, omit) {
+    omit = omit || [];
+    var pairs = [];
+    Object.keys(data).forEach(function (key) {
+      if (key.endsWith("_label") || omit.indexOf(key) !== -1) return;
+      if (key === "is_visible") pairs.push([key, Number(data[key]) === 0 ? "Tersembunyi (0)" : "Tampil (1)"]);
+      else pairs.push([key, data[key]]);
+    });
+    return pairs;
+  }
+  function recordActions(target, row, hidden) {
+    if (!String(row.message || "").trim()) return "";
+    var id = esc(row.id);
+    var subject = target === "rsvp" ? "ucapan RSVP" : "komentar";
+    return '<div class="fd-record-actions">' +
+      '<button class="fd-icon-button" type="button" data-record-action="edit" data-target="' + target + '" data-id="' + id + '" aria-label="Edit ' + subject + '" title="Edit"><i data-lucide="pencil"></i></button>' +
+      '<button class="fd-icon-button" type="button" data-record-action="' + (hidden ? "show" : "hide") + '" data-target="' + target + '" data-id="' + id + '" aria-label="' + (hidden ? "Tampilkan " : "Sembunyikan ") + subject + '" title="' + (hidden ? "Tampilkan" : "Sembunyikan") + '"><i data-lucide="' + (hidden ? "eye" : "eye-off") + '"></i></button>' +
+      '<button class="fd-icon-button danger" type="button" data-record-action="delete" data-target="' + target + '" data-id="' + id + '" aria-label="Hapus ' + subject + '" title="Hapus"><i data-lucide="trash-2"></i></button>' +
+      '</div>';
+  }
+  function visibleComments() {
+    var all = state.data ? (state.data.comments || []) : [];
+    var needle = state.commentSearch.trim().toLocaleLowerCase("id-ID");
+    return all.filter(function (row) {
+      var visible = Number(row.is_visible) !== 0;
+      if (state.filter === "visible" && !visible) return false;
+      if (state.filter === "hidden" && visible) return false;
+      return !needle || (String(row.name || "") + " " + String(row.message || "")).toLocaleLowerCase("id-ID").includes(needle);
+    });
+  }
+  function updateBulkControls(rows) {
+    q("bulkToolbar").hidden = !state.selectedComments.size;
+    q("bulkCount").textContent = state.selectedComments.size + " dipilih";
+    var visibleKeys = rows.map(function (row) { return "comment:" + row.id; });
+    q("selectAllComments").checked = visibleKeys.length > 0 && visibleKeys.every(function (key) { return state.selectedComments.has(key); });
+    q("selectAllComments").indeterminate = visibleKeys.some(function (key) { return state.selectedComments.has(key); }) && !q("selectAllComments").checked;
+  }
+  function renderComments() {
+    var all = state.data ? (state.data.comments || []) : [];
+    var rows = visibleComments();
+    q("commentsCount").textContent = rows.length === all.length ? all.length + " total" : rows.length + " dari " + all.length;
+    q("commentsList").innerHTML = rows.length ? rows.map(function (row) {
+      var hidden = Number(row.is_visible) === 0;
+      var key = "comment:" + row.id;
+      var editing = state.editKey === key;
+      var selected = state.selectedComments.has(key);
+      var message = editing
+        ? '<form class="fd-edit-form" data-edit-form data-target="comment" data-id="' + esc(row.id) + '"><label class="sr-only" for="edit-' + esc(row.id) + '">Edit komentar dari ' + esc(row.name) + '</label><textarea class="fd-edit-textarea" id="edit-' + esc(row.id) + '" name="message" maxlength="500" required>' + esc(row.message) + '</textarea><div class="fd-edit-actions"><button class="btn ghost small" type="button" data-cancel-edit>Batal</button><button class="btn primary small" type="submit">Update</button></div></form>'
+        : '<p class="fd-record-message' + (row.message ? '' : ' is-empty') + '">' + esc(row.message || 'Komentar kosong') + '</p>';
+      return '<article class="fd-record"><div class="fd-record-top"><label class="fd-check-target"><input class="fd-record-check" type="checkbox" data-comment-check data-key="' + esc(key) + '" aria-label="Pilih komentar dari ' + esc(row.name || "tamu") + '"' + (selected ? ' checked' : '') + '></label><div class="fd-record-main"><div class="fd-record-title"><strong>' + esc(row.name || "Tamu") + '</strong><span class="fd-record-state" data-visible="' + (!hidden) + '">' + (hidden ? 'Tersembunyi' : 'Tampil') + '</span></div>' + message + (editing ? '' : recordActions("comment", row, hidden)) + fieldsMarkup(updateMessageFields(row, ["name", "message", "is_visible", "wedding_id"])) + '</div></div></article>';
+    }).join("") : listEmpty(state.data ? (all.length ? "Tidak ada komentar yang cocok." : "Belum ada komentar.") : "Pilih undangan untuk melihat komentar.");
+    updateBulkControls(rows);
+    updateIcons(q("commentsList"));
+  }
+  function renderRsvp() {
+    var rows = state.data ? (state.data.rsvp || []) : [];
+    q("rsvpCount").textContent = rows.length.toLocaleString("id-ID");
+    q("rsvpList").innerHTML = rows.length ? rows.map(function (row) {
+      var hidden = Number(row.is_visible) === 0;
+      var commentCopy = Boolean(row.message) && (state.data.comments || []).find(function (comment) {
+        return comment.name === row.name && comment.message === row.message && comment.created_at === row.created_at;
+      });
+      var duplicateFields = ["name", "message", "is_visible", "wedding_id"];
+      if (commentCopy) ["reply_message", "replied_at", "created_at"].forEach(function (key) {
+        if (commentCopy[key] === row[key]) duplicateFields.push(key);
+      });
+      var key = "rsvp:" + row.id;
+      var editing = state.editKey === key;
+      var editor = editing
+        ? '<form class="fd-edit-form" data-edit-form data-target="rsvp" data-id="' + esc(row.id) + '"><label class="sr-only" for="edit-rsvp-' + esc(row.id) + '">Edit ucapan RSVP dari ' + esc(row.name) + '</label><textarea class="fd-edit-textarea" id="edit-rsvp-' + esc(row.id) + '" name="message" maxlength="500" required>' + esc(row.message) + '</textarea><div class="fd-edit-actions"><button class="btn ghost small" type="button" data-cancel-edit>Batal</button><button class="btn primary small" type="submit">Update</button></div></form>'
+        : commentCopy ? '<p class="fd-record-message fd-muted">Ucapan tercantum di Komentar.</p>' : '<p class="fd-record-message' + (row.message ? '' : ' is-empty') + '">' + esc(row.message || 'Tanpa komentar') + '</p>';
+      return '<article class="fd-record"><div class="fd-record-title"><strong>' + esc(row.name || "Tamu") + '</strong><span class="fd-record-state" data-visible="' + (!hidden) + '">' + (hidden ? 'Tersembunyi' : 'Tampil') + '</span></div>' + editor + (editing ? '' : recordActions("rsvp", row, hidden)) + fieldsMarkup(updateMessageFields(row, duplicateFields)) + '</article>';
+    }).join("") : listEmpty(state.data ? "Belum ada data RSVP." : "Pilih undangan untuk melihat RSVP.");
+    updateIcons(q("rsvpList"));
+  }
+  function renderTracking() {
+    var rows = state.data ? (state.data.guest_views || []) : [];
+    q("trackingCount").textContent = rows.length.toLocaleString("id-ID");
+    q("trackingList").innerHTML = rows.length ? rows.map(function (row) {
+      return '<article class="fd-record"><div class="fd-record-title"><strong>' + esc(row.guest_name || (row.token === "demo" ? "Preview" : "Tamu")) + '</strong><span class="fd-muted">' + (Number(row.view_count) || 0).toLocaleString("id-ID") + ' buka</span></div>' + fieldsMarkup([
+        ["token", row.token], ["last_viewed", row.last_viewed], ["created_at", row.created_at]
+      ]) + '</article>';
+    }).join("") : listEmpty(state.data ? "Belum ada token pelacakan." : "Pilih undangan untuk melihat pelacakan.");
+  }
+  function renderMetadata() {
+    var row = state.data && state.data.invitation;
+    q("metadataList").innerHTML = row ? '<article class="fd-record">' + fieldsMarkup(updateMessageFields(row, ["wedding_id", "label"])) + '</article>' : listEmpty(state.data ? "Belum ada metadata admin untuk ID ini." : "Pilih undangan untuk melihat metadata.");
+  }
+  function renderInvitation() {
+    var wedding = activeWedding();
+    var link = q("previewLink");
+    var remove = q("deleteWeddingBtn");
+    if (!wedding) {
+      q("panelTitle").textContent = "Pilih undangan";
+      q("activeSubtitle").textContent = "Semua data undangan tersimpan di D1.";
+      q("activeSubtitle").hidden = false;
+      q("invitationInfo").innerHTML = listEmpty("Pilih undangan di panel kiri.");
+      link.hidden = true; remove.hidden = true;
+      return;
+    }
+    q("panelTitle").textContent = wedding.label || wedding.wedding_id;
+    q("activeSubtitle").textContent = "";
+    q("activeSubtitle").hidden = true;
+    link.href = previewUrl(wedding.wedding_id);
+    link.hidden = false;
+    remove.hidden = false;
+    q("invitationInfo").innerHTML = '<dl class="fd-meta"><dt>Wedding ID</dt><dd><a href="' + esc(invitationUrl(wedding.wedding_id)) + '" target="_blank" rel="noopener noreferrer" aria-label="Buka undangan ' + esc(wedding.wedding_id) + '">' + esc(wedding.wedding_id) + ' <i data-lucide="external-link" aria-hidden="true"></i></a></dd></dl>';
+    updateIcons(q("invitationInfo"));
+  }
+  function renderAll() {
+    renderInvites(); renderInvitation(); renderComments(); renderRsvp(); renderTracking(); renderMetadata();
+  }
+  function resetCommentControls() {
+    state.commentSearch = ""; state.filter = "all"; state.selectedComments.clear();
+    q("commentSearch").value = "";
+    qa("[data-filter]").forEach(function (button) { button.setAttribute("aria-pressed", String(button.dataset.filter === "all")); });
+  }
+  function lock(message) {
+    state.session++; state.detailRequest++; state.pin = ""; state.weddings = []; state.activeId = ""; state.data = null;
+    state.selectedComments.clear(); state.editKey = ""; state.busy = false;
+    q("panel").hidden = true; q("authView").hidden = false; q("skipLink").href = "#gateTitle";
+    q("pinInput").value = ""; updatePinBoxes();
+    if (message) q("pinInput").setAttribute("aria-invalid", "true");
+    say(q("gateMsg"), message || "", message ? "error" : ""); q("pinInput").focus();
+  }
+  function openPanel() { q("authView").hidden = true; q("panel").hidden = false; q("skipLink").href = "#mainContent"; q("panelTitle").focus(); }
+  async function loadOverview() {
+    var out = await callApi("/founder/overview", { pin: state.pin });
+    if (out.status === 401 || (out.data && out.data.error === "dashboard_not_set")) { lock(errorText(out.data)); return false; }
+    if (out.status !== 200 || !out.data || !out.data.ok) { say(q("panelMsg"), errorText(out.data), "error"); return false; }
+    state.weddings = (out.data.weddings || []).filter(function (item) { return item.wedding_id !== "founder"; });
+    if (!state.weddings.some(function (item) { return item.wedding_id === state.activeId; })) state.activeId = state.weddings[0] ? state.weddings[0].wedding_id : "";
+    renderInvites(); return true;
+  }
+  async function loadDetail(weddingId) {
+    var requestId = ++state.detailRequest;
+    state.activeId = weddingId || ""; state.data = null; state.editKey = ""; state.selectedComments.clear();
+    renderAll();
+    if (!weddingId) return true;
+    var out = await callApi("/founder/detail", { pin: state.pin, weddingId: weddingId });
+    if (requestId !== state.detailRequest || state.activeId !== weddingId) return false;
+    if (out.status === 401) { lock(errorText(out.data)); return false; }
+    if (out.status !== 200 || !out.data || !out.data.ok) { say(q("panelMsg"), errorText(out.data), "error"); return false; }
+    state.data = out.data; renderAll(); return true;
+  }
+  async function loadWorkspace() {
+    if (state.busy) return false;
+    state.busy = true; q("refreshBtn").disabled = true;
+    var loaded = await loadOverview();
+    if (loaded) await loadDetail(state.activeId);
+    state.busy = false; q("refreshBtn").disabled = false;
+    return loaded && Boolean(state.pin);
+  }
+  async function refreshAfterChange(message, weddingId) {
+    if (!await loadOverview()) return;
+    if (state.activeId === weddingId) await loadDetail(weddingId);
+    say(q("panelMsg"), message, "ok");
+  }
+  async function saveEdit(form) {
+    var weddingId = state.activeId;
+    var target = form.getAttribute("data-target");
+    var message = form.elements.message.value.trim();
+    if (!message) { form.elements.message.setCustomValidity("Isi komentar tidak boleh kosong."); form.reportValidity(); return; }
+    var out = await callApi("/founder/edit-message", {
+      pin: state.pin, weddingId: weddingId, target: target, id: form.getAttribute("data-id"), message: message
+    });
+    if (out.status === 401) return lock(errorText(out.data));
+    if (out.status !== 200 || !out.data || !out.data.ok) { say(q("panelMsg"), errorText(out.data), "error"); return; }
+    state.editKey = ""; await refreshAfterChange("Komentar diperbarui.", weddingId);
+  }
+  async function moderate(target, id, action, name) {
+    var weddingId = state.activeId;
+    if (action === "delete" && !window.confirm("Hapus komentar dari " + (name || "tamu") + "? Data ini tidak dapat dipulihkan.")) return;
+    var out = await callApi("/founder/moderate", { pin: state.pin, weddingId: weddingId, target: target, id: id, action: action });
+    if (out.status === 401) return lock(errorText(out.data));
+    if (out.status !== 200 || !out.data || !out.data.ok) { say(q("panelMsg"), errorText(out.data), "error"); return; }
+    var label = action === "delete" ? "Komentar dihapus." : action === "hide" ? "Komentar disembunyikan." : "Komentar ditampilkan.";
+    state.selectedComments.delete(target + ":" + id);
+    await refreshAfterChange(label, weddingId);
+  }
+  async function bulkModerate(action) {
+    var weddingId = state.activeId;
+    var items = Array.from(state.selectedComments).map(function (key) { var parts = key.split(":"); return { target: parts[0], id: parts.slice(1).join(":") }; });
+    if (!items.length) return;
+    if (action === "delete" && !window.confirm("Hapus " + items.length + " komentar? Data ini tidak dapat dipulihkan.")) return;
+    say(q("panelMsg"), "Memproses " + items.length + " komentar…");
+    var changed = 0, skipped = 0;
+    for (var offset = 0; offset < items.length; offset += 40) {
+      var out = await callApi("/founder/bulk-moderate", {
+        pin: state.pin, weddingId: weddingId, action: action, items: items.slice(offset, offset + 40)
+      });
+      if (out.status === 401) return lock(errorText(out.data));
+      if (out.status !== 200 || !out.data || !out.data.ok) {
+        await refreshAfterChange(changed ? changed + " komentar diproses; sebagian gagal." : "", weddingId);
+        if (!changed) say(q("panelMsg"), errorText(out.data), "error");
+        return;
+      }
+      changed += Number(out.data.changed) || 0;
+      skipped += Array.isArray(out.data.skipped) ? out.data.skipped.length : 0;
+    }
+    state.selectedComments.clear();
+    var verb = action === "delete" ? "dihapus" : action === "hide" ? "disembunyikan" : "ditampilkan";
+    await refreshAfterChange(changed + " komentar " + verb + (skipped ? "; " + skipped + " dilewati karena datanya berubah." : "."), weddingId);
+  }
+  async function deleteWedding() {
+    var weddingId = state.activeId;
+    if (!weddingId) return;
+    var confirmation = window.prompt("Hapus semua data undangan ini? Ketik Wedding ID untuk melanjutkan:\n\n" + weddingId, "");
+    if (confirmation !== weddingId) {
+      if (confirmation !== null) say(q("panelMsg"), "Wedding ID tidak cocok. Data tidak dihapus.", "error");
+      return;
+    }
+    var out = await callApi("/founder/delete-wedding", { pin: state.pin, weddingId: weddingId, confirmWeddingId: confirmation });
+    if (out.status === 401) return lock(errorText(out.data));
+    if (out.status !== 200 || !out.data || !out.data.ok) { say(q("panelMsg"), errorText(out.data), "error"); return; }
+    state.data = null; resetCommentControls();
+    await loadOverview();
+    await loadDetail(state.activeId);
+    var deleted = out.data.deleted || {};
+    say(q("panelMsg"), "Wedding ID " + weddingId + " dihapus · " + (deleted.rsvp_responses || 0) + " RSVP, " +
+      (deleted.wedding_comments || 0) + " komentar, " + (deleted.guest_tokens || 0) + " token, dan metadata undangan.", "ok");
+  }
+
+  q("gateForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
+    var pin = q("pinInput").value.replace(/\D/g, "");
+    if (pin.length !== 6) { say(q("gateMsg"), "Masukkan PIN 6 digit.", "error"); q("pinInput").setAttribute("aria-invalid", "true"); q("pinInput").focus(); return; }
+    state.pin = pin; q("gateSubmit").disabled = true; q("gateSubmit").setAttribute("aria-busy", "true"); say(q("gateMsg"), "Memeriksa PIN…");
+    var ok = await loadWorkspace();
+    q("gateSubmit").disabled = false; q("gateSubmit").removeAttribute("aria-busy");
+    if (ok) openPanel();
+  });
+  q("pinInput").addEventListener("input", updatePinBoxes);
+  q("refreshBtn").addEventListener("click", function () { say(q("panelMsg"), ""); loadWorkspace(); });
+  q("deleteWeddingBtn").addEventListener("click", deleteWedding);
+  q("inviteSearch").addEventListener("input", function (event) { state.inviteSearch = event.target.value || ""; renderInvites(); });
+  q("commentSearch").addEventListener("input", function (event) { state.commentSearch = event.target.value || ""; state.selectedComments.clear(); renderComments(); });
+  q("inviteList").addEventListener("click", function (event) {
+    var button = event.target.closest("[data-wedding]");
+    if (!button || button.dataset.wedding === state.activeId) return;
+    say(q("panelMsg"), ""); resetCommentControls(); loadDetail(button.dataset.wedding);
+  });
+  q("commentsList").addEventListener("change", function (event) {
+    var checkbox = event.target.closest("[data-comment-check]");
+    if (!checkbox) return;
+    if (checkbox.checked) state.selectedComments.add(checkbox.dataset.key); else state.selectedComments.delete(checkbox.dataset.key);
+    updateBulkControls(visibleComments());
+  });
+  q("selectAllComments").addEventListener("change", function (event) {
+    var rows = visibleComments();
+    rows.forEach(function (row) { var key = "comment:" + row.id; if (event.target.checked) state.selectedComments.add(key); else state.selectedComments.delete(key); });
+    rows.forEach(function (row) {
+      var key = "comment:" + row.id;
+      var checkbox = Array.prototype.find.call(q("commentsList").querySelectorAll("[data-comment-check]"), function (item) { return item.dataset.key === key; });
+      if (checkbox) checkbox.checked = event.target.checked;
+    });
+    updateBulkControls(rows);
+  });
+  q("bulkToolbar").addEventListener("click", function (event) {
+    var button = event.target.closest("[data-bulk-action]");
+    if (button) bulkModerate(button.dataset.bulkAction);
+  });
+  function handleRecordClick(event) {
+    var cancel = event.target.closest("[data-cancel-edit]");
+    if (cancel) { state.editKey = ""; renderAll(); return; }
+    var button = event.target.closest("[data-record-action]");
+    if (!button) return;
+    var target = button.dataset.target, id = button.dataset.id, action = button.dataset.recordAction;
+    if (action === "edit") {
+      state.editKey = target + ":" + id; renderAll();
+      var textarea = target === "comment" ? q("commentsList").querySelector(".fd-edit-textarea") : q("rsvpList").querySelector(".fd-edit-textarea");
+      if (textarea) textarea.focus();
+      return;
+    }
+    var rows = target === "comment" ? (state.data.comments || []) : (state.data.rsvp || []);
+    var row = rows.find(function (item) { return String(item.id) === String(id); });
+    if (row) moderate(target, id, action, row.name);
+  }
+  q("commentsList").addEventListener("click", handleRecordClick);
+  q("rsvpList").addEventListener("click", handleRecordClick);
+  function handleEditSubmit(event) {
+    var form = event.target.closest("[data-edit-form]");
+    if (!form) return;
+    event.preventDefault(); saveEdit(form);
+  }
+  q("commentsList").addEventListener("submit", handleEditSubmit);
+  q("rsvpList").addEventListener("submit", handleEditSubmit);
+  qa("[data-filter]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      state.filter = button.dataset.filter;
+      state.selectedComments.clear();
+      qa("[data-filter]").forEach(function (item) { item.setAttribute("aria-pressed", String(item === button)); });
+      renderComments();
+    });
+  });
+  document.addEventListener("click", function (event) { if (event.target.closest("[data-logout]")) lock(""); });
+  updateIcons(); updatePinBoxes(); q("pinInput").focus();
+})();
+</script>
+</body>
+</html>
