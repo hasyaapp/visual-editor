@@ -1,6 +1,6 @@
 {
   "name": "scalev-visual-editor",
-  "version": "0.32.7",
+  "version": "0.32.8",
   "private": true,
   "type": "module",
   "scripts": {
