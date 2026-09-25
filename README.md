@@ -77,98 +77,19 @@ menyebut `sesi berakhir, muat ulang`.
 
 ## Pengembangan
 
-Source yang diedit berada di `src/editor.js`, `src/validation.js`, dan
-`src/preview.js`. Versi diambil dari `package.json`. Gunakan Node.js 22 atau lebih
-baru, lalu jalankan:
+Repo ini **hanya untuk hosting update Tampermonkey**. Isinya cuma hasil build
+yang ditarik Tampermonkey saat `@version` naik.
 
-```sh
-npm ci
-npm test
-npm run build
-npm run check
-```
+Source (`src/editor.js`, `src/preview.js`, `src/validation.js`), skrip build
+(`scripts/build.mjs`), dan tes dijalankan di mesin pengembang dan tidak
+dipublikasikan di sini. Perubahan dikerjakan di sana, hasil build-nya di-push
+ke repo ini.
 
-Build menghasilkan dua file dengan isi identik:
+Build menghasilkan satu file:
 
 - `scripts/scalev-visual-editor.user.js`
-- `scripts/Scalev Visual Editor - Schema First by Nikahin 0.9.5.js`
 
-Nama file kedua dipertahankan untuk kompatibilitas; versi sebenarnya ada pada
-metadata `@version`. Edit source di `src/`, lalu build ulang agar kedua salinan
-tetap sinkron. Parser JavaScript dan CSS sudah dibundel; userscript tidak memuat
-dependensi parser dari jaringan saat digunakan. Build lokal tidak menerbitkan
-update ke GitHub.
-
-Build draft tetap tersedia untuk pengujian terpisah, tetapi tidak diperlukan
-untuk fitur Inspect pada produksi 0.27.0:
-
-```sh
-npm run build:draft
-```
-
-Nonaktifkan userscript produksi lama sebelum memasang
-`test-results/scalev-visual-editor-draft.user.js`, lalu buka editor dengan
-parameter `?sve-draft=1`. Rilis produksi sebelum gate draft dapat tetap berjalan
-di URL itu dan mengambil slot panel sebelum draft. Build draft memakai nama dan
-penyimpanan terpisah serta tidak memiliki `@updateURL`. ID panel sengaja sama
-sebagai kunci singleton agar dua instance tidak dapat memasang panel bersamaan.
-Timpa draft sebelumnya, lalu reload penuh halaman. Footer harus menampilkan
-`Visual Editor Draft · v0.27.0-draft.1`; jika belum, build baru belum aktif.
-Gunakan `&sve-draft=1` jika URL sudah memiliki parameter lain.
-
-Draft mendengarkan pesan Inspect native dari iframe sandbox Scalev tanpa
-melonggarkan sandbox, menyuntikkan script ke preview, atau menambahkan polling.
-Pengujian mencakup pemalsuan asal pesan, ID tidak valid, pergantian preview,
-navigasi, pesan beruntun, konflik edit tertunda, dan singleton panel.
-
-Batas penggunaan: buka tab Kode terlebih dahulu agar CodeMirror tersedia.
-Pemetaan hanya mengetahui penanda yang ada di `srcdoc`; penanda yang dibuat atau
-diubah JavaScript setelah load belum dijamin terpetakan. Sesudah navigasi SPA ke
-halaman lain atau mengganti parameter draft, reload penuh sebelum memakai Inspect.
-Draft tetap mengedit source halaman yang sedang dibuka, bukan salinan data.
-Uji pada duplikat halaman; jangan Simpan/Terbitkan halaman produksi untuk percobaan.
-
-Tes browser memakai Brave lokal pada macOS jika tersedia. Browser lain dapat
-ditentukan lewat `SVE_TEST_BROWSER=/path/to/browser npm test`; tanpa Brave,
-pasang Chromium Playwright dengan `npx playwright install chromium`.
-Semua permintaan halaman uji dicegat secara lokal.
-
-Pengujian melalui ekstensi Tampermonkey asli:
-
-```sh
-npm run test:tampermonkey
-```
-
-Tes ini memerlukan OpenSSL dan folder ekstensi Tampermonkey yang terpasang.
-Pada macOS, tes mencari ekstensi di profil Default Brave, Chrome, atau Edge.
-Gunakan `SVE_TAMPERMONKEY_PATH` untuk menentukan folder lain yang berisi
-`manifest.json`, dan `SVE_TEST_BROWSER` untuk memilih executable browser yang
-mendukung pemuatan ekstensi lokal. Tanpa Brave, tes memakai Chromium Playwright.
-
-Tes membuat profil browser sementara, mengaktifkan Allow User Scripts hanya
-pada profil tersebut, memasang userscript melalui UI Tampermonkey, lalu
-menghapus profil setelah selesai. Proxy HTTPS lokal menyediakan respons fixture
-untuk request ekstensi dan menolak tujuan lain. Sertifikat sementara hanya
-dipercaya oleh browser pengujian. Tes tidak mengubah profil browser pribadi atau
-PIN produksi. Bukti ditulis ke `test-results/tampermonkey/`.
-
-Validasi template sebelum impor atau push:
-
-```sh
-node scripts/verify-template.mjs path/to/template.html
-```
-
-Validator CLI, impor SVE, dan panel Status berbagi pemeriksaan sintaks,
-CONFIG/schema, observer, CSS, serta atribut media. Panel Status tetap memiliki
-pemeriksaan tambahan untuk kelengkapan integrasi editor. Validasi menganalisis
-source tanpa menjalankan JavaScript template; pemeriksaan statis bukan simulasi
-seluruh cascade CSS atau semua jalur eksekusi JavaScript.
-
-Benchmark lokal opsional:
-
-```sh
-node scripts/benchmark-sve.mjs /path/to/userscript-sebelum-perbaikan.js
-```
-
-Hasil pengujian dan benchmark ditulis ke `test-results/`. Catatan perbaikan
-per versi disimpan lokal di repositori kerja.
+Versi sebenarnya ada pada metadata `@version`. Parser JavaScript dan CSS sudah
+dibundel; userscript tidak memuat dependensi parser dari jaringan saat
+digunakan. Build lokal tidak menerbitkan update ke GitHub — push dilakukan
+manual.

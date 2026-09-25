@@ -1,0 +1,19 @@
+# ============================================================
+# Repo publik `hasyaapp/visual-editor` HANYA untuk hosting
+# update Tampermonkey: 3 userscript + README + LICENSE.
+#
+# Daftar-putih, bukan daftar-hitam. Daftar-hitam sudah terbukti
+# bocor: `pages/` di-ignore, tapi begitu ada yang menjalankan
+# `git add -f pages/...`, file PIN ikut masuk repo publik.
+# Dengan daftar-putih, file baru tidak akan pernah ikut
+# ter-commit kecuali ditambahkan sengaja di bawah ini.
+# ============================================================
+/*
+!/.gitignore
+!/LICENSE
+!/README.md
+!/scripts/
+/scripts/*
+!/scripts/scalev-visual-editor.user.js
+!/scripts/scalev-multi-upload-dev.user.js
+!/scripts/scalev-multi-upload-reseller.user.js
