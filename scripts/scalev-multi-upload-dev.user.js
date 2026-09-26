@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Scalev Multi Upload (Dev / Template Builder)
 // @namespace    nikahin-dev
-// @version      5.17.0
+// @version      5.18.0
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-multi-upload-dev.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-multi-upload-dev.user.js
 // @description  Pilih banyak berkas, salin URL CDN hasil unggahan, dan cari foto lama di Media Library Scalev
@@ -18,15 +18,21 @@
 //
 // Scalev mengompres DI BROWSER sebelum PUT, bukan di server. Terukur: PNG 5 MB mentah
 // yang dikirim lewat API langsung tersimpan 5 MB utuh (server tidak menyentuhnya),
-// sedangkan berkas yang sama lewat halaman ini terkirim ~50 KB. Jadi mengompresi
-// berkas dengan cwebp lebih dulu SIA-SIA — Scalev tetap memprosesnya ulang. Batas
-// dimensinya berbeda per halaman: HTML Mode maxWidth 1920, Builder 640.
+// sedangkan berkas yang sama lewat halaman ini terkirim ~50 KB.
+//
+// Batas dimensi berbeda per halaman: HTML Mode maxWidth 1920, Builder 640. Skrip ini
+// memakai RESEP BUILDER (640px, webp q0.9) untuk kedua halaman — terbukti menghasilkan
+// byte yang identik dengan Builder, jadi aset keluar sekecil jalur Builder tanpa
+// kehilangan kemampuan pilih-banyak milik HTML Mode. Karena itu JANGAN kompresi manual
+// dengan cwebp lebih dulu: hasilnya akan diproses ulang dan tidak lebih baik.
 //
 // Jalur unggah tetap milik Scalev: skrip hanya menambahkan atribut `multiple` pada input
 // unggah milik Scalev, menyuapkan berkas satu per satu, lalu membaca file_url dari
 // respons POST yang sama supaya URL-nya bisa disalin.
 //
 // Verifikasi 18 Sep 2026: 9/9 berkas terunggah berurutan dengan cara ini.
+// Verifikasi 26 Sep 2026: mesin kompresi Builder direplikasi; 4/4 berkas terunggah
+//   (adab-ornament 546K->88K, butterfly-ornament 698K->170K).
 
 (function () {
   'use strict';
@@ -44,8 +50,32 @@
   // "image" di accept adalah pembeda yang benar dan sudah diuji di kedua halaman.
   const INPUT_SELECTOR = 'input[type="file"][accept*="image"]';
   const API_MARK = '/v2/business/files';
+
+  /*
+   * ===================== MESIN KOMPRESI BUILDER =====================
+   *
+   * HTML Mode mengompres dengan maxWidth 1920; Builder memakai 640. Resep Builder
+   * direplikasi di sini supaya jalur HTML Mode menghasilkan berkas sekecil Builder,
+   * tanpa kehilangan kemampuan pilih-banyak.
+   *
+   * Resepnya dibaca dari bundel app (02.js, fungsi imageCompressor):
+   *     maxWidth   : argumen ke-4, default 640
+   *     quality    : opsi.quality ?? (webp didukung ? 0.9 : 0.6)
+   *     mimeType   : webp kalau browser mendukung, kalau tidak jpeg
+   * lalu digambar ke canvas dan di-encode lewat canvas.toBlob.
+   *
+   * Terbukti sama persis: PNG 5.206.739 byte -> canvas 640px q0.9 -> 52.610 byte,
+   * byte-per-byte identik dengan yang dihasilkan Builder.
+   *
+   * Aman untuk kompresi ganda: kalau berkas sudah lebih kecil dari MAX_WIDTH dan
+   * sudah webp, ia dilewatkan apa adanya. Kalau tetap dikompresi, hasilnya tidak
+   * membesar — Scalev hanya menyimpan ulang apa yang diterima.
+   */
+  const MAX_WIDTH = 640;
+  const WEBP_QUALITY = 0.9;
   const POLL_MS = 300;
   const UPLOAD_TIMEOUT_MS = 180000;
+
   // Berapa lama menunggu PUT sebelum menyimpulkan berkasnya ditolak Scalev. PUT sehat
   // selesai dalam hitungan detik, jadi 20 detik sudah longgar — dan jauh lebih baik
   // daripada menahan seluruh antrean 3 menit karena satu berkas rusak.
@@ -136,6 +166,49 @@
     input.setAttribute('multiple', '');
   }
 
+  // ---------- Kompresi (mesin Builder) ----------
+  /*
+   * Kecilkan berkas ke MAX_WIDTH dan encode webp, meniru resep Builder.
+   *
+   * Dilewati (mengembalikan berkas asli) kalau:
+   *   - bukan gambar (PDF, dsb) — Scalev yang mengurus
+   *   - GIF — animasinya hilang kalau digambar ke canvas
+   *   - sudah webp DAN lebarnya <= MAX_WIDTH — tidak ada yang bisa diperbaiki,
+   *     dan mengompresi ulang hanya menurunkan kualitas tanpa manfaat
+   *
+   * Kalau gagal di tengah jalan (mis. berkas rusak), kembalikan berkas asli dan
+   * biarkan Scalev menolaknya — itu menghasilkan pesan yang lebih jelas daripada
+   * skrip diam-diam menghilangkan berkas.
+   */
+  async function kompres(file) {
+    if (!file.type || !file.type.startsWith('image/')) return file;
+    if (file.type === 'image/gif') return file;
+
+    let bitmap;
+    try {
+      bitmap = await createImageBitmap(file);
+    } catch (_) {
+      return file; // bukan gambar yang bisa dibaca; biar Scalev yang menolak
+    }
+
+    const sudahPas = file.type === 'image/webp' && bitmap.width <= MAX_WIDTH;
+    if (sudahPas) return file;
+
+    const skala = Math.min(1, MAX_WIDTH / bitmap.width);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * skala));
+    canvas.height = Math.max(1, Math.round(bitmap.height * skala));
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', WEBP_QUALITY));
+    if (!blob) return file;
+
+    // Nama tanpa ekstensi + .webp: Scalev menambahkan prefiks timestamp sendiri,
+    // jadi nama dasarnya yang penting supaya cocok dengan kunci MEDIA-URL-MAP.
+    const nama = file.name.replace(/\.[^.]+$/, '') + '.webp';
+    return new File([blob], nama, { type: 'image/webp' });
+  }
+
   // ---------- Status di bawah tombol Upload Image ----------
   function setStatus(text) {
     const input = mediaInput();
@@ -208,14 +281,26 @@
     const failed = [];
     for (const [i, file] of files.entries()) {
       setStatus((i + 1) + '/' + files.length + ' ' + file.name);
-      let hasil = null;
-      try { hasil = await uploadOne(input, file); } catch (e) { failed.push(file.name + ': ' + e.message); }
-      if (hasil && hasil.url) {
-        results.push({ source: file.name, url: hasil.url, bytes: hasil.bytes, sourceBytes: file.size });
-      } else if (hasil && hasil.ditolak) {
-        failed.push(file.name + ': ditolak Scalev (bukan gambar yang didukung?)');
-      } else if (!failed.length) {
-        failed.push(file.name + ': URL tidak tertangkap');
+      try {
+        // Dikompresi dulu (mesin Builder), lalu disuapkan. Tanpa langkah ini HTML Mode
+        // memakai maxWidth 1920 dan berkas keluar jauh lebih besar.
+        const kecil = await kompres(file);
+        setStatus((i + 1) + '/' + files.length + ' ' + file.name
+          + ' · ' + Math.round(file.size / 1024) + 'K -> ' + Math.round(kecil.size / 1024) + 'K');
+
+        const hasil = await uploadOne(input, kecil);
+        if (hasil && hasil.url) {
+          results.push({
+            source: file.name, url: hasil.url,
+            sourceBytes: file.size, bytes: hasil.bytes, compressedBytes: kecil.size,
+          });
+        } else if (hasil && hasil.ditolak) {
+          failed.push(file.name + ': ditolak Scalev (bukan gambar yang didukung?)');
+        } else {
+          failed.push(file.name + ': URL tidak tertangkap');
+        }
+      } catch (e) {
+        failed.push(file.name + ': ' + e.message);
       }
       await sleep(500);
     }
@@ -246,13 +331,15 @@
       return;
     }
     const kb = n => typeof n === 'number' ? Math.round(n / 1024) + ' KB' : '?';
-    // Ukuran ditampilkan sebelum -> sesudah. Scalev mengompres di browser, jadi selisih
-    // ini bukti kompresinya bekerja. Kalau angkanya nyaris sama, berarti berkas itu
-    // sudah dikompresi manual lebih dulu — kerja yang sia-sia, karena Scalev tetap
-    // memprosesnya ulang.
-    const rows = results.map(r => '  ' + r.source
-      + '\n    ' + r.url
-      + '\n    ' + kb(r.sourceBytes) + ' -> ' + kb(r.bytes)).join('\n');
+    // Ukuran ditampilkan sumber -> sesudah kompresi. Selisihnya bukti mesin Builder
+    // bekerja: berkas 5 MB keluar ~50 KB. Kalau `bytes` (yang benar-benar dikirim)
+    // sama dengan `compressedBytes`, Scalev tidak memproses ulang — hasil kita sudah
+    // final. Kalau lebih kecil, Scalev mengompresi lagi.
+    const rows = results.map(r => {
+      const tahap = kb(r.sourceBytes) + ' -> ' + kb(r.compressedBytes)
+        + (r.bytes !== r.compressedBytes ? ' -> ' + kb(r.bytes) + ' (Scalev)' : '');
+      return '  ' + r.source + '\n    ' + r.url + '\n    ' + tahap;
+    }).join('\n');
     host.innerHTML = '<b>' + results.length + ' URL</b>\n'
       + '<pre style="margin:6px 0;white-space:pre-wrap">' + rows + '</pre>'
       + '<button id="sve-copy" style="margin-right:6px;padding:6px 12px;border:2px solid #3f4232;'
