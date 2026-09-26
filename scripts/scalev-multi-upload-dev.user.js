@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Scalev Multi Upload (Dev / Template Builder)
 // @namespace    nikahin-dev
-// @version      5.16.0
+// @version      5.17.0
 // @updateURL    https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-multi-upload-dev.user.js
 // @downloadURL  https://raw.githubusercontent.com/hasyaapp/visual-editor/main/scripts/scalev-multi-upload-dev.user.js
 // @description  Pilih banyak berkas, salin URL CDN hasil unggahan, dan cari foto lama di Media Library Scalev
@@ -15,7 +15,12 @@
 //      → balas { file_url (CDN final), upload_url (presigned R2) }
 //   2. PUT  upload_url          body = bytes berkas
 //   3. GET  /v2/business/files  → refresh daftar
-// Scalev mengonversi raster ke WebP dan menambahkan prefiks timestamp pada nama.
+//
+// Scalev mengompres DI BROWSER sebelum PUT, bukan di server. Terukur: PNG 5 MB mentah
+// yang dikirim lewat API langsung tersimpan 5 MB utuh (server tidak menyentuhnya),
+// sedangkan berkas yang sama lewat halaman ini terkirim ~50 KB. Jadi mengompresi
+// berkas dengan cwebp lebih dulu SIA-SIA — Scalev tetap memprosesnya ulang. Batas
+// dimensinya berbeda per halaman: HTML Mode maxWidth 1920, Builder 640.
 //
 // Jalur unggah tetap milik Scalev: skrip hanya menambahkan atribut `multiple` pada input
 // unggah milik Scalev, menyuapkan berkas satu per satu, lalu membaca file_url dari
@@ -26,10 +31,25 @@
 (function () {
   'use strict';
 
-  const INPUT_SELECTOR = 'input[type="file"][accept="image/*"]';
+  // Input Media Scalev. Sengaja memakai pencocokan SEBAGIAN (accept*="image"), bukan
+  // kesamaan penuh, karena nilai `accept` berbeda antar halaman dan bisa berubah:
+  //   HTML Mode : accept="image/*"
+  //   Builder   : accept=".jpg,.jpeg,.png,.webp,.gif,.heic"   ← tidak cocok "image/*"
+  // Selektor lama menuntut persis "image/*", jadi ia diam-diam tidak menemukan apa pun
+  // di Builder. Diam itu berbahaya: tidak ada galat, hanya tidak terjadi apa-apa.
+  //
+  // Yang TIDAK dipakai: selektor longgar seperti membuang [accept*=".ico"] dan id meta*.
+  // Itu terukur cocok juga dengan input "Import HTML" (accept=".html,text/html") di
+  // halaman HTML Mode — gambar bisa tersuap ke sana dan merusak halaman. Penyaring
+  // "image" di accept adalah pembeda yang benar dan sudah diuji di kedua halaman.
+  const INPUT_SELECTOR = 'input[type="file"][accept*="image"]';
   const API_MARK = '/v2/business/files';
   const POLL_MS = 300;
   const UPLOAD_TIMEOUT_MS = 180000;
+  // Berapa lama menunggu PUT sebelum menyimpulkan berkasnya ditolak Scalev. PUT sehat
+  // selesai dalam hitungan detik, jadi 20 detik sudah longgar — dan jauh lebih baik
+  // daripada menahan seluruh antrean 3 menit karena satu berkas rusak.
+  const NO_PUT_MS = 20000;
 
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const results = [];
@@ -38,6 +58,9 @@
   // jadi atribusinya aman tanpa perlu mencocokkan nama.
   let lastFileUrl = null;
   let r2Puts = 0;
+  // Ukuran byte yang BENAR-BENAR dikirim ke R2 (setelah Scalev mengompres di browser).
+  // Ini satu-satunya cara tahu kompresinya terjadi: berkas 5 MB bisa terkirim 50 KB.
+  let lastPutBytes = null;
 
   // ---------- Tangkap respons API ----------
   function noteResponse(text) {
@@ -57,7 +80,13 @@
     if (url.includes(API_MARK) && method === 'POST') {
       response.clone().text().then(noteResponse).catch(() => {});
     }
-    if (/r2\.cloudflarestorage\.com/.test(url) && method === 'PUT') r2Puts += 1;
+    if (/r2\.cloudflarestorage\.com/.test(url) && method === 'PUT') {
+      r2Puts += 1;
+      // Ukuran body PUT = byte sesudah kompresi Scalev. Dibaca dari body-nya, bukan dari
+      // header content-length, karena header itu ikut terbaca sebelum kompresi selesai.
+      const body = init && init.body;
+      lastPutBytes = body && typeof body.size === 'number' ? body.size : null;
+    }
     return response;
   };
 
@@ -131,6 +160,7 @@
   async function uploadOne(input, file) {
     const putsBefore = r2Puts;
     lastFileUrl = null;
+    lastPutBytes = null;
 
     const transfer = new DataTransfer();
     transfer.items.add(file);
@@ -139,16 +169,27 @@
 
     // Sukses dinilai dari PUT ke R2. Jumlah kartu di daftar tidak bisa dipakai:
     // Scalev me-refresh daftar lewat GET, bukan menambah kartu satu per satu.
+    //
+    // Berkas yang ditolak Scalev tidak pernah menghasilkan PUT, jadi tanpa batas
+    // tambahan ia menunggu UPLOAD_TIMEOUT_MS penuh — 3 menit untuk satu berkas rusak,
+    // dan berkas berikutnya di antrean ikut tertahan. PUT yang sehat terukur selesai
+    // dalam hitungan detik (3 berkas berturut-turut: ~1 detik masing-masing), jadi
+    // diam lebih dari NO_PUT_MS hampir pasti berarti berkasnya ditolak.
     const deadline = Date.now() + UPLOAD_TIMEOUT_MS;
+    const batasDiam = Date.now() + NO_PUT_MS;
     while (Date.now() < deadline) {
       await sleep(POLL_MS);
       if (r2Puts > putsBefore) {
         // Beri jeda singkat agar respons POST sempat tercatat.
         for (let i = 0; i < 10 && !lastFileUrl; i++) await sleep(150);
-        return lastFileUrl;
+        // Byte yang terkirim dibaca dari body PUT: itu ukuran sesudah Scalev mengompres
+        // di browser. Berguna untuk membuktikan kompresinya benar-benar terjadi —
+        // dan untuk memastikan tidak ada yang mengompresi manual lebih dulu (sia-sia).
+        return { url: lastFileUrl, bytes: lastPutBytes };
       }
+      if (Date.now() > batasDiam) return { url: null, bytes: null, ditolak: true };
     }
-    return null;
+    return { url: null, bytes: null, ditolak: true };
   }
 
   async function onChangeCapture(event) {
@@ -167,10 +208,15 @@
     const failed = [];
     for (const [i, file] of files.entries()) {
       setStatus((i + 1) + '/' + files.length + ' ' + file.name);
-      let url = null;
-      try { url = await uploadOne(input, file); } catch (e) { failed.push(file.name + ': ' + e.message); }
-      if (url) results.push({ source: file.name, url });
-      else if (!failed.length) failed.push(file.name + ': URL tidak tertangkap');
+      let hasil = null;
+      try { hasil = await uploadOne(input, file); } catch (e) { failed.push(file.name + ': ' + e.message); }
+      if (hasil && hasil.url) {
+        results.push({ source: file.name, url: hasil.url, bytes: hasil.bytes, sourceBytes: file.size });
+      } else if (hasil && hasil.ditolak) {
+        failed.push(file.name + ': ditolak Scalev (bukan gambar yang didukung?)');
+      } else if (!failed.length) {
+        failed.push(file.name + ': URL tidak tertangkap');
+      }
       await sleep(500);
     }
     busy = false;
@@ -199,15 +245,25 @@
         + '<div style="margin-top:6px;color:#74675f">Pilih 2+ berkas.</div>';
       return;
     }
-    const rows = results.map(r => '  ' + r.source + '\n    ' + r.url).join('\n');
+    const kb = n => typeof n === 'number' ? Math.round(n / 1024) + ' KB' : '?';
+    // Ukuran ditampilkan sebelum -> sesudah. Scalev mengompres di browser, jadi selisih
+    // ini bukti kompresinya bekerja. Kalau angkanya nyaris sama, berarti berkas itu
+    // sudah dikompresi manual lebih dulu — kerja yang sia-sia, karena Scalev tetap
+    // memprosesnya ulang.
+    const rows = results.map(r => '  ' + r.source
+      + '\n    ' + r.url
+      + '\n    ' + kb(r.sourceBytes) + ' -> ' + kb(r.bytes)).join('\n');
     host.innerHTML = '<b>' + results.length + ' URL</b>\n'
       + '<pre style="margin:6px 0;white-space:pre-wrap">' + rows + '</pre>'
       + '<button id="sve-copy" style="margin-right:6px;padding:6px 12px;border:2px solid #3f4232;'
       + 'border-radius:6px;background:#3f4232;color:#fff;font-size:12px;font-weight:600;cursor:pointer">'
       + 'Salin</button>'
-      + '<button id="sve-json" style="padding:6px 12px;border:2px solid #3f4232;border-radius:6px;'
+      + '<button id="sve-json" style="margin-right:6px;padding:6px 12px;border:2px solid #3f4232;'
+      + 'border-radius:6px;background:#fff;color:#3f4232;font-size:12px;font-weight:600;cursor:pointer">'
+      + 'JSON</button>'
+      + '<button id="sve-map" style="padding:6px 12px;border:2px solid #3f4232;border-radius:6px;'
       + 'background:#fff;color:#3f4232;font-size:12px;font-weight:600;cursor:pointer">'
-      + 'JSON</button>';
+      + 'Peta</button>';
 
     host.querySelector('#sve-copy').onclick = async () => {
       const text = results.map(r => r.url).join('\n');
@@ -221,6 +277,30 @@
       a.download = 'scalev-uploaded-urls.json';
       a.click();
       URL.revokeObjectURL(a.href);
+    };
+    /*
+     * "Peta" menghasilkan bentuk yang dibaca build.mjs: MEDIA-URL-MAP.json.
+     *
+     * build.mjs mencocokkan aset lewat NAMA BERKAS (assetUrl -> MEDIA_MAP[bare]),
+     * jadi kuncinya harus nama berkas, bukan nama node. Nama yang dipakai adalah
+     * nama berkas yang dipilih di sini — dan itu memang nama kanvas untuk template
+     * baru. Untuk aset lama (vintage-olive) kuncinya kebetulan image-N.png, karena
+     * dulu belum ada konvensi penamaan; pemetaan itu tidak bisa ditebak, harus
+     * disesuaikan manual saat menggabungkan ke peta yang sudah ada.
+     *
+     * Nilai URL diambil dari CDN final (bukan upload_url R2), karena itu yang dipakai
+     * halaman. Scalev menambahkan prefiks timestamp pada nama di CDN — itu normal.
+     */
+    host.querySelector('#sve-map').onclick = async () => {
+      const peta = {};
+      for (const r of results) peta[r.source] = r.url;
+      const teks = JSON.stringify(peta, null, 2);
+      try {
+        await navigator.clipboard.writeText(teks);
+        setStatus('Peta tersalin (' + results.length + ' entri)');
+      } catch (_) {
+        setStatus('Gagal salin peta');
+      }
     };
   }
 
